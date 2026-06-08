@@ -326,7 +326,7 @@ const HomeThemeOne = () => {
                     className="relative left-1/2 mt-[8px] w-screen -translate-x-1/2 overflow-hidden"
                 >
                     {isBannerLoading ? (
-                        <div className="h-[520px] md:h-[644px] skeleton"></div>
+                        <div className="h-[520px] md:h-[636px] skeleton"></div>
                     ) : (
                         <div
                             className={cn(
@@ -364,7 +364,7 @@ const HomeThemeOne = () => {
 
                                         return (
                                             <div
-                                                className="relative aspect-[16/9] w-full overflow-hidden rounded-[5px] bg-center md:aspect-[21/9] lg:h-[420px] lg:aspect-auto xl:h-[520px] 3xl:h-[620px]"
+                                                className="relative aspect-[16/9] w-full overflow-hidden rounded-[5px] bg-center md:aspect-[21/9] lg:h-[420px] lg:aspect-auto xl:h-[636px] 3xl:h-[636px]"
                                                 style={{
                                                     backgroundImage:
                                                         item.backgroundImage
@@ -625,7 +625,7 @@ const HomeThemeOne = () => {
 
                                         return (
                                             <SwiperSlide key={idx}>
-                                                <div className="relative aspect-[16/9] w-full overflow-hidden rounded-[5px] bg-stone-100 md:aspect-[21/9] lg:h-[420px] lg:aspect-auto xl:h-[520px] 3xl:h-[620px]">
+                                                <div className="relative aspect-[16/9] w-full overflow-hidden rounded-[5px] bg-stone-100 md:aspect-[21/9] lg:h-[420px] lg:aspect-auto xl:h-[636px] 3xl:h-[636px]">
                                                     {item.link ? (
                                                         <Link
                                                             to={item.link}
