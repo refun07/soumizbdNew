@@ -370,7 +370,7 @@ const HomeThemeOne = () => {
                                                         item.backgroundImage
                                                             ? `url(${item.backgroundImage})`
                                                             : 'none',
-                                                    backgroundSize: 'cover',
+                                                    backgroundSize: '100% 100%',
                                                     backgroundRepeat:
                                                         'no-repeat',
                                                 }}
@@ -560,7 +560,7 @@ const HomeThemeOne = () => {
                                                                     item.foregroundImage
                                                                 }
                                                                 alt=""
-                                                                className="w-full h-full object-cover object-center"
+                                                                className="w-full h-full object-fill object-center"
                                                             />
                                                         </motion.div>
                                                     ) : shouldShowForegroundImage ? (
@@ -619,7 +619,7 @@ const HomeThemeOne = () => {
                                                         ? 'eager'
                                                         : 'lazy'
                                                 }
-                                                className="h-full w-full object-cover"
+                                                className="h-full w-full object-fill"
                                             />
                                         );
 
@@ -662,8 +662,8 @@ const HomeThemeOne = () => {
                             }}
                         >
                             <ThemeSlider
-                                slidesPerView={1.05}
-                                spaceBetween={12}
+                                slidesPerView={2}
+                                spaceBetween={10}
                                 loop={false}
                                 rewind={promoCards.length > 1}
                                 pagination={promoCards.length > 1}
@@ -671,6 +671,7 @@ const HomeThemeOne = () => {
                                 breakpoints={{
                                     480: {
                                         slidesPerView: 2,
+                                        spaceBetween: 12,
                                     },
                                     768: {
                                         slidesPerView: 3,
@@ -685,7 +686,7 @@ const HomeThemeOne = () => {
                                     return (
                                         <SwiperSlide key={idx}>
                                             <div
-                                                className="flex min-h-[86px] items-center gap-4 rounded-[5px] px-4 py-4 shadow-sm md:px-5"
+                                                className="flex min-h-[112px] flex-col items-center justify-center gap-2 rounded-[5px] px-2 py-3 text-center shadow-sm md:min-h-[86px] md:flex-row md:justify-start md:gap-4 md:px-5 md:py-4 md:text-left"
                                                 style={{
                                                     backgroundColor:
                                                         promoCardsRes.data
@@ -702,12 +703,12 @@ const HomeThemeOne = () => {
                                                                 ? 'eager'
                                                                 : 'lazy'
                                                         }
-                                                        className="h-14 w-14 shrink-0 object-contain md:h-16 md:w-16"
+                                                        className="h-10 w-10 shrink-0 object-contain md:h-16 md:w-16"
                                                     />
                                                 )}
                                                 <div className="min-w-0">
                                                     <h3
-                                                        className="text-sm font-semibold leading-tight md:text-base"
+                                                        className="text-xs font-semibold leading-tight md:text-base"
                                                         style={{
                                                             color:
                                                                 promoCardsRes
@@ -719,7 +720,7 @@ const HomeThemeOne = () => {
                                                         {card.mainText}
                                                     </h3>
                                                     <p
-                                                        className="mt-1 text-sm leading-tight"
+                                                        className="mt-1 text-xs leading-tight md:text-sm"
                                                         style={{
                                                             color:
                                                                 promoCardsRes
