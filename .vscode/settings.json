@@ -1,0 +1,39 @@
+{
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "explicit",
+        "source.fixAll.tslint": "explicit",
+        "source.organizeImports": "explicit"
+    },
+    "files.associations": {
+        "*.css": "tailwindcss"
+    },
+    "cSpell.words": [
+        "clsx",
+        "daterangepicker",
+        "echarts",
+        "Epik",
+        "footable",
+        "Guage",
+        "laravel",
+        "lightbox",
+        "lightgallery",
+        "Logobar",
+        "nouislider",
+        "reduxjs",
+        "signin",
+        "svgr",
+        "uppy",
+        "upsert"
+    ],
+    "[typescriptreact]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[php]": {
+        "editor.defaultFormatter": "bmewburn.vscode-intelephense-client"
+    },
+    "[blade]": {
+        "editor.defaultFormatter": "shufo.vscode-blade-formatter"
+    }
+}

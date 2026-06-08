@@ -1,0 +1,18 @@
+{
+    "recommendations": [
+        "bmewburn.vscode-intelephense-client",
+        "dsznajder.es7-react-js-snippets",
+        "dbaeumer.vscode-eslint",
+        "shuhei.laravel-blade",
+        "onecentlin.laravel5-snippets",
+        "onecentlin.laravel-blade-snippets",
+        "austenc.laravel-blade-spacer",
+        "mohamedbenhida.laravel-intellisense",
+        "calebporzio.laravel-extra-intellisense",
+        "stef-k.laravel-goto-view",
+        "naoray.laravel-goto-components",
+        "bmewburn.vscode-intelephense-client",
+        "esbenp.prettier-vscode",
+        "aaron-bond.better-comments"
+    ]
+}

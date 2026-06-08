@@ -1,0 +1,217 @@
+/* Custom styles for react-date-range - Supports both light and dark mode via CSS variables */
+
+/* Main wrapper */
+.rdrDateRangePickerWrapper {
+  z-index: 50;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+  background-color: var(--card);
+}
+
+.react-date-range {
+  max-width: 90vw;
+  overflow: visible;
+  background-color: var(--card);
+}
+
+.rdrCalendarWrapper {
+  background-color: var(--card);
+  color: var(--card-foreground);
+}
+
+.rdrMonthAndYearWrapper {
+  color: var(--card-foreground);
+  font-weight: 600;
+  background-color: var(--card);
+}
+
+.rdrMonthAndYearDivider {
+  color: var(--card-foreground);
+  background-color: var(--card);
+}
+
+.rdrMonthPicker {
+  background-color: var(--card);
+}
+
+.rdrMonthPicker select {
+  background-color: var(--card) !important;
+  color: var(--card-foreground) !important;
+  border-color: var(--border) !important;
+}
+
+.rdrYearPicker {
+  background-color: var(--card);
+}
+
+.rdrYearPicker select {
+  background-color: var(--card) !important;
+  color: var(--card-foreground) !important;
+  border-color: var(--border) !important;
+}
+
+.rdrNavButton {
+  color: var(--card-foreground);
+}
+
+.rdrNavButton:hover {
+  background-color: var(--muted);
+}
+
+.rdrWeekDay {
+  color: var(--muted-foreground);
+  font-weight: 500;
+}
+
+.rdrCalendarWrapper .rdrDay {
+  background-color: var(--card);
+  color: var(--card-foreground);
+}
+
+.rdrCalendarWrapper .rdrDayPassive {
+  background-color: var(--card);
+}
+
+.rdrCalendarWrapper .rdrDayPassive .rdrDayNumber {
+  color: rgb(170, 170, 170);
+  opacity: 0.95;
+}
+
+.rdrCalendarWrapper .rdrDayPassive:hover {
+  background-color: var(--muted);
+}
+
+.rdrCalendarWrapper .rdrDayPassive:hover .rdrDayNumber {
+  opacity: 1;
+}
+
+.rdrCalendarWrapper .rdrDay:hover:not(.rdrDayDisabled):not(.rdrDayPassive) {
+  background-color: var(--muted);
+}
+
+
+.rdrCalendarWrapper .rdrDayToday .rdrDayNumber {
+  font-weight: 600;
+}
+
+.rdrCalendarWrapper .rdrSelected {
+  background-color: #2563eb;
+}
+
+.rdrCalendarWrapper .rdrSelected .rdrDayNumber {
+  font-weight: 600;
+}
+
+.rdrCalendarWrapper .rdrInRange {
+  background-color: #2563eb;
+}
+
+
+.rdrCalendarWrapper .rdrStartEdge,
+.rdrCalendarWrapper .rdrEndEdge {
+  background-color: #2563eb;
+}
+
+
+.rdrCalendarWrapper .rdrDayDisabled {
+  background-color: var(--card);
+  opacity: 0.6;
+}
+
+
+.rdrCalendarWrapper .rdrDayNumber {
+  font-size: 0.875rem;
+}
+
+/*
+  These 2 rules work perfectly in dark mode but break light mode.
+  So we only enable them in dark mode using the .dark selector.
+  They help make past dates visible in dark mode.
+*/
+
+/* DARK MODE ONLY - for better visibility of past dates */
+.dark .rdrCalendarWrapper .rdrDay[style*="color:"] .rdrDayNumber span {
+  color: var(--card-foreground) !important;
+}
+
+/* DARK MODE ONLY - for better visibility of past dates */
+.dark .rdrCalendarWrapper .rdrDay[style*="color:"] {
+  color: var(--card-foreground) !important;
+}
+
+.rdrDefinedRangesWrapper {
+  background-color: var(--card);
+  border-right: 1px solid var(--border);
+}
+
+.rdrStaticRanges {
+  flex-shrink: 0;
+  background-color: var(--card);
+}
+
+.rdrStaticRange {
+  background-color: var(--card);
+  color: var(--card-foreground);
+}
+
+.rdrStaticRange:hover {
+  background-color: var(--muted);
+}
+
+.rdrStaticRangeLabel {
+  color: var(--card-foreground);
+}
+
+.random-date-string {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  margin-top: 2px;
+  font-weight: normal;
+}
+
+.rdrMonthName {
+  color: var(--card-foreground);
+}
+
+.rdrDateDisplay,
+.rdrDateDisplayWrapper {
+  background-color: var(--card);
+  border-bottom: 1px solid var(--border);
+}
+
+.rdrDateDisplayItem {
+  background-color: var(--card);
+  color: var(--card-foreground);
+  border-color: var(--border);
+  box-shadow: 0 1px 2px 0 rgba(35, 57, 66, 0.21);
+}
+
+.rdrDateDisplayItem input {
+  background-color: var(--card);
+  color: var(--card-foreground);
+}
+
+.rdrInputRanges {
+  background-color: var(--card);
+}
+
+.rdrInputRange {
+  background-color: var(--card);
+}
+
+.rdrInputRange input {
+  background-color: var(--card);
+  color: var(--card-foreground);
+  border-color: var(--border);
+}
+
+.rdrInputRangeLabel {
+  color: var(--card-foreground);
+}
+
+.rdrFooter {
+  background-color: var(--card);
+  border-top: 1px solid var(--border);
+}

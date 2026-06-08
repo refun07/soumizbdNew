@@ -1,0 +1,10 @@
+export { default as CategorySkeleton } from './CategorySkeleton';
+export { default as CouponSkeleton } from './CouponSkeleton';
+export { default as DashboardOrderSkeleton } from './DashboardOrderSkeleton';
+export { default as DashboardReviewsSkeleton } from './DashboardReviewsSkeleton';
+export { default as DashboardSidebarSkeleton } from './DashboardSidebarSkeleton';
+export { default as DashboardSkeleton } from './DashboardSkeleton';
+export { default as OrderDetailsSkeleton } from './OrderDetailsSkeleton';
+export { default as ProductPreviewSkeletonMobile } from './ProductPreviewSkeletonMobile';
+export { default as ProductPreviewSkeleton } from './ProductPreviewSkeleton';
+export { default as WishlistSkeleton } from './WishlistSkeleton';

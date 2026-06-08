@@ -1,0 +1,1434 @@
+import { motion } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Autoplay } from 'swiper/modules';
+import { SwiperSlide } from 'swiper/react';
+import Badge from '../../components/Badge';
+import Button from '../../components/buttons/Button';
+import ProductCard from '../../components/card/product-card';
+import TallBannerCard from '../../components/card/TallBannerCard';
+import CategoryCard from '../../components/category-card';
+import DynamicSectionRenderer from '../../components/home/DynamicSectionRenderer';
+import ProductSectionSkeleton from '../../components/skeletons/ProductSectionSkeleton';
+import CategorySlider from '../../components/slider/CategorySlider';
+import ProductsSlider from '../../components/slider/ProductsSlider';
+import ThemeSlider from '../../components/slider/ThemeSlider';
+import SmallProductsColumn from '../../components/SmallProductsColumn';
+import SectionTitle from '../../components/titles/SectionTitle';
+import {
+    useGetBannerQuery,
+    useGetBannerSliderQuery,
+    useGetBottomImageBannersQuery,
+    useGetCategoryProductsQuery,
+    useGetFeaturedCategoriesQuery,
+    useGetFlashSaleProductsQuery,
+    useGetFourImageBannersQuery,
+    useGetSingleImageBannerQuery,
+    useGetTopProductsQuery,
+} from '../../store/features/api/homeApis/theme-one/homeApiThemeOne';
+import { togglePopup } from '../../store/features/popup/popupSlice';
+import { useAppDispatch } from '../../store/store';
+import { containerAnimation, itemAnimation } from '../../utils/animation';
+import { cn } from '../../utils/cn';
+import { translate } from '../../utils/translate';
+
+declare global {
+    interface Window {
+        YT?: any;
+        onYouTubeIframeAPIReady?: () => void;
+        __youtubeIframeApiPromise?: Promise<void>;
+    }
+}
+
+const getYoutubeVideoId = (url: string) => {
+    if (!url) return null;
+
+    const patterns = [
+        /(?:youtube\.com\/watch\?v=|youtube\.com\/embed\/|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/,
+        /^([a-zA-Z0-9_-]{11})$/,
+    ];
+
+    for (const pattern of patterns) {
+        const match = url.match(pattern);
+        if (match?.[1]) {
+            return match[1];
+        }
+    }
+
+    return null;
+};
+
+const loadYoutubeIframeApi = () => {
+    if (window.YT?.Player) return Promise.resolve();
+    if (window.__youtubeIframeApiPromise)
+        return window.__youtubeIframeApiPromise;
+
+    window.__youtubeIframeApiPromise = new Promise<void>((resolve) => {
+        const existingScript = document.querySelector<HTMLScriptElement>(
+            'script[src="https://www.youtube.com/iframe_api"]',
+        );
+
+        if (!existingScript) {
+            const script = document.createElement('script');
+            script.src = 'https://www.youtube.com/iframe_api';
+            document.body.appendChild(script);
+        }
+
+        const previousReady = window.onYouTubeIframeAPIReady;
+        window.onYouTubeIframeAPIReady = () => {
+            previousReady?.();
+            resolve();
+        };
+
+        // In case API is already ready before callback assignment.
+        if (window.YT?.Player) resolve();
+    });
+
+    return window.__youtubeIframeApiPromise;
+};
+
+const LazyBackgroundVideo = ({
+    src,
+    audioEnabled = false,
+    isActive = true,
+}: {
+    src: string;
+    audioEnabled?: boolean;
+    isActive?: boolean;
+}) => {
+    const playerHostRef = useRef<HTMLDivElement | null>(null);
+    const playerRef = useRef<any>(null);
+    const loopTimerRef = useRef<number | null>(null);
+    const audioEnabledRef = useRef(audioEnabled);
+    const isActiveRef = useRef(isActive);
+    const isPlayingRef = useRef(false);
+    const [shouldLoad] = useState(true);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [hasPlayerError, setHasPlayerError] = useState(false);
+    const videoId = getYoutubeVideoId(src);
+
+    const stretchPlayerFrame = (player: any) => {
+        const iframe = player?.getIframe?.();
+        if (!iframe) return;
+
+        iframe.style.position = 'absolute';
+        iframe.style.top = '50%';
+        iframe.style.left = '50%';
+        iframe.style.transform = 'translate(-50%, -50%)';
+        iframe.style.width = 'max(100vw, 177.77vh)';
+        iframe.style.height = 'max(56.25vw, 100vh)';
+        iframe.style.border = '0';
+        iframe.style.pointerEvents = 'none';
+    };
+
+    useEffect(() => {
+        audioEnabledRef.current = audioEnabled;
+        isActiveRef.current = isActive;
+    }, [audioEnabled, isActive]);
+
+    useEffect(() => {
+        if (!shouldLoad || !videoId || !playerHostRef.current || hasPlayerError)
+            return;
+
+        let isMounted = true;
+        const failSafeTimer = isActiveRef.current
+            ? window.setTimeout(() => {
+                  if (isActiveRef.current && !isPlayingRef.current)
+                      setHasPlayerError(true);
+              }, 5000)
+            : null;
+
+        loadYoutubeIframeApi().then(() => {
+            if (!isMounted || !playerHostRef.current || !window.YT?.Player)
+                return;
+
+            playerRef.current = new window.YT.Player(playerHostRef.current, {
+                videoId,
+                playerVars: {
+                    autoplay: 1,
+                    mute: audioEnabledRef.current ? 0 : 1,
+                    controls: 0,
+                    modestbranding: 1,
+                    rel: 0,
+                    playsinline: 1,
+                    disablekb: 1,
+                    fs: 0,
+                    iv_load_policy: 3,
+                },
+                events: {
+                    onReady: (event: any) => {
+                        stretchPlayerFrame(event.target);
+                        const shouldPlay = isActiveRef.current;
+
+                        if (audioEnabledRef.current && shouldPlay) {
+                            event.target.unMute();
+                            event.target.setVolume(100);
+                        } else {
+                            event.target.mute();
+                        }
+
+                        if (shouldPlay) {
+                            event.target.playVideo();
+                        } else {
+                            event.target.pauseVideo();
+                        }
+                    },
+                    onStateChange: (event: any) => {
+                        stretchPlayerFrame(event.target);
+                        if (event.data === window.YT.PlayerState.PLAYING) {
+                            isPlayingRef.current = true;
+                            setIsPlaying(true);
+                            if (failSafeTimer) {
+                                window.clearTimeout(failSafeTimer);
+                            }
+
+                            if (!loopTimerRef.current) {
+                                loopTimerRef.current = window.setInterval(() => {
+                                    const player = playerRef.current;
+                                    if (!player?.getCurrentTime || !player?.seekTo)
+                                        return;
+
+                                    const currentTime = player.getCurrentTime();
+                                    if (currentTime >= 20) {
+                                        player.seekTo(0, true);
+                                    }
+                                }, 500);
+                            }
+                        } else if (event.data === window.YT.PlayerState.ENDED) {
+                            if (loopTimerRef.current) {
+                                window.clearInterval(loopTimerRef.current);
+                                loopTimerRef.current = null;
+                            }
+                            if (isActiveRef.current) {
+                                event.target.seekTo(0, true);
+                                event.target.playVideo();
+                            }
+                        } else if (event.data === window.YT.PlayerState.PAUSED) {
+                            if (loopTimerRef.current) {
+                                window.clearInterval(loopTimerRef.current);
+                                loopTimerRef.current = null;
+                            }
+                            if (!isActiveRef.current) {
+                                isPlayingRef.current = false;
+                                setIsPlaying(false);
+                            }
+                        }
+                    },
+                    onError: () => {
+                        isPlayingRef.current = false;
+                        setHasPlayerError(true);
+                        if (failSafeTimer) {
+                            window.clearTimeout(failSafeTimer);
+                        }
+                    },
+                },
+            });
+        });
+
+        return () => {
+            isMounted = false;
+            isPlayingRef.current = false;
+            if (failSafeTimer) {
+                window.clearTimeout(failSafeTimer);
+            }
+            if (loopTimerRef.current) {
+                window.clearInterval(loopTimerRef.current);
+                loopTimerRef.current = null;
+            }
+            playerRef.current?.destroy?.();
+            playerRef.current = null;
+        };
+    }, [shouldLoad, videoId, hasPlayerError]);
+
+    useEffect(() => {
+        const player = playerRef.current;
+        if (!player) return;
+
+        if (!isActive) {
+            isPlayingRef.current = false;
+            setIsPlaying(false);
+            player.mute?.();
+            player.pauseVideo?.();
+            return;
+        }
+
+        if (audioEnabled) {
+            player.unMute?.();
+            player.setVolume?.(100);
+        } else {
+            player.mute?.();
+        }
+
+        player.playVideo?.();
+    }, [audioEnabled, isActive]);
+
+    if (!videoId) return null;
+
+    return (
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            {shouldLoad && !hasPlayerError && (
+                <div className="absolute inset-0">
+                    <div
+                        className={cn(
+                            'absolute inset-0 transition-opacity duration-300',
+                            isActive && isPlaying
+                                ? 'opacity-100 visible'
+                                : 'opacity-0 invisible',
+                        )}
+                    >
+                        <div
+                            ref={playerHostRef}
+                            className="relative h-full w-full overflow-hidden"
+                        />
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
+const HomeThemeOne = () => {
+    const dispatch = useAppDispatch();
+    const { data: banner, isLoading: isBannerLoading } = useGetBannerQuery();
+    const bannerSliderRes = useGetBannerSliderQuery();
+    const featuredCategoryRes = useGetFeaturedCategoriesQuery();
+    const topProductRes = useGetTopProductsQuery();
+    const singleImageBannerRes = useGetSingleImageBannerQuery();
+    const flashSaleProductRes = useGetFlashSaleProductsQuery();
+    const fourImageBannerRes = useGetFourImageBannersQuery();
+    const categoryProductsRes = useGetCategoryProductsQuery();
+    const bottomImageBannerRes = useGetBottomImageBannersQuery();
+
+    // Get dynamic sections from window.config
+    const dynamicSections = (window as any).config?.dynamicSections || [];
+
+    return (
+        <div className="space-y-10 lg:space-y-16 pb-5">
+            {/* start::banner */}
+            {banner?.showThemeOneMainBanner === '1' && (
+                <section
+                    id="banner"
+                    className="relative w-screen left-1/2 -translate-x-1/2 overflow-hidden"
+                >
+                    {isBannerLoading ? (
+                        <div className="h-[520px] md:h-[644px] skeleton"></div>
+                    ) : (
+                        <ThemeSlider
+                            slidesPerView={1}
+                            spaceBetween={0}
+                            autoplay={
+                                banner?.settings?.autoplay
+                                    ? {
+                                          delay:
+                                              banner?.settings?.delay || 5000,
+                                          disableOnInteraction: false,
+                                          pauseOnMouseEnter: true,
+                                      }
+                                    : false
+                            }
+                            loop={false}
+                            rewind={
+                                !!(banner?.banners && banner.banners.length > 1)
+                            }
+                            pagination={
+                                banner?.banners && banner.banners.length > 1
+                            }
+                        >
+                            {banner?.banners?.map((item, idx) => (
+                                <SwiperSlide key={idx}>
+                                    {({ isActive: isSlideActive }) => {
+                                        const shouldShowVideo =
+                                            item.useBackgroundVideo === '1' &&
+                                            !!item.backgroundVideoLink;
+                                        const shouldShowForegroundImage =
+                                            item.showForegroundImage === '1' &&
+                                            !!item.foregroundImage;
+
+                                        return (
+                                            <div
+                                                className="relative w-full aspect-[16/9] md:aspect-[21/9] overflow-hidden bg-center"
+                                                style={{
+                                                    backgroundImage:
+                                                        item.backgroundImage
+                                                            ? `url(${item.backgroundImage})`
+                                                            : 'none',
+                                                    backgroundSize: 'cover',
+                                                    backgroundRepeat:
+                                                        'no-repeat',
+                                                }}
+                                            >
+                                                {shouldShowVideo &&
+                                                    isSlideActive && (
+                                                        <>
+                                                            <LazyBackgroundVideo
+                                                                src={
+                                                                    item.backgroundVideoLink
+                                                                }
+                                                                audioEnabled={
+                                                                    item.backgroundVideoAudio ===
+                                                                    '1'
+                                                                }
+                                                            />
+                                                            <div className="absolute inset-0 bg-black/20"></div>
+                                                        </>
+                                                    )}
+
+                                                <div
+                                                    className={`max-w-[1212px] h-full mx-auto px-6 flex items-center gap-y-8 ${
+                                                        banner?.settings
+                                                            ?.contentAlignment ===
+                                                        'center'
+                                                            ? 'flex-col justify-center relative z-10'
+                                                            : banner?.settings
+                                                                  ?.contentAlignment ===
+                                                              'right'
+                                                            ? 'flex-row-reverse justify-between relative z-10'
+                                                            : 'max-md:flex-col justify-between relative z-10'
+                                                    }`}
+                                                >
+                                                    <div
+                                                        className={`max-w-[660px] ${
+                                                            banner?.settings
+                                                                ?.contentAlignment ===
+                                                            'center'
+                                                                ? 'text-center relative z-10'
+                                                                : banner
+                                                                      ?.settings
+                                                                      ?.contentAlignment ===
+                                                                  'right'
+                                                                ? 'text-right'
+                                                                : 'max-md:text-center'
+                                                        }`}
+                                                    >
+                                                        {item.badgeText &&
+                                                            item.badgeText !=
+                                                                '' && (
+                                                                <motion.div
+                                                                    initial={{
+                                                                        opacity: 0,
+                                                                        y: 20,
+                                                                    }}
+                                                                    whileInView={{
+                                                                        opacity: 1,
+                                                                        y: 0,
+                                                                    }}
+                                                                    viewport={{
+                                                                        once: true,
+                                                                    }}
+                                                                    transition={{
+                                                                        duration: 0.5,
+                                                                    }}
+                                                                >
+                                                                    <Badge>
+                                                                        {
+                                                                            item.badgeText
+                                                                        }
+                                                                    </Badge>
+                                                                </motion.div>
+                                                            )}
+
+                                                        <motion.h1
+                                                            initial={{
+                                                                opacity: 0,
+                                                                y: 20,
+                                                            }}
+                                                            whileInView={{
+                                                                opacity: 1,
+                                                                y: 0,
+                                                            }}
+                                                            viewport={{
+                                                                once: true,
+                                                            }}
+                                                            transition={{
+                                                                duration: 0.5,
+                                                                delay: 0.2,
+                                                            }}
+                                                            className="ek-h1 font-semibold text-primary mt-5 mb-2"
+                                                            style={
+                                                                item.titleColor
+                                                                    ? {
+                                                                          color: item.titleColor,
+                                                                      }
+                                                                    : undefined
+                                                            }
+                                                        >
+                                                            {item.title}
+                                                        </motion.h1>
+                                                        <motion.p
+                                                            initial={{
+                                                                opacity: 0,
+                                                                y: 20,
+                                                            }}
+                                                            whileInView={{
+                                                                opacity: 1,
+                                                                y: 0,
+                                                            }}
+                                                            viewport={{
+                                                                once: true,
+                                                            }}
+                                                            transition={{
+                                                                duration: 0.5,
+                                                                delay: 0.4,
+                                                            }}
+                                                            className="text-primary/70 text-lg mb-7"
+                                                            style={
+                                                                item.subTitleColor
+                                                                    ? {
+                                                                          color: item.subTitleColor,
+                                                                      }
+                                                                    : undefined
+                                                            }
+                                                        >
+                                                            {item.subTitle}
+                                                        </motion.p>
+                                                        {item.link &&
+                                                            item.link != '' && (
+                                                                <motion.div
+                                                                    initial={{
+                                                                        opacity: 0,
+                                                                        y: 20,
+                                                                    }}
+                                                                    whileInView={{
+                                                                        opacity: 1,
+                                                                        y: 0,
+                                                                    }}
+                                                                    viewport={{
+                                                                        once: true,
+                                                                    }}
+                                                                    transition={{
+                                                                        duration: 0.5,
+                                                                        delay: 0.5,
+                                                                    }}
+                                                                >
+                                                                    <Button
+                                                                        as="link"
+                                                                        to={
+                                                                            item.link ||
+                                                                            '#'
+                                                                        }
+                                                                        variant="primary"
+                                                                        size="lg"
+                                                                    >
+                                                                        {translate(
+                                                                            'VISIT SHOP',
+                                                                        )}
+                                                                    </Button>
+                                                                </motion.div>
+                                                            )}
+                                                    </div>
+
+                                                    {banner?.settings
+                                                        ?.contentAlignment ===
+                                                        'center' &&
+                                                    shouldShowForegroundImage ? (
+                                                        <motion.div
+                                                            initial={{
+                                                                opacity: 0,
+                                                            }}
+                                                            whileInView={{
+                                                                opacity: 1,
+                                                            }}
+                                                            viewport={{
+                                                                once: true,
+                                                            }}
+                                                            transition={{
+                                                                duration: 0.5,
+                                                                delay: 0.5,
+                                                            }}
+                                                            className="absolute inset-0 z-0"
+                                                        >
+                                                            <img
+                                                                src={
+                                                                    item.foregroundImage
+                                                                }
+                                                                alt=""
+                                                                className="w-full h-full object-cover object-center"
+                                                            />
+                                                        </motion.div>
+                                                    ) : shouldShowForegroundImage ? (
+                                                        <motion.div
+                                                            initial={{
+                                                                opacity: 0,
+                                                                y: 20,
+                                                            }}
+                                                            whileInView={{
+                                                                opacity: 1,
+                                                                y: 0,
+                                                            }}
+                                                            viewport={{
+                                                                once: true,
+                                                            }}
+                                                            transition={{
+                                                                duration: 0.5,
+                                                                delay: 0.5,
+                                                            }}
+                                                        >
+                                                            <img
+                                                                src={
+                                                                    item.foregroundImage
+                                                                }
+                                                                alt=""
+                                                                className="max-w-[80%] xl:max-w-[392px] 3xl:max-w-[550px] mx-auto"
+                                                            />
+                                                        </motion.div>
+                                                    ) : null}
+                                                </div>
+                                            </div>
+                                        );
+                                    }}
+                                </SwiperSlide>
+                            ))}
+                        </ThemeSlider>
+                    )}
+                </section>
+            )}
+
+            {bannerSliderRes.data?.[0]?.showThemeOneSliderSection == '1' && (
+                <motion.section
+                    variants={{
+                        hidden: { opacity: 1, translateY: 20 },
+                        whileInView: {
+                            opacity: 1,
+                            translateY: 0,
+                            transition: {
+                                staggerChildren: 0.3,
+                            },
+                        },
+                    }}
+                    className="!mt-2.5 px-3.5"
+                    id="banner-slider"
+                >
+                    <ThemeSlider
+                        slidesPerView={1}
+                        spaceBetween={15}
+                        autoplay={{
+                            delay: 2000,
+                            pauseOnMouseEnter: true,
+                        }}
+                        modules={[Autoplay]}
+                        breakpoints={{
+                            568: {
+                                slidesPerView: 2,
+                            },
+                            768: {
+                                slidesPerView: 3,
+                            },
+                            992: {
+                                slidesPerView: 4,
+                            },
+                        }}
+                    >
+                        {bannerSliderRes.isLoading
+                            ? [1, 2, 3, 4].map((item) => (
+                                  <SwiperSlide key={item}>
+                                      <div className="skeleton h-auto w-full rounded-banner aspect-[14/10]" />
+                                  </SwiperSlide>
+                              ))
+                            : bannerSliderRes?.data?.map((item, idx) => (
+                                  <SwiperSlide key={idx}>
+                                      <Link
+                                          to={item.url}
+                                          className="w-full h-full"
+                                      >
+                                          <motion.img
+                                              variants={{
+                                                  hidden: {
+                                                      y: 20,
+                                                      opacity: 0,
+                                                  },
+                                                  whileInView: {
+                                                      y: 0,
+                                                      opacity: 1,
+                                                  },
+                                              }}
+                                              viewport={{ once: true }}
+                                              src={item.image}
+                                              alt=""
+                                              className="w-full h-full rounded-banner"
+                                          />
+                                      </Link>
+                                  </SwiperSlide>
+                              ))}
+                    </ThemeSlider>
+                </motion.section>
+            )}
+
+            {/* start::featured-category */}
+            {featuredCategoryRes.isLoading ? (
+                <ProductSectionSkeleton />
+            ) : featuredCategoryRes.data?.showFeaturedCategories === '1' ? (
+                <section
+                    className="featured-category-section"
+                    id="featured-categories"
+                >
+                    <motion.div
+                        variants={containerAnimation}
+                        initial="initial"
+                        whileInView="whileInView"
+                        viewport={{ once: true }}
+                        className="container"
+                    >
+                        <SectionTitle
+                            animated
+                            title={translate('[Featured] Categories')}
+                            subTitle={translate('Handpicked')}
+                            onClick={() => dispatch(togglePopup('categories'))}
+                        />
+                        {featuredCategoryRes.data?.categories?.length > 4 ? (
+                            <CategorySlider>
+                                {featuredCategoryRes.data?.categories.map(
+                                    (category) => (
+                                        <SwiperSlide key={category.id}>
+                                            <motion.div
+                                                variants={itemAnimation}
+                                            >
+                                                <CategoryCard
+                                                    title={category.name}
+                                                    to={`/categories/${category.slug}`}
+                                                    image={
+                                                        category.thumbnailImage
+                                                    }
+                                                />
+                                            </motion.div>
+                                        </SwiperSlide>
+                                    ),
+                                )}
+                            </CategorySlider>
+                        ) : (
+                            <div className="flex justify-center">
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 ">
+                                    {featuredCategoryRes.data?.categories.map(
+                                        (category) => (
+                                            <div key={category.id}>
+                                                <CategoryCard
+                                                    title={category.name}
+                                                    to={`/categories/${category.slug}`}
+                                                    image={
+                                                        category.thumbnailImage
+                                                    }
+                                                />
+                                            </div>
+                                        ),
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </motion.div>
+                </section>
+            ) : null}
+            {/* start::featured-category */}
+
+            {/* start::top-products */}
+            {topProductRes.isLoading ? (
+                <ProductSectionSkeleton withCategoryImage />
+            ) : topProductRes.data?.showThemeOneTopProducts === '1' ? (
+                <section className="top-products-section" id="top-products">
+                    <motion.div
+                        variants={containerAnimation}
+                        initial="initial"
+                        whileInView="whileInView"
+                        viewport={{ once: true }}
+                        className="container"
+                    >
+                        <SectionTitle
+                            animated
+                            title={translate('[Top] Products')}
+                            subTitle={translate('Popular')}
+                            link="/products"
+                        />
+
+                        <ProductsSlider>
+                            {topProductRes.data.products.map((product) => (
+                                <SwiperSlide key={product.id}>
+                                    <motion.div variants={itemAnimation}>
+                                        <ProductCard product={product} />
+                                    </motion.div>
+                                </SwiperSlide>
+                            ))}
+                        </ProductsSlider>
+                    </motion.div>
+                </section>
+            ) : null}
+            {/* start::top-products */}
+
+            {/* end::banner */}
+            {banner?.showThemeOneSecondaryBanner === '1' && (
+                <section
+                    id="secondary-banner"
+                    className="relative w-screen left-1/2 -translate-x-1/2 overflow-hidden"
+                >
+                    {(() => {
+                        const item = banner.secondaryBanner;
+                        const shouldShowVideo =
+                            item.useBackgroundVideo === '1' &&
+                            !!item.backgroundVideoLink;
+                        const secondaryContentAlignment =
+                            item.contentAlignment ?? 'left';
+
+                        return (
+                            <div
+                                className="relative h-[520px] md:h-[510px] w-full overflow-hidden bg-center"
+                                style={{
+                                    backgroundImage: item.backgroundImage
+                                        ? `url(${item.backgroundImage})`
+                                        : 'none',
+                                    backgroundSize: 'cover',
+                                    backgroundRepeat: 'no-repeat',
+                                    backgroundPosition: 'center center',
+                                }}
+                            >
+                                {shouldShowVideo && (
+                                    <>
+                                        <LazyBackgroundVideo
+                                            src={item.backgroundVideoLink}
+                                            audioEnabled={
+                                                item.backgroundVideoAudio ===
+                                                '1'
+                                            }
+                                        />
+                                        <div className="absolute inset-0 bg-black/20"></div>
+                                    </>
+                                )}
+
+                                <div className="max-w-[1212px] h-full mx-auto px-6 max-md:pt-8 max-md:pb-8 flex items-center justify-center relative z-10">
+                                    <div
+                                        className={cn(
+                                            'max-w-[660px] w-full',
+                                            secondaryContentAlignment ===
+                                                'center'
+                                                ? 'mx-auto text-center'
+                                                : secondaryContentAlignment ===
+                                                  'right'
+                                                ? 'ml-auto text-right'
+                                                : 'mr-auto text-left',
+                                        )}
+                                    >
+                                        {item.badgeText &&
+                                            item.badgeText != '' && (
+                                                <Badge>{item.badgeText}</Badge>
+                                            )}
+
+                                        <motion.h1
+                                            initial={{ opacity: 0, y: 20 }}
+                                            whileInView={{ opacity: 1, y: 0 }}
+                                            viewport={{ once: true }}
+                                            transition={{
+                                                duration: 0.5,
+                                                delay: 0.2,
+                                            }}
+                                            className="ek-h1 font-semibold text-primary mt-5 mb-2"
+                                            style={
+                                                item.titleColor
+                                                    ? { color: item.titleColor }
+                                                    : undefined
+                                            }
+                                        >
+                                            {item.title}
+                                        </motion.h1>
+
+                                        <motion.p
+                                            initial={{ opacity: 0, y: 20 }}
+                                            whileInView={{ opacity: 1, y: 0 }}
+                                            viewport={{ once: true }}
+                                            transition={{
+                                                duration: 0.5,
+                                                delay: 0.3,
+                                            }}
+                                            className="text-primary/70 text-lg mb-7"
+                                            style={
+                                                item.subTitleColor
+                                                    ? {
+                                                          color: item.subTitleColor,
+                                                      }
+                                                    : undefined
+                                            }
+                                        >
+                                            {item.subTitle}
+                                        </motion.p>
+
+                                        {item.link && item.link != '' && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: 20 }}
+                                                whileInView={{
+                                                    opacity: 1,
+                                                    y: 0,
+                                                }}
+                                                viewport={{ once: true }}
+                                                transition={{
+                                                    duration: 0.5,
+                                                    delay: 0.4,
+                                                }}
+                                            >
+                                                <Button
+                                                    as="link"
+                                                    to={item.link || '#'}
+                                                    variant="primary"
+                                                    size="lg"
+                                                >
+                                                    {translate('VISIT SHOP')}
+                                                </Button>
+                                            </motion.div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })()}
+                </section>
+            )}
+
+            {singleImageBannerRes.data?.showThemeOneSingleImageBanner ? (
+                <section id="single-image-banner">
+                    <div className="container">
+                        <motion.div
+                            variants={containerAnimation}
+                            initial="initial"
+                            whileInView="whileInView"
+                            viewport={{ once: true }}
+                            className="md:h-[644px] rounded-banner bg-gray-100 max-md:pt-[60px] max-md:pb-5 px-4 bg-center relative"
+                            style={{
+                                backgroundImage: `url(${singleImageBannerRes?.data.themeOneSingleImageBannerBackgroundImage})`,
+                                backgroundSize: 'cover',
+                                backgroundRepeat: 'no-repeat',
+                            }}
+                        >
+                            <div className="max-w-[1212px] h-full mx-auto flex max-md:flex-col items-center justify-between gap-y-8">
+                                <div className="max-w-[660px] max-md:text-center">
+                                    {singleImageBannerRes.data
+                                        .themeOneSingleImageBannerBadgeText &&
+                                        singleImageBannerRes.data
+                                            .themeOneSingleImageBannerBadgeText !=
+                                            '' && (
+                                            <Badge
+                                                reverse
+                                                textColor={
+                                                    singleImageBannerRes.data
+                                                        .themeOneSingleImageBannerBadgeTextColor
+                                                }
+                                                backgroundColor={
+                                                    singleImageBannerRes.data
+                                                        .themeOneSingleImageBannerBadgeBackgroundColor
+                                                }
+                                                classNames={{
+                                                    container:
+                                                        'sm:absolute sm:top-10 sm:right-0 mb-4',
+                                                }}
+                                            >
+                                                {
+                                                    singleImageBannerRes.data
+                                                        .themeOneSingleImageBannerBadgeText
+                                                }
+                                            </Badge>
+                                        )}
+                                    <motion.p
+                                        variants={itemAnimation}
+                                        className="ek-headline"
+                                        style={
+                                            singleImageBannerRes.data
+                                                .themeOneSingleImageBannerHeadlineColor
+                                                ? {
+                                                      color: singleImageBannerRes
+                                                          .data
+                                                          .themeOneSingleImageBannerHeadlineColor,
+                                                  }
+                                                : undefined
+                                        }
+                                    >
+                                        {
+                                            singleImageBannerRes.data
+                                                .themeOneSingleImageBannerHeadline
+                                        }
+                                    </motion.p>
+                                    <motion.h1
+                                        variants={itemAnimation}
+                                        className="ek-h1 font-semibold text-primary mt-4"
+                                        style={
+                                            singleImageBannerRes.data
+                                                .themeOneSingleImageBannerTitleColor
+                                                ? {
+                                                      color: singleImageBannerRes
+                                                          .data
+                                                          .themeOneSingleImageBannerTitleColor,
+                                                  }
+                                                : undefined
+                                        }
+                                    >
+                                        {
+                                            singleImageBannerRes.data
+                                                .themeOneSingleImageBannerTitle
+                                        }
+                                    </motion.h1>
+                                    <div className="border-b border-secondary/34 mt-2.5 mb-6">
+                                        <span className="border-b-4 border-theme-orange block max-w-[100px]"></span>
+                                    </div>
+
+                                    <motion.p
+                                        variants={itemAnimation}
+                                        className="text-primary/70 text-lg mb-7"
+                                        style={
+                                            singleImageBannerRes.data
+                                                .themeOneSingleImageBannerSubTitleColor
+                                                ? {
+                                                      color: singleImageBannerRes
+                                                          .data
+                                                          .themeOneSingleImageBannerSubTitleColor,
+                                                  }
+                                                : undefined
+                                        }
+                                    >
+                                        {
+                                            singleImageBannerRes.data
+                                                .themeOneSingleImageBannerSubTitle
+                                        }
+                                    </motion.p>
+
+                                    {singleImageBannerRes.data
+                                        .themeOneSingleImageBannerLink &&
+                                        singleImageBannerRes.data
+                                            .themeOneSingleImageBannerLink !=
+                                            '' && (
+                                            <motion.div
+                                                variants={itemAnimation}
+                                            >
+                                                <Button
+                                                    as="link"
+                                                    to={
+                                                        singleImageBannerRes
+                                                            .data
+                                                            .themeOneSingleImageBannerLink ||
+                                                        '#'
+                                                    }
+                                                    variant="primary"
+                                                    size="lg"
+                                                    textColor={
+                                                        singleImageBannerRes
+                                                            .data
+                                                            .themeOneSingleImageBannerButtonTextColor
+                                                    }
+                                                    backgroundColor={
+                                                        singleImageBannerRes
+                                                            .data
+                                                            .themeOneSingleImageBannerButtonBackgroundColor
+                                                    }
+                                                >
+                                                    {translate('VISIT SHOP')}
+                                                </Button>
+                                            </motion.div>
+                                        )}
+                                </div>
+
+                                <motion.div variants={itemAnimation}>
+                                    <img
+                                        src={
+                                            singleImageBannerRes.data
+                                                .themeOneSingleImageBannerForegroundImage
+                                        }
+                                        alt=""
+                                        className="max-w-[80%] xl:max-w-[592px] 3xl:max-w-[550px] mx-auto"
+                                    />
+                                </motion.div>
+                            </div>
+                        </motion.div>
+                    </div>
+                </section>
+            ) : null}
+
+            {flashSaleProductRes.data?.showHomeFlashSale === '1' &&
+            flashSaleProductRes.data.flashSaleCampaign ? (
+                <section id="flash-sale-products">
+                    <motion.div
+                        variants={containerAnimation}
+                        initial="initial"
+                        whileInView="whileInView"
+                        viewport={{ once: true }}
+                        className="container"
+                    >
+                        <SectionTitle
+                            animated
+                            title={translate('[On Sale] Products')}
+                            subTitle={translate('Popular')}
+                            countTo={
+                                +flashSaleProductRes.data.flashSaleCampaign
+                                    .endDate * 1000
+                            }
+                            text={
+                                flashSaleProductRes.data.flashSaleCampaign.name
+                            }
+                            link={`/campaigns/${flashSaleProductRes.data.flashSaleCampaign.slug}`}
+                        />
+
+                        <ProductsSlider>
+                            {flashSaleProductRes.data.flashSaleProducts.map(
+                                (product) => (
+                                    <SwiperSlide key={product.id}>
+                                        <motion.div variants={itemAnimation}>
+                                            <ProductCard product={product} />
+                                        </motion.div>
+                                    </SwiperSlide>
+                                ),
+                            )}
+                        </ProductsSlider>
+                    </motion.div>
+                </section>
+            ) : null}
+
+            {fourImageBannerRes.data?.showThemeOneFourImageBanner ? (
+                <section id="4-banner-section">
+                    <motion.div
+                        variants={{
+                            whileInView: {
+                                transition: {
+                                    delay: 0.4,
+                                    delayChildren: 0.3,
+                                    staggerChildren: 0.2,
+                                },
+                            },
+                        }}
+                        initial="initial"
+                        whileInView="whileInView"
+                        viewport={{ once: true }}
+                        className="container grid grid-cols-2 md:grid-cols-4 gap-0"
+                    >
+                        <Link
+                            to={
+                                fourImageBannerRes.data
+                                    ?.themeOneFourImageBannerImageOneLink
+                            }
+                        >
+                            <motion.img
+                                variants={{
+                                    initial: { opacity: 0, scale: 0.8 },
+                                    whileInView: {
+                                        opacity: 1,
+                                        scale: 1,
+                                    },
+                                }}
+                                src={
+                                    fourImageBannerRes.data
+                                        ?.themeOneFourImageBannerImageOne
+                                }
+                                alt=""
+                                className="w-full aspect-square"
+                            />
+                        </Link>
+                        <Link
+                            to={
+                                fourImageBannerRes.data
+                                    ?.themeOneFourImageBannerImageTwoLink
+                            }
+                        >
+                            <motion.img
+                                variants={{
+                                    initial: { opacity: 0, scale: 0.8 },
+                                    whileInView: {
+                                        opacity: 1,
+                                        scale: 1,
+                                    },
+                                }}
+                                src={
+                                    fourImageBannerRes.data
+                                        ?.themeOneFourImageBannerImageTwo
+                                }
+                                alt=""
+                                className="w-full aspect-square"
+                            />
+                        </Link>
+                        <Link
+                            to={
+                                fourImageBannerRes.data
+                                    ?.themeOneFourImageBannerImageThreeLink
+                            }
+                            className="col-span-2 row-span-2"
+                        >
+                            <motion.img
+                                variants={{
+                                    initial: { opacity: 0, scale: 0.8 },
+                                    whileInView: {
+                                        opacity: 1,
+                                        scale: 1,
+                                    },
+                                }}
+                                src={
+                                    fourImageBannerRes.data
+                                        ?.themeOneFourImageBannerImageThree
+                                }
+                                alt=""
+                                className="w-full h-full"
+                            />
+                        </Link>
+                        <Link
+                            to={
+                                fourImageBannerRes.data
+                                    ?.themeOneFourImageBannerImageFourLink
+                            }
+                            className="col-span-2"
+                        >
+                            <motion.img
+                                variants={{
+                                    initial: { opacity: 0, scale: 0.8 },
+                                    whileInView: {
+                                        opacity: 1,
+                                        scale: 1,
+                                    },
+                                }}
+                                src={
+                                    fourImageBannerRes.data
+                                        ?.themeOneFourImageBannerImageFour
+                                }
+                                alt=""
+                                className="w-full h-full"
+                            />
+                        </Link>
+                    </motion.div>
+                </section>
+            ) : null}
+
+            {/* start::category product sections */}
+            {(categoryProductsRes.data?.showThemeOneCategoryProducts === '1' ||
+                !categoryProductsRes.data?.showThemeOneCategoryProducts) &&
+                categoryProductsRes.data?.map((item, idx) => (
+                    <section
+                        className=""
+                        key={item.category.id}
+                        id={`category-products--${item.category.name}`}
+                    >
+                        <motion.div
+                            variants={containerAnimation}
+                            initial="initial"
+                            whileInView="whileInView"
+                            // viewport={{ once: true }}
+                            className="container"
+                        >
+                            <SectionTitle
+                                animated
+                                highlightFirstWord
+                                title={item.category.name}
+                                subTitle={translate('Popular')}
+                                link={`/categories/${item.category.slug}`}
+                            />
+                            <div
+                                className={cn(
+                                    'flex max-lg:flex-col gap-5 mt-8',
+                                    {
+                                        'lg:flex-row-reverse': idx % 2 === 1,
+                                    },
+                                )}
+                            >
+                                {item.image && item.image != '' && (
+                                    <div className="w-full grow lg:max-w-[530px] xl:max-w-[460px] 3xl:max-w-[631px] relative">
+                                        <motion.img
+                                            variants={{
+                                                initial: {
+                                                    opacity: 0,
+                                                    scale: 0.9,
+                                                },
+                                                whileInView: {
+                                                    opacity: 1,
+                                                    scale: 1,
+                                                    transition: {
+                                                        duration: 0.5,
+                                                    },
+                                                },
+                                            }}
+                                            src={item.image}
+                                            alt=""
+                                            className="rounded-banner h-[calc(100%-34px)] w-full absolute"
+                                        />
+                                    </div>
+                                )}
+
+                                <ThemeSlider
+                                    slidesPerView={1}
+                                    containerClass="grow"
+                                    breakpoints={{
+                                        320: {
+                                            slidesPerView: 2,
+                                            spaceBetween: 16,
+                                        },
+                                        640: {
+                                            slidesPerView: 2,
+                                            spaceBetween: 16,
+                                        },
+                                        1280: {
+                                            slidesPerView: 3,
+                                            spaceBetween: 20,
+                                        },
+                                    }}
+                                >
+                                    {item.products.map((product) => (
+                                        <SwiperSlide key={product.id}>
+                                            <motion.div
+                                                variants={itemAnimation}
+                                            >
+                                                <ProductCard
+                                                    product={product}
+                                                />
+                                            </motion.div>
+                                        </SwiperSlide>
+                                    ))}
+                                </ThemeSlider>
+                            </div>
+                        </motion.div>
+                    </section>
+                ))}
+            {/* end::category product sections */}
+
+            {bottomImageBannerRes.data?.showThemeOneBottomFourImageBanner ? (
+                <section id="bottom-image-banner">
+                    <motion.div
+                        variants={containerAnimation}
+                        initial="initial"
+                        whileInView="whileInView"
+                        viewport={{ once: true }}
+                        className="container"
+                    >
+                        <SectionTitle
+                            animated
+                            highlightFirstWord
+                            title={
+                                bottomImageBannerRes.data
+                                    .themeOneBottomFourImageBannerTitle || ''
+                            }
+                            subTitle={
+                                bottomImageBannerRes.data
+                                    .themeOneBottomFourImageBannerSubTitle || ''
+                            }
+                        />
+                    </motion.div>
+                    <motion.div
+                        variants={containerAnimation}
+                        initial="initial"
+                        whileInView="whileInView"
+                        viewport={{ once: true }}
+                        className="container grid sm:grid-cols-2 xl:grid-cols-4 gap-6 mt-8"
+                    >
+                        <motion.div variants={itemAnimation}>
+                            <TallBannerCard
+                                image={
+                                    bottomImageBannerRes.data
+                                        .themeOneBottomFourImageBannerImageOne
+                                }
+                                bg={
+                                    bottomImageBannerRes.data
+                                        .themeOneBottomFourImageBannerImageOneBG
+                                }
+                                subTitle={
+                                    bottomImageBannerRes.data
+                                        .themeOneBottomFourImageBannerImageOneSubTitle
+                                }
+                                title={
+                                    bottomImageBannerRes.data
+                                        .themeOneBottomFourImageBannerImageOneTitle
+                                }
+                                description={
+                                    bottomImageBannerRes.data
+                                        .themeOneBottomFourImageBannerImageOneDescription
+                                }
+                                link={
+                                    bottomImageBannerRes.data
+                                        .themeOneBottomFourImageBannerImageOneLink
+                                }
+                            />
+                        </motion.div>
+                        <motion.div variants={itemAnimation}>
+                            <TallBannerCard
+                                image={
+                                    bottomImageBannerRes.data
+                                        .themeOneBottomFourImageBannerImageTwo
+                                }
+                                bg={
+                                    bottomImageBannerRes.data
+                                        .themeOneBottomFourImageBannerImageTwoBG
+                                }
+                                subTitle={
+                                    bottomImageBannerRes.data
+                                        .themeOneBottomFourImageBannerImageTwoSubTitle
+                                }
+                                title={
+                                    bottomImageBannerRes.data
+                                        .themeOneBottomFourImageBannerImageTwoTitle
+                                }
+                                description={
+                                    bottomImageBannerRes.data
+                                        .themeOneBottomFourImageBannerImageTwoDescription
+                                }
+                                link={
+                                    bottomImageBannerRes.data
+                                        .themeOneBottomFourImageBannerImageTwoLink
+                                }
+                            />
+                        </motion.div>
+                        <motion.div variants={itemAnimation}>
+                            <TallBannerCard
+                                image={
+                                    bottomImageBannerRes.data
+                                        .themeOneBottomFourImageBannerImageThree
+                                }
+                                bg={
+                                    bottomImageBannerRes.data
+                                        .themeOneBottomFourImageBannerImageThreeBG
+                                }
+                                subTitle={
+                                    bottomImageBannerRes.data
+                                        .themeOneBottomFourImageBannerImageThreeSubTitle
+                                }
+                                title={
+                                    bottomImageBannerRes.data
+                                        .themeOneBottomFourImageBannerImageThreeTitle
+                                }
+                                description={
+                                    bottomImageBannerRes.data
+                                        .themeOneBottomFourImageBannerImageThreeDescription
+                                }
+                                link={
+                                    bottomImageBannerRes.data
+                                        .themeOneBottomFourImageBannerImageThreeLink
+                                }
+                            />
+                        </motion.div>
+                        <motion.div variants={itemAnimation}>
+                            <TallBannerCard
+                                image={
+                                    bottomImageBannerRes.data
+                                        .themeOneBottomFourImageBannerImageFour
+                                }
+                                bg={
+                                    bottomImageBannerRes.data
+                                        .themeOneBottomFourImageBannerImageFourBG
+                                }
+                                subTitle={
+                                    bottomImageBannerRes.data
+                                        .themeOneBottomFourImageBannerImageFourSubTitle
+                                }
+                                title={
+                                    bottomImageBannerRes.data
+                                        .themeOneBottomFourImageBannerImageFourTitle
+                                }
+                                description={
+                                    bottomImageBannerRes.data
+                                        .themeOneBottomFourImageBannerImageFourDescription
+                                }
+                                link={
+                                    bottomImageBannerRes.data
+                                        .themeOneBottomFourImageBannerImageFourLink
+                                }
+                            />
+                        </motion.div>
+                    </motion.div>
+                </section>
+            ) : null}
+
+            {/* Dynamic Sections */}
+            {dynamicSections.length > 0 && (
+                <DynamicSectionRenderer
+                    sections={dynamicSections}
+                    theme="theme-one"
+                />
+            )}
+
+            <SmallProductsColumn />
+        </div>
+    );
+};
+
+export default HomeThemeOne;

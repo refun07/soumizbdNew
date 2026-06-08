@@ -1,0 +1,199 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --primary: 0 91 255;
+        --secondary: 47 161 253;
+        --secondary-light: 116 194 253;
+        --text-muted: 148 148 148;
+
+        --theme-alert: 238 88 88;
+        --theme-orange: 255 126 5;
+        --theme-green: 48 173 46;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        background-image: url('/images/installation/bg.png');
+        @apply text-sm font-inter leading-loose;
+    }
+}
+
+@layer components {
+    table {
+        @apply border-collapse rounded-md;
+    }
+    table:not(.border-none) td,
+    table:not(.border-none) th {
+        @apply border border-gray-200 py-3.5 px-7 rounded-md;
+    }
+
+    /* input */
+
+    /* input checkbox (toggler) */
+    .theme-checkbox--toggler {
+        @apply inline-flex items-center relative cursor-pointer select-none;
+    }
+    .theme-checkbox__input {
+        @apply hidden;
+    }
+    .theme-checkbox--toggler .theme-checkbox__checkmark {
+        @apply h-[17px] w-[34px] relative border border-[#e2e2e2] rounded-full mr-2;
+    }
+    .theme-checkbox--toggler .theme-checkbox__checkmark::after {
+        content: '';
+        @apply absolute left-0 top-0 bottom-0 border border-[#e3e3e3] w-[15px] h-[15px] bg-[#e3e3e3] transition-all rounded-full;
+    }
+    .theme-checkbox__text {
+        @apply text-[#949494] text-[14px] md:text-[16px] whitespace-nowrap;
+        width: calc(100% - (var(--box-size) + 8px + 2px));
+    }
+
+    .theme-checkbox--toggler
+        .theme-checkbox__input:checked
+        ~ .theme-checkbox__checkmark {
+        @apply border-green-500;
+    }
+    .theme-checkbox--toggler
+        .theme-checkbox__input:checked
+        ~ .theme-checkbox__checkmark:after {
+        @apply left-[calc(100%-15px)] bg-green-500 border-green-500;
+    }
+    .theme-checkbox--toggler
+        .theme-checkbox__input:disabled
+        ~ .theme-checkbox__checkmark {
+        @apply opacity-[0.25];
+    }
+
+    /* veriants */
+    .theme-checkbox--toggler.theme-checkbox--primary
+        .theme-checkbox__input:checked
+        ~ .theme-checkbox__checkmark {
+        @apply border-primary;
+    }
+    .theme-checkbox--toggler.theme-checkbox--primary
+        .theme-checkbox__input:checked
+        ~ .theme-checkbox__checkmark::after {
+        @apply bg-primary border-primary;
+    }
+
+    .theme-checkbox--toggler.theme-checkbox--secondary
+        .theme-checkbox__input:checked
+        ~ .theme-checkbox__checkmark {
+        @apply border-secondary;
+    }
+    .theme-checkbox--toggler.theme-checkbox--secondary
+        .theme-checkbox__input:checked
+        ~ .theme-checkbox__checkmark::after {
+        @apply bg-secondary border-secondary;
+    }
+
+    .theme-checkbox--toggler.theme-checkbox--danger
+        .theme-checkbox__input:checked
+        ~ .theme-checkbox__checkmark {
+        @apply border-rose-500;
+    }
+    .theme-checkbox--toggler.theme-checkbox--danger
+        .theme-checkbox__input:checked
+        ~ .theme-checkbox__checkmark::after {
+        @apply bg-rose-500 border-rose-500;
+    }
+
+    .theme-checkbox--toggler.theme-checkbox--warning
+        .theme-checkbox__input:checked
+        ~ .theme-checkbox__checkmark {
+        @apply border-amber-500;
+    }
+    .theme-checkbox--toggler.theme-checkbox--warning
+        .theme-checkbox__input:checked
+        ~ .theme-checkbox__checkmark::after {
+        @apply bg-amber-500 border-amber-500;
+    }
+
+    .theme-checkbox--toggler.theme-checkbox--light
+        .theme-checkbox__input:checked
+        ~ .theme-checkbox__checkmark {
+        @apply border-gray-100;
+    }
+    .theme-checkbox--toggler.theme-checkbox--light
+        .theme-checkbox__input:checked
+        ~ .theme-checkbox__checkmark::after {
+        @apply bg-gray-100 border-gray-100;
+    }
+
+    .theme-checkbox--toggler.theme-checkbox--dark
+        .theme-checkbox__input:checked
+        ~ .theme-checkbox__checkmark {
+        @apply border-gray-800;
+    }
+    .theme-checkbox--toggler.theme-checkbox--dark
+        .theme-checkbox__input:checked
+        ~ .theme-checkbox__checkmark::after {
+        @apply bg-gray-800 border-gray-800;
+    }
+
+    /* checkbox (check mark)  */
+    .theme-checkbox-check {
+        @apply h-5 w-5 relative cursor-pointer select-none border border-[#e2e2e2];
+    }
+    .theme-checkbox-check .theme-checkbox__checkmark {
+        font-family: 'Font Awesome 6 Pro';
+        @apply h-full w-full absolute top-0 left-0 bg-secondary text-white text-xs flex items-center justify-center opacity-0 transition-all;
+    }
+    .theme-checkbox-check .theme-checkbox__checkmark::after {
+        content: '\f00c';
+    }
+
+    .theme-checkbox-check
+        .theme-checkbox__input:checked
+        ~ .theme-checkbox__checkmark {
+        @apply opacity-100;
+    }
+    .theme-checkbox-check:has(
+            .theme-checkbox__input:checked ~ .theme-checkbox__checkmark
+        ) {
+        @apply border-secondary;
+    }
+
+    /* input radio */
+    .theme-radio {
+        --box-size: 20px;
+        @apply flex items-center relative cursor-pointer select-none;
+    }
+    .theme-radio__input {
+        @apply hidden;
+    }
+    .theme-radio__checkmark {
+        @apply h-[18px] w-[18px] relative border-2 border-[#e2e2e2] mr-2;
+    }
+    .theme-radio__checkmark::after {
+        @apply absolute left-[50%] top-[50%] transform translate-y-[-50%] translate-x-[-50%] w-[10px] h-[10px] hidden transition-all bg-[#2196f3];
+        content: '';
+    }
+    .theme-radio__text {
+        @apply text-[#949494] text-xs md:text-[16px] whitespace-nowrap;
+        width: calc(100% - (var(--box-size) + 8px + 2px));
+    }
+
+    .theme-radio:hover .theme-radio__checkmark {
+        @apply bg-[#2195f32c];
+    }
+    .theme-radio__input:checked ~ .theme-radio__checkmark {
+        @apply border-[#2196f3];
+    }
+    .theme-radio__input:checked ~ .theme-radio__checkmark:after {
+        @apply block;
+    }
+    .theme-radio__input:disabled ~ .theme-radio__checkmark {
+        @apply opacity-[0.25];
+    }
+}
+@layer utilities {
+}
