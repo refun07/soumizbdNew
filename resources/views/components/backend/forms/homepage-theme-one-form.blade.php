@@ -46,6 +46,7 @@
 {{-- main banner carousel --}}
 @php
     $mainBanners = getSetting('themeOneMainBanners') != null ? json_decode(getSetting('themeOneMainBanners'), true) : [];
+    $mainSideBanners = getSetting('themeOneMainSideBanners') != null ? json_decode(getSetting('themeOneMainSideBanners'), true) : [];
     $bannerSettings = getSetting('themeOneMainBannerSettings') != null ? json_decode(getSetting('themeOneMainBannerSettings'), true) : [];
     $secondaryBanner = getSetting('themeOneSecondaryBanner') != null ? json_decode(getSetting('themeOneSecondaryBanner'), true) : [];
 @endphp
@@ -231,6 +232,58 @@
                                     </div>'
                     data-target=".main-banner-wrapper">
                     {{ translate('Add Banner') }}
+                    <span class="ml-2">
+                        <i class="fa-solid fa-plus"></i>
+                    </span>
+                </a>
+
+                <input type="hidden" name="types[]" value="themeOneMainSideBanners">
+
+                <div class="bg-gray-50 border border-gray-100 rounded-md p-3 mt-6 mb-4">
+                    <h3 class="font-semibold text-base mb-1">{{ translate('Right Banner Slides') }}</h3>
+                    <p class="text-xs text-gray-500">{{ translate('These slides appear in the right 40% banner on desktop and below the main banner on mobile.') }}</p>
+                </div>
+
+                <div class="main-banner-side-wrapper">
+                    @if (count($mainSideBanners) > 0)
+                        @foreach ($mainSideBanners as $key => $banner)
+                            <div class="main-banner-item border border-gray-200 rounded-lg p-4 mb-4">
+                                <div class="flex justify-between items-center mb-3">
+                                    <h4 class="font-medium">{{ translate('Right Banner') }} {{ $key + 1 }}</h4>
+                                    <button type="button" class="text-red-500 hover:text-red-700 text-sm remove-banner-item">
+                                        <i class="fa-solid fa-trash"></i> {{ translate('Remove') }}
+                                    </button>
+                                </div>
+
+                                <x-backend.inputs.file :labelInline="false" label="Banner Image"
+                                    name="themeOneMainSideBanners[{{ $key }}][backgroundImage]"
+                                    value="{{ $banner['backgroundImage'] ?? '' }}" class="mb-3" />
+                                <p class="text-xs text-gray-500 mt-1 mb-4">Recommended: 800x600 pixels</p>
+
+                                <x-backend.inputs.text :labelInline="false" label="Link"
+                                    name="themeOneMainSideBanners[{{ $key }}][link]"
+                                    value="{{ $banner['link'] ?? '' }}" placeholder="https://www.example.com" :isRequired="false" class="mb-4" />
+                            </div>
+                        @endforeach
+                    @endif
+                </div>
+
+                <a href="javascript:void(0);" class="text-secondary-light" data-toggle="add-more"
+                    data-content='<div class="main-banner-item border border-gray-200 rounded-lg p-4 mb-4">
+                                        <div class="flex justify-between items-center mb-3">
+                                            <h4 class="font-medium">{{ translate('New Right Banner') }}</h4>
+                                            <button type="button" class="text-red-500 hover:text-red-700 text-sm remove-banner-item">
+                                                <i class="fa-solid fa-trash"></i> {{ translate('Remove') }}
+                                            </button>
+                                        </div>
+                                        <x-backend.inputs.file :labelInline="false"
+                                            label="Banner Image" name="themeOneMainSideBanners[__INDEX__][backgroundImage]" value="" class="mb-3" />
+                                        <p class="text-xs text-gray-500 mt-1 mb-4">Recommended: 800x600 pixels</p>
+                                        <x-backend.inputs.text :labelInline="false" label="Link" name="themeOneMainSideBanners[__INDEX__][link]"
+                                            value="" placeholder="https://www.example.com" :isRequired="false" class="mb-4" />
+                                    </div>'
+                    data-target=".main-banner-side-wrapper">
+                    {{ translate('Add Right Banner') }}
                     <span class="ml-2">
                         <i class="fa-solid fa-plus"></i>
                     </span>

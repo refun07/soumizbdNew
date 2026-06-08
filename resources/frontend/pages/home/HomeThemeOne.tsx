@@ -301,6 +301,15 @@ const HomeThemeOne = () => {
 
     // Get dynamic sections from window.config
     const dynamicSections = (window as any).config?.dynamicSections || [];
+    const mainSideBanners =
+        banner?.sideBanners?.filter((item) => item.backgroundImage) ?? [];
+    const mainBannerAutoplay = banner?.settings?.autoplay
+        ? {
+              delay: banner?.settings?.delay || 5000,
+              disableOnInteraction: false,
+              pauseOnMouseEnter: true,
+          }
+        : false;
 
     return (
         <div className="space-y-10 lg:space-y-16 pb-5">
@@ -308,31 +317,34 @@ const HomeThemeOne = () => {
             {banner?.showThemeOneMainBanner === '1' && (
                 <section
                     id="banner"
-                    className="relative w-screen left-1/2 -translate-x-1/2 overflow-hidden"
+                    className="relative left-1/2 mt-[8px] w-screen -translate-x-1/2 overflow-hidden"
                 >
                     {isBannerLoading ? (
                         <div className="h-[520px] md:h-[644px] skeleton"></div>
                     ) : (
+                        <div
+                            className={cn(
+                                'grid w-full grid-cols-1 gap-4 px-3.5 md:gap-5 md:px-5 lg:gap-6 lg:px-6',
+                                mainSideBanners.length > 0 &&
+                                    'lg:grid-cols-[minmax(0,60fr)_minmax(0,40fr)]',
+                            )}
+                        >
                         <ThemeSlider
                             slidesPerView={1}
                             spaceBetween={0}
-                            autoplay={
-                                banner?.settings?.autoplay
-                                    ? {
-                                          delay:
-                                              banner?.settings?.delay || 5000,
-                                          disableOnInteraction: false,
-                                          pauseOnMouseEnter: true,
-                                      }
-                                    : false
-                            }
+                            autoplay={mainBannerAutoplay}
                             loop={false}
                             rewind={
                                 !!(banner?.banners && banner.banners.length > 1)
                             }
                             pagination={
-                                banner?.banners && banner.banners.length > 1
+                                !!(
+                                    banner?.banners &&
+                                    banner.banners.length > 1
+                                )
                             }
+                            containerClass="min-w-0"
+                            paginationContainerClass="absolute inset-x-0 bottom-4 z-20 mt-0"
                         >
                             {banner?.banners?.map((item, idx) => (
                                 <SwiperSlide key={idx}>
@@ -346,7 +358,7 @@ const HomeThemeOne = () => {
 
                                         return (
                                             <div
-                                                className="relative w-full aspect-[16/9] md:aspect-[21/9] overflow-hidden bg-center"
+                                                className="relative aspect-[16/9] w-full overflow-hidden rounded-[5px] bg-center md:aspect-[21/9] lg:h-[420px] lg:aspect-auto xl:h-[520px] 3xl:h-[620px]"
                                                 style={{
                                                     backgroundImage:
                                                         item.backgroundImage
@@ -374,20 +386,20 @@ const HomeThemeOne = () => {
                                                     )}
 
                                                 <div
-                                                    className={`max-w-[1212px] h-full mx-auto px-6 flex items-center gap-y-8 ${
+                                                    className={`relative z-10 flex h-full items-center gap-y-8 px-4 sm:px-6 lg:px-8 xl:px-10 ${
                                                         banner?.settings
                                                             ?.contentAlignment ===
                                                         'center'
-                                                            ? 'flex-col justify-center relative z-10'
+                                                            ? 'flex-col justify-center'
                                                             : banner?.settings
                                                                   ?.contentAlignment ===
                                                               'right'
-                                                            ? 'flex-row-reverse justify-between relative z-10'
-                                                            : 'max-md:flex-col justify-between relative z-10'
+                                                            ? 'flex-row-reverse justify-between'
+                                                            : 'max-md:flex-col justify-between'
                                                     }`}
                                                 >
                                                     <div
-                                                        className={`max-w-[660px] ${
+                                                        className={`max-w-[560px] ${
                                                             banner?.settings
                                                                 ?.contentAlignment ===
                                                             'center'
@@ -470,7 +482,7 @@ const HomeThemeOne = () => {
                                                                 duration: 0.5,
                                                                 delay: 0.4,
                                                             }}
-                                                            className="text-primary/70 text-lg mb-7"
+                                                            className="mb-7 text-base text-primary/70 md:text-lg"
                                                             style={
                                                                 item.subTitleColor
                                                                     ? {
@@ -568,7 +580,7 @@ const HomeThemeOne = () => {
                                                                     item.foregroundImage
                                                                 }
                                                                 alt=""
-                                                                className="max-w-[80%] xl:max-w-[392px] 3xl:max-w-[550px] mx-auto"
+                                                                className="mx-auto max-w-[72%] xl:max-w-[320px] 3xl:max-w-[430px]"
                                                             />
                                                         </motion.div>
                                                     ) : null}
@@ -579,6 +591,55 @@ const HomeThemeOne = () => {
                                 </SwiperSlide>
                             ))}
                         </ThemeSlider>
+
+                            {mainSideBanners.length > 0 && (
+                                <ThemeSlider
+                                    slidesPerView={1}
+                                    spaceBetween={0}
+                                    autoplay={mainBannerAutoplay}
+                                    loop={false}
+                                    rewind={mainSideBanners.length > 1}
+                                    pagination={mainSideBanners.length > 1}
+                                    containerClass="min-w-0"
+                                    paginationContainerClass="absolute inset-x-0 bottom-4 z-20 mt-0"
+                                >
+                                    {mainSideBanners.map((item, idx) => {
+                                        const image = (
+                                            <img
+                                                src={item.backgroundImage}
+                                                alt=""
+                                                loading={
+                                                    idx === 0
+                                                        ? 'eager'
+                                                        : 'lazy'
+                                                }
+                                                className="h-full w-full object-cover"
+                                            />
+                                        );
+
+                                        return (
+                                            <SwiperSlide key={idx}>
+                                                <div className="relative aspect-[16/9] w-full overflow-hidden rounded-[5px] bg-stone-100 md:aspect-[21/9] lg:h-[420px] lg:aspect-auto xl:h-[520px] 3xl:h-[620px]">
+                                                    {item.link ? (
+                                                        <Link
+                                                            to={item.link}
+                                                            className="block h-full w-full"
+                                                            aria-label={translate(
+                                                                'View banner',
+                                                            )}
+                                                        >
+                                                            {image}
+                                                        </Link>
+                                                    ) : (
+                                                        image
+                                                    )}
+                                                </div>
+                                            </SwiperSlide>
+                                        );
+                                    })}
+                                </ThemeSlider>
+                            )}
+                        </div>
                     )}
                 </section>
             )}

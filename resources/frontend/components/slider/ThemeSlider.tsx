@@ -10,10 +10,12 @@ interface Props extends SwiperProps {
         next?: string;
     };
     containerClass?: string;
+    paginationContainerClass?: string;
 }
 
 const ThemeSlider = ({
     containerClass,
+    paginationContainerClass,
     className,
     arrows = true,
     modules,
@@ -21,35 +23,52 @@ const ThemeSlider = ({
     children,
     ...rest
 }: Props) => {
-    const options = rest;
+    const { pagination, ...options } = rest;
+    const hasPagination = pagination !== false;
+    const paginationOptions =
+        typeof pagination === 'object' && pagination !== null
+            ? pagination
+            : {};
 
     const sliderEl = useRef<SwiperRef>(null);
-    const bulletContainerEl = useRef<HTMLDivElement>(null);
+    const paginationTargetClassName = useRef(
+        `theme-slider-pagination-${Math.random().toString(36).slice(2, 10)}`,
+    ).current;
 
     return (
         <div className={cn('relative min-w-0 min-h-0', containerClass)}>
             <Swiper
-                className={`theme-slider ${className}`}
+                className={cn('theme-slider', className)}
                 ref={sliderEl}
-                pagination={{
-                    enabled: true,
-                    el: bulletContainerEl.current,
-                    clickable: true,
-                    bulletActiveClass: 'w-10 bg-secondary',
-                    renderBullet: function (_index, className) {
-                        return `<span class="size-1.5 inline-block rounded-full bg-primary transition-all cursor-pointer ${className}"></span>`;
-                    },
-                }}
+                pagination={
+                    hasPagination
+                        ? {
+                              enabled: true,
+                              el: `.${paginationTargetClassName}`,
+                              clickable: true,
+                              bulletActiveClass: 'w-10 bg-secondary',
+                              renderBullet: function (_index, className) {
+                                  return `<span class="size-1.5 inline-block rounded-full bg-primary transition-all cursor-pointer ${className}"></span>`;
+                              },
+                              ...paginationOptions,
+                          }
+                        : false
+                }
                 modules={[Pagination, Autoplay, ...(modules || [])]}
                 {...options}
             >
                 {children}
             </Swiper>
 
-            <div
-                className="flex justify-center gap-2.5 mt-7"
-                ref={bulletContainerEl}
-            ></div>
+            {hasPagination && (
+                <div
+                    className={cn(
+                        'mt-7 flex justify-center gap-2.5',
+                        paginationContainerClass,
+                        paginationTargetClassName,
+                    )}
+                ></div>
+            )}
         </div>
     );
 };

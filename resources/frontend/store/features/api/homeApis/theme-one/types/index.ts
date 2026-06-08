@@ -17,10 +17,16 @@ export interface IMainBannerItem {
     subTitleColor: string;
 }
 
+export interface IMainSideBannerItem {
+    backgroundImage: string;
+    link: string;
+}
+
 export interface IMainBannerCarousel {
     showThemeOneMainBanner: '1' | '0';
     showThemeOneSecondaryBanner: '1' | '0';
     banners: IMainBannerItem[];
+    sideBanners: IMainSideBannerItem[];
     secondaryBanner: IMainBannerItem;
     settings: {
         autoplay: boolean;

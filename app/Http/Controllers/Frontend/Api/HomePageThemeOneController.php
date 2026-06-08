@@ -57,6 +57,17 @@ class HomePageThemeOneController extends Controller
             ];
         }
 
+        $sideBanners = [];
+        if (getSetting('themeOneMainSideBanners') != null) {
+            $sideBannersData = json_decode(getSetting('themeOneMainSideBanners'), true);
+            foreach ($sideBannersData as $banner) {
+                $sideBanners[] = [
+                    'backgroundImage' => uploadedAsset($banner['backgroundImage'] ?? null),
+                    'link' => $banner['link'] ?? '',
+                ];
+            }
+        }
+
         $bannerSettings = [];
         if (getSetting('themeOneMainBannerSettings') != null) {
             $bannerSettings = json_decode(getSetting('themeOneMainBannerSettings'), true);
@@ -98,6 +109,7 @@ class HomePageThemeOneController extends Controller
                 'showThemeOneMainBanner' => getSetting('showThemeOneMainBanner') ?? '0',
                 'showThemeOneSecondaryBanner' => getSetting('showThemeOneSecondaryBanner') ?? '0',
                 'banners' => $banners,
+                'sideBanners' => $sideBanners,
                 'secondaryBanner' => $secondaryBanner,
                 'settings' => $bannerSettings,
             ],
