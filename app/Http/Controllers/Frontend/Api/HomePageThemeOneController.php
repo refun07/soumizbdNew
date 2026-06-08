@@ -116,6 +116,40 @@ class HomePageThemeOneController extends Controller
         ];
     }
 
+    # get promo cards
+    public function promoCards(Request $request)
+    {
+        $settings = getSetting('themeOnePromoCardSettings') != null ? json_decode(getSetting('themeOnePromoCardSettings'), true) : [];
+        $cardsData = getSetting('themeOnePromoCards') != null ? json_decode(getSetting('themeOnePromoCards'), true) : [];
+        $cards = [];
+
+        foreach ($cardsData as $card) {
+            if (empty($card['image']) && empty($card['mainText']) && empty($card['subText'])) {
+                continue;
+            }
+
+            $cards[] = [
+                'image' => uploadedAsset($card['image'] ?? null),
+                'mainText' => $card['mainText'] ?? '',
+                'subText' => $card['subText'] ?? '',
+            ];
+        }
+
+        return [
+            'success' => true,
+            'status' => 200,
+            'message' => '',
+            'result' => [
+                'showThemeOnePromoCards' => getSetting('showThemeOnePromoCards') ?? '0',
+                'sectionBackgroundColor' => $settings['sectionBackgroundColor'] ?? '#f7f7f7',
+                'backgroundColor' => $settings['backgroundColor'] ?? '#ffffff',
+                'mainTextColor' => $settings['mainTextColor'] ?? '#B3052A',
+                'secondaryTextColor' => $settings['secondaryTextColor'] ?? '#3f3f46',
+                'cards' => $cards,
+            ],
+        ];
+    }
+
     # get sliders
     public function sliders(Request $request)
     {

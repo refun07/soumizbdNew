@@ -35,6 +35,21 @@ export interface IMainBannerCarousel {
     };
 }
 
+export interface IPromoCardItem {
+    image: string;
+    mainText: string;
+    subText: string;
+}
+
+export interface IGetPromoCards {
+    showThemeOnePromoCards: '1' | '0';
+    sectionBackgroundColor: string;
+    backgroundColor: string;
+    mainTextColor: string;
+    secondaryTextColor: string;
+    cards: IPromoCardItem[];
+}
+
 export interface IGetFourImageBanners {
     showThemeOneFourImageBanner: 0 | '1';
     themeOneFourImageBannerImageOne: string;

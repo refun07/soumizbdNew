@@ -9,6 +9,7 @@ import {
     IMainBannerCarousel,
     IGetFeaturedCategories,
     IGetFourImageBanners,
+    IGetPromoCards,
     IGetSingleImageBanner,
 } from './types';
 
@@ -23,6 +24,11 @@ const homeApi = apiSlice.injectEndpoints({
 
         getBannerSlider: builder.query<{ showThemeOneSliderSection: '1' | '0'; image: string; url: string }[], void>({
             query: () => `${urlPrefix}/sliders`,
+            transformResponse: (res: any) => res.result,
+        }),
+
+        getPromoCards: builder.query<IGetPromoCards, void>({
+            query: () => `${urlPrefix}/promo-cards`,
             transformResponse: (res: any) => res.result,
         }),
 
@@ -67,6 +73,7 @@ export const {
     useGetBannerQuery,
     useGetBannerSliderQuery,
     useGetFeaturedCategoriesQuery,
+    useGetPromoCardsQuery,
     useGetTopProductsQuery,
     useGetSingleImageBannerQuery,
     useGetFlashSaleProductsQuery,

@@ -298,6 +298,113 @@
     </div>
 </div>
 
+{{-- promo cards --}}
+@php
+    $promoCardSettings = getSetting('themeOnePromoCardSettings') != null ? json_decode(getSetting('themeOnePromoCardSettings'), true) : [];
+    $promoCards = getSetting('themeOnePromoCards') != null ? json_decode(getSetting('themeOnePromoCards'), true) : [];
+@endphp
+<div class="ac !mt-0 ">
+    <h2 class="ac-header">
+        <button type="button" class="ac-trigger !px-8 !rounded-none !bg-background !text-foreground">
+            <span class="">{{ translate('Main Promo Cards') }}</span>
+        </button>
+    </h2>
+    <div class="ac-panel">
+        <div class="pt-0 pb-7 px-3 md:px-6 xl:px-10">
+            <form action="" class="space-y-3 homepage-form" method="POST" enctype="multipart/form-data">
+                @csrf
+
+                <input type="hidden" name="types[]" value="showThemeOnePromoCards">
+                <div class="flex items-center justify-between mb-5">
+                    <p>{{ translate('Show/Hide Promo Cards') }}</p>
+                    <x-backend.inputs.checkbox toggler="true" name="showThemeOnePromoCards"
+                        value="1" isChecked="{{ getSetting('showThemeOnePromoCards') ?? false }}" />
+                </div>
+
+                <input type="hidden" name="types[]" value="themeOnePromoCardSettings">
+                <div class="bg-gray-50 border border-gray-100 rounded-md p-3 mb-4">
+                    <h3 class="font-semibold text-base mb-1">{{ translate('Card Settings') }}</h3>
+                    <p class="text-xs text-gray-500">{{ translate('These colors apply to every promo card in this carousel.') }}</p>
+                </div>
+
+                <x-backend.inputs.color :isRequired="false" label="Full Banner Background Color"
+                    name="themeOnePromoCardSettings[sectionBackgroundColor]"
+                    value="{{ $promoCardSettings['sectionBackgroundColor'] ?? '#f7f7f7' }}" class="mb-4" />
+
+                <x-backend.inputs.color :isRequired="false" label="Card Background Color"
+                    name="themeOnePromoCardSettings[backgroundColor]"
+                    value="{{ $promoCardSettings['backgroundColor'] ?? '#ffffff' }}" class="mb-4" />
+
+                <x-backend.inputs.color :isRequired="false" label="Main Text Color"
+                    name="themeOnePromoCardSettings[mainTextColor]"
+                    value="{{ $promoCardSettings['mainTextColor'] ?? '#B3052A' }}" class="mb-4" />
+
+                <x-backend.inputs.color :isRequired="false" label="Secondary Text Color"
+                    name="themeOnePromoCardSettings[secondaryTextColor]"
+                    value="{{ $promoCardSettings['secondaryTextColor'] ?? '#3f3f46' }}" class="mb-4" />
+
+                <input type="hidden" name="types[]" value="themeOnePromoCards">
+
+                <div class="promo-card-wrapper">
+                    @if (count($promoCards) > 0)
+                        @foreach ($promoCards as $key => $card)
+                            <div class="main-banner-item border border-gray-200 rounded-lg p-4 mb-4">
+                                <div class="flex justify-between items-center mb-3">
+                                    <h4 class="font-medium">{{ translate('Promo Card') }} {{ $key + 1 }}</h4>
+                                    <button type="button" class="text-red-500 hover:text-red-700 text-sm remove-banner-item">
+                                        <i class="fa-solid fa-trash"></i> {{ translate('Remove') }}
+                                    </button>
+                                </div>
+
+                                <x-backend.inputs.file :labelInline="false" label="Card Image"
+                                    name="themeOnePromoCards[{{ $key }}][image]"
+                                    value="{{ $card['image'] ?? '' }}" class="mb-3" />
+                                <p class="text-xs text-gray-500 mt-1 mb-4">Recommended: 120x120 pixels</p>
+
+                                <x-backend.inputs.text :labelInline="false" label="Main Text"
+                                    name="themeOnePromoCards[{{ $key }}][mainText]"
+                                    value="{{ $card['mainText'] ?? '' }}" :isRequired="false" class="mb-4" />
+
+                                <x-backend.inputs.text :labelInline="false" label="Below Text"
+                                    name="themeOnePromoCards[{{ $key }}][subText]"
+                                    value="{{ $card['subText'] ?? '' }}" :isRequired="false" class="mb-4" />
+                            </div>
+                        @endforeach
+                    @endif
+                </div>
+
+                <a href="javascript:void(0);" class="text-secondary-light" data-toggle="add-more"
+                    data-content='<div class="main-banner-item border border-gray-200 rounded-lg p-4 mb-4">
+                                        <div class="flex justify-between items-center mb-3">
+                                            <h4 class="font-medium">{{ translate('New Promo Card') }}</h4>
+                                            <button type="button" class="text-red-500 hover:text-red-700 text-sm remove-banner-item">
+                                                <i class="fa-solid fa-trash"></i> {{ translate('Remove') }}
+                                            </button>
+                                        </div>
+                                        <x-backend.inputs.file :labelInline="false"
+                                            label="Card Image" name="themeOnePromoCards[__INDEX__][image]" value="" class="mb-3" />
+                                        <p class="text-xs text-gray-500 mt-1 mb-4">Recommended: 120x120 pixels</p>
+                                        <x-backend.inputs.text :labelInline="false" label="Main Text" name="themeOnePromoCards[__INDEX__][mainText]"
+                                            value="" :isRequired="false" class="mb-4" />
+                                        <x-backend.inputs.text :labelInline="false" label="Below Text" name="themeOnePromoCards[__INDEX__][subText]"
+                                            value="" :isRequired="false" class="mb-4" />
+                                    </div>'
+                    data-target=".promo-card-wrapper">
+                    {{ translate('Add Promo Card') }}
+                    <span class="ml-2">
+                        <i class="fa-solid fa-plus"></i>
+                    </span>
+                </a>
+
+                <div class="flex justify-end pt-2">
+                    <x-backend.inputs.button type="submit" buttonText="{{ translate('Save Changes') }}"
+                        class="submit-btn" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 {{-- secondary banner --}}
 <div class="ac !mt-0 ">
     <h2 class="ac-header">
