@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import { FaBars, FaPhoneVolume, FaRegUserCircle, FaTag } from 'react-icons/fa';
 import { IoMdSearch } from 'react-icons/io';
+import { IoArrowForward } from 'react-icons/io5';
 import { Link } from 'react-router-dom';
 import DynamicLogo from '../../../../components/DynamicLogo';
 import { togglePopup } from '../../../../store/features/popup/popupSlice';
@@ -14,6 +15,21 @@ const HeaderThemeTwo = () => {
     const navbarEl = useRef<HTMLDivElement>(null);
     const dispatch = useAppDispatch();
     const showCustomerMenu = window.config.customerMenu?.enabled ?? true;
+    const actionButton = window.config.headerNavbarConfig?.action_button;
+    const actionButtonName = actionButton?.name?.trim() || '';
+    const actionButtonLink = actionButton?.link?.trim() || '#';
+    const showActionButton = Boolean(actionButton?.enabled && actionButtonName);
+    const isExternalActionButtonLink =
+        /^(https?:)?\/\//i.test(actionButtonLink) ||
+        /^[a-z][a-z\d+.-]*:/i.test(actionButtonLink);
+    const actionButtonClassName =
+        'group inline-flex h-9 max-w-[120px] items-center justify-center gap-1.5 rounded-button bg-[#B3052A] px-3 text-xs font-semibold uppercase leading-none text-white transition hover:bg-[#900421] sm:h-10 sm:max-w-[190px] sm:gap-2 sm:px-4 sm:text-sm';
+    const actionButtonContent = (
+        <>
+            <span className="truncate">{actionButtonName}</span>
+            <IoArrowForward className="shrink-0 text-lg text-[#F2C488] transition-transform duration-300 group-hover:translate-x-1" />
+        </>
+    );
 
     return (
         <header className="sticky top-0 z-[3] bg-white shadow-sm">
@@ -39,7 +55,7 @@ const HeaderThemeTwo = () => {
                 className="flex h-[68px] items-center justify-center bg-white text-[#0f0f0f] md:h-[78px] xl:h-[86px]"
                 ref={navbarEl}
             >
-                <div className="container flex items-center justify-between gap-8 sm:gap-[50px]">
+                <div className="container flex items-center justify-between gap-4 sm:gap-[50px]">
                     <div className="flex items-center gap-5 lg:gap-14">
                         <button
                             className="text-[#b3052a] lg:hidden"
@@ -64,7 +80,28 @@ const HeaderThemeTwo = () => {
                         }}
                     />
 
-                    <div className="flex items-center gap-5 text-[#b3052a]">
+                    <div className="flex items-center gap-3 text-[#b3052a] sm:gap-5">
+                        {showActionButton &&
+                            (isExternalActionButtonLink ? (
+                                <a
+                                    href={actionButtonLink}
+                                    className={actionButtonClassName}
+                                    title={actionButtonName}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                >
+                                    {actionButtonContent}
+                                </a>
+                            ) : (
+                                <Link
+                                    to={actionButtonLink}
+                                    className={actionButtonClassName}
+                                    title={actionButtonName}
+                                >
+                                    {actionButtonContent}
+                                </Link>
+                            ))}
+
                         <div className="relative group option-dropdown">
                             <button className="text-2xl">
                                 <IoMdSearch />

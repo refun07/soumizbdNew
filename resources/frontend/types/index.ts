@@ -4,10 +4,16 @@ import { ICountry } from './checkout';
 declare global {
     interface Window {
         config: {
-            defaultTheme: 'theme-one' | 'theme-two';
-            defaultCategoryCard: 'category-card-one' | 'category-card-two';
-            defaultProductCard: 'product-card-one' | 'product-card-two';
-            defaultHeader: 'header-one' | 'header-two';
+            defaultTheme: 'theme-one' | 'theme-two' | 'theme-three';
+            defaultCategoryCard:
+                | 'category-card-one'
+                | 'category-card-two'
+                | 'category-card-three';
+            defaultProductCard:
+                | 'product-card-one'
+                | 'product-card-two'
+                | 'product-card-three';
+            defaultHeader: 'header-one' | 'header-two' | 'header-three';
             cartVisibilityToggle: string;
             storefrontLayout?: {
                 desktopSideSpacing: number;
@@ -15,6 +21,15 @@ declare global {
             topbarHotline: string;
             topbarHotlineLabel: string;
             topbarPromoText: string;
+            headerTopbarConfig?: {
+                enabled?: boolean;
+                hotline_number?: string;
+                hotline?: string;
+                promo_text_icon?: string;
+                promo_text?: string;
+                bg_color?: string;
+                text_color?: string;
+            };
             headerNavbarConfig?: {
                 custom_links_enabled?: boolean;
                 custom_links?: {
@@ -23,6 +38,11 @@ declare global {
                     icon_path: string;
                     icon_svg?: string;
                 }[];
+                action_button?: {
+                    enabled?: boolean;
+                    name?: string;
+                    link?: string;
+                };
                 menu_style?: {
                     font_size?: number;
                     font_weight?: string;

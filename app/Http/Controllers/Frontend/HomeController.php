@@ -190,6 +190,11 @@ class HomeController extends Controller
             'headerNavbarConfig'    => [
                 'custom_links_enabled' => filter_var(getSetting("header_{$selectedHeader}_nav_custom_links_enabled", false), FILTER_VALIDATE_BOOLEAN),
                 'custom_links' => json_decode(getSetting("header_{$selectedHeader}_nav_custom_links", '[]'), true) ?? [],
+                'action_button' => [
+                    'enabled' => filter_var(getSetting("header_{$selectedHeader}_nav_action_button_enabled", false), FILTER_VALIDATE_BOOLEAN),
+                    'name' => getSetting("header_{$selectedHeader}_nav_action_button_name", ''),
+                    'link' => getSetting("header_{$selectedHeader}_nav_action_button_link", ''),
+                ],
                 'menu_style' => [
                     'font_size' => (int) getSetting("header_{$selectedHeader}_nav_menu_font_size", 14),
                     'font_weight' => getSetting("header_{$selectedHeader}_nav_menu_font_weight", '500'),

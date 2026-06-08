@@ -56,6 +56,15 @@ class ThemeSelectionController extends Controller
         ];
     }
 
+    private function buildNavbarActionButton(string $headerId): array
+    {
+        return [
+            'enabled' => filter_var(getSetting("header_{$headerId}_nav_action_button_enabled", false), FILTER_VALIDATE_BOOLEAN),
+            'name' => getSetting("header_{$headerId}_nav_action_button_name", ''),
+            'link' => getSetting("header_{$headerId}_nav_action_button_link", ''),
+        ];
+    }
+
     # get theme selection data
     public function index()
     {
@@ -334,16 +343,13 @@ class ThemeSelectionController extends Controller
         try {
             // Get global default values from window.config equivalents
             $globalHotline = getSetting('topbarHotline', 'Our Hotline +88 0176 229 201');
-            $globalPromoText = getSetting('topbarPromoText', 'FREE delivery & 40% Discount for next 3 orders!');
-
-            // Set header-specific defaults based on header type
-            $defaultPromoText = $headerId === 'header-three' ? '' : $globalPromoText;
 
             $config = [
                 'topbar' => $this->buildTopbarConfig($headerId, $headerId === 'header-three' ? '' : $globalHotline),
                 'navbar' => [
                     'custom_links_enabled' => filter_var(getSetting("header_{$headerId}_nav_custom_links_enabled", false), FILTER_VALIDATE_BOOLEAN),
                     'custom_links' => json_decode(getSetting("header_{$headerId}_nav_custom_links", '[]'), true) ?? [],
+                    'action_button' => $this->buildNavbarActionButton($headerId),
                     'menu_style' => $this->buildNavbarMenuStyle($headerId),
                 ]
             ];
@@ -404,6 +410,15 @@ class ThemeSelectionController extends Controller
                 }
             }
 
+            if (isset($requestData['navbar']['action_button']['enabled'])) {
+                $actionButtonEnabled = $requestData['navbar']['action_button']['enabled'];
+                if ($actionButtonEnabled === '' || $actionButtonEnabled === null) {
+                    $requestData['navbar']['action_button']['enabled'] = false;
+                } elseif (is_string($actionButtonEnabled)) {
+                    $requestData['navbar']['action_button']['enabled'] = in_array(strtolower($actionButtonEnabled), ['true', '1', 'on']);
+                }
+            }
+
             // Replace the request data with processed data
             $request->replace($requestData);
 
@@ -420,6 +435,10 @@ class ThemeSelectionController extends Controller
                 'navbar.custom_links.*.url' => 'nullable|string|max:255',
                 'navbar.custom_links.*.icon_path' => 'nullable|string',
                 'navbar.custom_links.*.icon_svg' => 'nullable|string',
+                'navbar.action_button' => 'nullable|array',
+                'navbar.action_button.enabled' => 'nullable|boolean',
+                'navbar.action_button.name' => 'nullable|string|max:50',
+                'navbar.action_button.link' => 'nullable|string|max:255',
                 'navbar.menu_style' => 'nullable|array',
                 'navbar.menu_style.font_size' => 'nullable|integer|min:10|max:32',
                 'navbar.menu_style.font_weight' => 'nullable|string|in:300,400,500,600,700,800,900',
@@ -456,6 +475,9 @@ class ThemeSelectionController extends Controller
             // Update navbar settings
             $this->updateSystemSetting("header_{$headerId}_nav_custom_links_enabled", $request->input('navbar.custom_links_enabled'));
             $this->updateSystemSetting("header_{$headerId}_nav_custom_links", json_encode($request->input('navbar.custom_links', [])));
+            $this->updateSystemSetting("header_{$headerId}_nav_action_button_enabled", $request->boolean('navbar.action_button.enabled', false));
+            $this->updateSystemSetting("header_{$headerId}_nav_action_button_name", $request->input('navbar.action_button.name', ''));
+            $this->updateSystemSetting("header_{$headerId}_nav_action_button_link", $request->input('navbar.action_button.link', ''));
             $this->updateSystemSetting("header_{$headerId}_nav_menu_font_size", $request->input('navbar.menu_style.font_size', 14));
             $this->updateSystemSetting("header_{$headerId}_nav_menu_font_weight", $request->input('navbar.menu_style.font_weight', '500'));
             $this->updateSystemSetting("header_{$headerId}_nav_menu_text_color", $request->input('navbar.menu_style.text_color', '#FFFFFF'));
@@ -889,13 +911,13 @@ class ThemeSelectionController extends Controller
         try {
             // Get global default values
             $globalHotline = getSetting('topbar_hotline', 'Our Hotline +88 0176 229 201');
-            $globalPromoText = getSetting('topbar_promo_text', 'FREE delivery & 40% Discount for next 3 orders!');
 
             $config = [
                 'topbar' => $this->buildTopbarConfig($headerId, $headerId === 'header-three' ? '' : $globalHotline),
                 'navbar' => [
                     'custom_links_enabled' => filter_var(getSetting("header_{$headerId}_nav_custom_links_enabled", false), FILTER_VALIDATE_BOOLEAN),
                     'custom_links' => json_decode(getSetting("header_{$headerId}_nav_custom_links", '[]'), true) ?? [],
+                    'action_button' => $this->buildNavbarActionButton($headerId),
                     'menu_style' => $this->buildNavbarMenuStyle($headerId),
                 ]
             ];

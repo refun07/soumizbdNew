@@ -32,6 +32,9 @@ const HeaderConfigurationApp: React.FC<HeaderConfigurationAppProps> = ({
     const [menuTextColor, setMenuTextColor] = useState("#FFFFFF");
     const [menuActiveBorderColor, setMenuActiveBorderColor] = useState("#FFFFFF");
     const [menuActiveBorderWidth, setMenuActiveBorderWidth] = useState(4);
+    const [showActionButton, setShowActionButton] = useState(false);
+    const [actionButtonName, setActionButtonName] = useState("");
+    const [actionButtonLink, setActionButtonLink] = useState("");
     const [customLinks, setCustomLinks] = useState<CustomLink[]>([
         { id: 1, name: "Campaign", link: "", icon: "cart_icon.png", iconSvg: "" },
         { id: 2, name: "Coupons", link: "", icon: "cart_icon.png", iconSvg: "" },
@@ -61,8 +64,11 @@ const HeaderConfigurationApp: React.FC<HeaderConfigurationAppProps> = ({
                     setMenuTextColor(result.data.navbar.menu_style?.text_color || "#FFFFFF");
                     setMenuActiveBorderColor(result.data.navbar.menu_style?.active_border_color || "#FFFFFF");
                     setMenuActiveBorderWidth(result.data.navbar.menu_style?.active_border_width || 4);
+                    setShowActionButton(Boolean(result.data.navbar.action_button?.enabled));
+                    setActionButtonName(result.data.navbar.action_button?.name || "");
+                    setActionButtonLink(result.data.navbar.action_button?.link || "");
 
-                    if (result.data.navbar.custom_links.length > 0) {
+                    if (result.data.navbar.custom_links?.length > 0) {
                         setCustomLinks(result.data.navbar.custom_links.map((link: any, index: number) => ({
                             id: index + 1,
                             name: link.name,
@@ -174,6 +180,11 @@ const HeaderConfigurationApp: React.FC<HeaderConfigurationAppProps> = ({
                         icon_path: link.icon,
                         icon_svg: link.iconSvg
                     })),
+                    action_button: {
+                        enabled: Boolean(showActionButton),
+                        name: actionButtonName,
+                        link: actionButtonLink
+                    },
                     menu_style: {
                         font_size: menuFontSize,
                         font_weight: menuFontWeight,
@@ -326,12 +337,40 @@ const HeaderConfigurationApp: React.FC<HeaderConfigurationAppProps> = ({
 
                                 {/* Header Two Settings */}
                                 <div className="space-y-6 mb-8">
-                                    {/* Show/Hide Campaigns Button */}
+                                    {/* Show/Hide Action Button */}
                                     <div className="flex items-center">
                                         <label className="w-56 text-xs font-medium text-[#6b7280] uppercase tracking-wide">
-                                            Show/Hide Campaigns Button
+                                            Show/Hide Button
                                         </label>
-                                        <Toggle enabled={showTopBar} onChange={setShowTopBar} />
+                                        <Toggle enabled={showActionButton} onChange={setShowActionButton} />
+                                    </div>
+
+                                    {/* Button Name */}
+                                    <div className="flex items-center">
+                                        <label className="w-56 text-xs font-medium text-[#6b7280] uppercase tracking-wide">
+                                            Button Name
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={actionButtonName}
+                                            onChange={(e) => setActionButtonName(e.target.value)}
+                                            placeholder="Campaign"
+                                            className="w-80 px-4 py-2.5 border border-gray-200 rounded-md text-sm text-gray-600 focus:outline-none focus:border-gray-300"
+                                        />
+                                    </div>
+
+                                    {/* Button Link */}
+                                    <div className="flex items-center">
+                                        <label className="w-56 text-xs font-medium text-[#6b7280] uppercase tracking-wide">
+                                            Button Link
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={actionButtonLink}
+                                            onChange={(e) => setActionButtonLink(e.target.value)}
+                                            placeholder="/campaigns"
+                                            className="w-80 px-4 py-2.5 border border-gray-200 rounded-md text-sm text-gray-600 focus:outline-none focus:border-gray-300"
+                                        />
                                     </div>
 
                                     {/* Header Background Color */}
