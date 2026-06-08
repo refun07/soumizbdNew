@@ -651,91 +651,92 @@ const HomeThemeOne = () => {
             )}
 
             {shouldShowPromoCards && (
-                <section
-                    id="promo-cards"
-                    className="relative left-1/2 !mt-2.5 w-screen -translate-x-1/2 overflow-hidden px-3.5 md:px-5 lg:px-6"
-                >
-                    <div
-                        className="overflow-hidden rounded-[5px] px-3 py-6 md:px-5"
-                        style={{
-                            backgroundColor:
-                                promoCardsRes.data?.sectionBackgroundColor ||
-                                '#f7f7f7',
-                        }}
-                    >
-                        <ThemeSlider
-                            slidesPerView={1.05}
-                            spaceBetween={12}
-                            loop={false}
-                            rewind={promoCards.length > 1}
-                            pagination={promoCards.length > 1}
-                            paginationContainerClass="mt-4"
-                            breakpoints={{
-                                480: {
-                                    slidesPerView: 2,
-                                },
-                                768: {
-                                    slidesPerView: 3,
-                                },
-                                1024: {
-                                    slidesPerView: 4,
-                                    spaceBetween: 16,
-                                },
+                <section id="promo-cards" className="!mt-2.5">
+                    <div className="container">
+                        <div
+                            className="overflow-hidden rounded-[5px] px-3 py-6 md:px-5"
+                            style={{
+                                backgroundColor:
+                                    promoCardsRes.data
+                                        ?.sectionBackgroundColor || '#f7f7f7',
                             }}
                         >
-                            {promoCards.map((card, idx) => {
-                                return (
-                                    <SwiperSlide key={idx}>
-                                        <div
-                                            className="flex min-h-[86px] items-center gap-4 rounded-[5px] px-4 py-4 shadow-sm md:px-5"
-                                            style={{
-                                                backgroundColor:
-                                                    promoCardsRes.data
-                                                        ?.backgroundColor ||
-                                                    '#ffffff',
-                                            }}
-                                        >
-                                            {card.image && (
-                                                <img
-                                                    src={card.image}
-                                                    alt=""
-                                                    loading={
-                                                        idx < 4
-                                                            ? 'eager'
-                                                            : 'lazy'
-                                                    }
-                                                    className="h-14 w-14 shrink-0 object-contain md:h-16 md:w-16"
-                                                />
-                                            )}
-                                            <div className="min-w-0">
-                                                <h3
-                                                    className="text-sm font-semibold leading-tight md:text-base"
-                                                    style={{
-                                                        color:
-                                                            promoCardsRes.data
-                                                                ?.mainTextColor ||
-                                                            '#B3052A',
-                                                    }}
-                                                >
-                                                    {card.mainText}
-                                                </h3>
-                                                <p
-                                                    className="mt-1 text-sm leading-tight"
-                                                    style={{
-                                                        color:
-                                                            promoCardsRes.data
-                                                                ?.secondaryTextColor ||
-                                                            '#3f3f46',
-                                                    }}
-                                                >
-                                                    {card.subText}
-                                                </p>
+                            <ThemeSlider
+                                slidesPerView={1.05}
+                                spaceBetween={12}
+                                loop={false}
+                                rewind={promoCards.length > 1}
+                                pagination={promoCards.length > 1}
+                                paginationContainerClass="mt-4"
+                                breakpoints={{
+                                    480: {
+                                        slidesPerView: 2,
+                                    },
+                                    768: {
+                                        slidesPerView: 3,
+                                    },
+                                    1024: {
+                                        slidesPerView: 4,
+                                        spaceBetween: 16,
+                                    },
+                                }}
+                            >
+                                {promoCards.map((card, idx) => {
+                                    return (
+                                        <SwiperSlide key={idx}>
+                                            <div
+                                                className="flex min-h-[86px] items-center gap-4 rounded-[5px] px-4 py-4 shadow-sm md:px-5"
+                                                style={{
+                                                    backgroundColor:
+                                                        promoCardsRes.data
+                                                            ?.backgroundColor ||
+                                                        '#ffffff',
+                                                }}
+                                            >
+                                                {card.image && (
+                                                    <img
+                                                        src={card.image}
+                                                        alt=""
+                                                        loading={
+                                                            idx < 4
+                                                                ? 'eager'
+                                                                : 'lazy'
+                                                        }
+                                                        className="h-14 w-14 shrink-0 object-contain md:h-16 md:w-16"
+                                                    />
+                                                )}
+                                                <div className="min-w-0">
+                                                    <h3
+                                                        className="text-sm font-semibold leading-tight md:text-base"
+                                                        style={{
+                                                            color:
+                                                                promoCardsRes
+                                                                    .data
+                                                                    ?.mainTextColor ||
+                                                                '#B3052A',
+                                                        }}
+                                                    >
+                                                        {card.mainText}
+                                                    </h3>
+                                                    <p
+                                                        className="mt-1 text-sm leading-tight"
+                                                        style={{
+                                                            color:
+                                                                promoCardsRes
+                                                                    .data
+                                                                    ?.secondaryTextColor ||
+                                                                '#3f3f46',
+                                                        }}
+                                                    >
+                                                        {card.subText}
+                                                    </p>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </SwiperSlide>
-                                );
-                            })}
-                        </ThemeSlider>
+                                        </SwiperSlide>
+                                    );
+                                })}
+                            </ThemeSlider>
+                        </div>
                     </div>
                 </section>
             )}
