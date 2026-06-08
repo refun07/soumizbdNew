@@ -37,7 +37,7 @@ const ProductCardThemeTwo = (props: Props) => {
             !window.config.generalSettings.allowBackorder);
 
     return (
-        <div className="group relative flex h-full flex-col overflow-hidden rounded-[5px] border border-transparent bg-white transition duration-300 hover:border-[#bc2444] hover:shadow-[0_14px_35px_rgba(179,5,42,0.14)]">
+        <div className="group relative flex h-full flex-col overflow-hidden rounded-[5px] border border-[#F4F4F4] bg-white transition duration-300">
             <div className="absolute left-4 top-4 z-[1] flex flex-col items-start gap-2">
                 {product.isPreOrder && product.preOrderData?.is_active ? (
                     <ThemeLabel
@@ -72,11 +72,11 @@ const ProductCardThemeTwo = (props: Props) => {
                         className="size-full object-cover transition duration-300 group-hover:scale-105"
                     />
                 </Link>
-                <div className="absolute right-5 top-5 flex translate-x-5 flex-col gap-4 opacity-0 transition duration-300 group-hover:translate-x-0 group-hover:opacity-100">
+                <div className="absolute right-4 top-4 flex flex-col gap-3">
                     <button
                         type="button"
                         className={cn(
-                            'flex size-[46px] items-center justify-center rounded-full bg-white text-[18px] text-[#ff2718] shadow-[0_8px_18px_rgba(0,0,0,0.12)] transition hover:bg-[#ff2718] hover:text-white disabled:opacity-60',
+                            'flex size-9 items-center justify-center rounded-full bg-white text-[16px] text-[#ff2718] shadow-[0_6px_16px_rgba(0,0,0,0.12)] transition hover:bg-[#ff2718] hover:text-white disabled:opacity-60',
                             product.inWishlist && 'text-[#ff2718]',
                         )}
                         onClick={
@@ -98,7 +98,7 @@ const ProductCardThemeTwo = (props: Props) => {
                     </button>
                     <button
                         type="button"
-                        className="flex size-[46px] items-center justify-center rounded-full bg-white text-[22px] text-[#bc2444] shadow-[0_8px_18px_rgba(0,0,0,0.12)] transition hover:bg-[#bc2444] hover:text-white"
+                        className="flex size-9 items-center justify-center rounded-full bg-white text-[18px] text-[#B3052A] shadow-[0_6px_16px_rgba(0,0,0,0.12)] transition hover:bg-[#B3052A] hover:text-white"
                         onClick={handleProductPreview}
                         aria-label={translate('Preview product')}
                     >
@@ -107,10 +107,10 @@ const ProductCardThemeTwo = (props: Props) => {
                 </div>
 
                 {cartProduct ? (
-                    <div className="absolute bottom-5 left-5 right-5 flex h-[38px] translate-y-8 items-center overflow-hidden rounded-full bg-white px-5 text-[#bc2444] opacity-0 shadow-[0_8px_18px_rgba(0,0,0,0.12)] transition duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+                    <div className="absolute bottom-5 left-5 right-5 flex h-9 items-center overflow-hidden rounded-full bg-white px-4 text-[#B3052A] shadow-[0_8px_18px_rgba(0,0,0,0.12)]">
                         <button
                             type="button"
-                            className="flex h-full w-8 items-center justify-start text-[18px]"
+                            className="flex h-full w-8 items-center justify-start text-[17px]"
                             onClick={() => handleCartQuantityChange('decrease')}
                             aria-label={translate('Decrease quantity')}
                         >
@@ -122,7 +122,7 @@ const ProductCardThemeTwo = (props: Props) => {
                         </span>
                         <button
                             type="button"
-                            className="flex h-full w-8 items-center justify-end text-[18px]"
+                            className="flex h-full w-8 items-center justify-end text-[17px]"
                             onClick={() => handleCartQuantityChange('increase')}
                             aria-label={translate('Increase quantity')}
                         >
@@ -132,7 +132,7 @@ const ProductCardThemeTwo = (props: Props) => {
                 ) : (
                     <button
                         type="button"
-                        className="absolute bottom-5 right-5 flex size-[46px] translate-y-8 items-center justify-center rounded-full bg-white text-[26px] text-[#bc2444] opacity-0 shadow-[0_8px_18px_rgba(0,0,0,0.12)] transition duration-300 hover:bg-[#bc2444] hover:text-white group-hover:translate-y-0 group-hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="absolute bottom-5 right-5 flex size-11 items-center justify-center rounded-full bg-white text-[24px] text-[#B3052A] shadow-[0_8px_18px_rgba(0,0,0,0.12)] transition duration-300 hover:bg-[#B3052A] hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
                         onClick={handleAddToCart}
                         disabled={cartDisabled}
                         aria-label={translate('Add to Cart')}
@@ -142,11 +142,11 @@ const ProductCardThemeTwo = (props: Props) => {
                 )}
             </div>
 
-            <div className="flex grow flex-col px-5 pb-7 pt-5 sm:px-6 xl:px-8 xl:pt-6">
-                <p className="line-clamp-1 text-[14px] font-medium text-[#667085] sm:text-[15px]">
+            <div className="flex min-h-[178px] grow flex-col px-5 pb-6 pt-5 sm:px-6">
+                <p className="line-clamp-1 text-[13px] font-normal text-[#667085]">
                     {categoryLabel}
                 </p>
-                <h3 className="mt-1 min-h-[24px] text-[15px] font-semibold leading-[1.45] text-[#111111] transition group-hover:text-[#bc2444]">
+                <h3 className="mt-2 min-h-[22px] text-[14px] font-semibold leading-[1.45] text-[#111111] transition group-hover:text-[#B3052A]">
                     <Link
                         to={`/products/${product.slug}`}
                         className="line-clamp-2"
@@ -154,12 +154,12 @@ const ProductCardThemeTwo = (props: Props) => {
                         {product.name}
                     </Link>
                 </h3>
-                <div className="mt-4 flex items-center gap-2">
-                    <span className="text-[20px] font-semibold text-[#bc1734]">
+                <div className="mt-3 flex items-center gap-2">
+                    <span className="text-[16px] font-semibold text-[#B3052A]">
                         {currencyFormatter(product.discountedBasePrice)}
                     </span>
                     {priceChanged ? (
-                        <span className="text-[16px] font-semibold text-[#575757] line-through">
+                        <span className="text-[13px] font-medium text-[#575757] line-through">
                             {currencyFormatter(product.basePrice)}
                         </span>
                     ) : null}
@@ -167,9 +167,9 @@ const ProductCardThemeTwo = (props: Props) => {
                 <ThemeRating
                     rating={product.rating.average}
                     totalReviews={product.rating.total}
-                    className="mt-3 text-[13px]"
-                    ratingClasses="max-w-[92px]"
-                    style={{ maxWidth: 92 }}
+                    className="mt-3 text-[12px]"
+                    ratingClasses="max-w-[82px]"
+                    style={{ maxWidth: 82 }}
                 />
             </div>
         </div>
