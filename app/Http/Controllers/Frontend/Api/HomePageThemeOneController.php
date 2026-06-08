@@ -222,6 +222,39 @@ class HomePageThemeOneController extends Controller
         ];
     }
 
+    # get on sale products
+    public function onSaleProducts(Request $request)
+    {
+        $settings = getSetting('themeOneOnSaleProductSettings') != null
+            ? json_decode(getSetting('themeOneOnSaleProductSettings'), true)
+            : [];
+        $onSaleProductIds = array_slice($this->themeOneOnSaleProductIds(), 0, 15);
+        $products = collect();
+
+        if (count($onSaleProductIds) > 0) {
+            $columns = (new ProductService)->getSpecificColumns();
+            $products = Product::fromPublishedShops()
+                ->isPublished()
+                ->hideOnEcom()
+                ->whereIn('id', $onSaleProductIds)
+                ->get($columns)
+                ->sortBy(fn ($product) => array_search($product->id, $onSaleProductIds))
+                ->values();
+        }
+
+        return [
+            'success'   => true,
+            'status'    => 200,
+            'message'   => '',
+            'result'    => [
+                'showThemeOneOnSaleProducts' => getSetting('showThemeOneOnSaleProducts') ?? 0,
+                'backgroundColor'            => $settings['backgroundColor'] ?? '#B3052A',
+                'endsAt'                     => $settings['endsAt'] ?? null,
+                'products'                   => ProductResource::collection($products),
+            ],
+        ];
+    }
+
     # get single image banner
     public function singleImageBanner(Request $request)
     {
@@ -396,5 +429,20 @@ class HomePageThemeOneController extends Controller
                 'themeOneBottomFourImageBannerImageFourLink'       => getSetting('themeOneBottomFourImageBannerImageFourLink'),
             ],
         ];
+    }
+
+    private function themeOneOnSaleProductIds(): array
+    {
+        $products = getSetting('themeOneOnSaleProducts');
+        if ($products == null) {
+            return [];
+        }
+
+        $products = json_decode($products, true);
+        if (!is_array($products)) {
+            return [];
+        }
+
+        return array_values(array_unique(array_filter(array_map('intval', $products))));
     }
 }

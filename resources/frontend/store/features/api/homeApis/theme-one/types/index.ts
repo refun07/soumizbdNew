@@ -1,4 +1,5 @@
 import { ICategoryShort } from '../../../../../../types';
+import { IProductShort } from '../../../../../../types/product';
 
 export interface IMainBannerItem {
     foregroundImage: string;
@@ -48,6 +49,13 @@ export interface IGetPromoCards {
     mainTextColor: string;
     secondaryTextColor: string;
     cards: IPromoCardItem[];
+}
+
+export interface IGetOnSaleProducts {
+    showThemeOneOnSaleProducts: 0 | '0' | '1';
+    backgroundColor: string;
+    endsAt: string | null;
+    products: IProductShort[];
 }
 
 export interface IGetFourImageBanners {

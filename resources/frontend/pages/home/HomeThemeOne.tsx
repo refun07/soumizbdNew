@@ -23,6 +23,7 @@ import {
     useGetFeaturedCategoriesQuery,
     useGetFlashSaleProductsQuery,
     useGetFourImageBannersQuery,
+    useGetOnSaleProductsQuery,
     useGetPromoCardsQuery,
     useGetSingleImageBannerQuery,
     useGetTopProductsQuery,
@@ -288,10 +289,60 @@ const LazyBackgroundVideo = ({
     );
 };
 
+const OnSaleCountdown = ({ endsAt }: { endsAt?: string | null }) => {
+    const [now, setNow] = useState(Date.now());
+    const endTime = endsAt ? new Date(endsAt).getTime() : NaN;
+
+    useEffect(() => {
+        if (!endsAt || Number.isNaN(endTime)) return;
+
+        const timer = window.setInterval(() => setNow(Date.now()), 1000);
+        return () => window.clearInterval(timer);
+    }, [endsAt, endTime]);
+
+    if (!endsAt || Number.isNaN(endTime)) return null;
+
+    const remaining = Math.max(0, endTime - now);
+    const totalSeconds = Math.floor(remaining / 1000);
+    const days = Math.floor(totalSeconds / 86400);
+    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    const parts = [
+        { value: days, label: translate('Days') },
+        { value: hours, label: translate('Hour') },
+        { value: minutes, label: translate('Min') },
+        { value: seconds, label: translate('Sec') },
+    ];
+
+    return (
+        <div className="flex items-center gap-1.5 text-white">
+            {parts.map((part, index) => (
+                <div key={part.label} className="flex items-start gap-1.5">
+                    {index > 0 && (
+                        <span className="text-xl font-semibold leading-none md:text-2xl">
+                            :
+                        </span>
+                    )}
+                    <div className="flex min-w-8 flex-col items-center">
+                        <span className="text-xl font-semibold leading-none md:text-2xl">
+                            {String(part.value).padStart(2, '0')}
+                        </span>
+                        <span className="mt-0.5 text-[10px] leading-none text-white/80">
+                            {part.label}
+                        </span>
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+};
+
 const HomeThemeOne = () => {
     const dispatch = useAppDispatch();
     const { data: banner, isLoading: isBannerLoading } = useGetBannerQuery();
     const promoCardsRes = useGetPromoCardsQuery();
+    const onSaleProductRes = useGetOnSaleProductsQuery();
     const bannerSliderRes = useGetBannerSliderQuery();
     const featuredCategoryRes = useGetFeaturedCategoriesQuery();
     const topProductRes = useGetTopProductsQuery();
@@ -316,6 +367,10 @@ const HomeThemeOne = () => {
     const shouldShowPromoCards =
         promoCardsRes.data?.showThemeOnePromoCards === '1' &&
         promoCards.length > 0;
+    const onSaleProducts = onSaleProductRes.data?.products?.slice(0, 15) ?? [];
+    const shouldShowOnSaleProducts =
+        onSaleProductRes.data?.showThemeOneOnSaleProducts === '1' &&
+        onSaleProducts.length > 0;
 
     return (
         <div className="space-y-10 lg:space-y-16 pb-5">
@@ -686,7 +741,7 @@ const HomeThemeOne = () => {
                                     return (
                                         <SwiperSlide key={idx}>
                                             <div
-                                                className="flex min-h-[112px] flex-col items-center justify-center gap-2 rounded-[5px] px-2 py-3 text-center shadow-sm md:min-h-[86px] md:flex-row md:justify-start md:gap-4 md:px-5 md:py-4 md:text-left"
+                                                className="flex h-[152px] flex-col items-center justify-center gap-2.5 rounded-[5px] px-2.5 py-4 text-center shadow-sm md:h-[86px] md:flex-row md:justify-start md:gap-4 md:px-5 md:py-4 md:text-left"
                                                 style={{
                                                     backgroundColor:
                                                         promoCardsRes.data
@@ -703,12 +758,12 @@ const HomeThemeOne = () => {
                                                                 ? 'eager'
                                                                 : 'lazy'
                                                         }
-                                                        className="h-10 w-10 shrink-0 object-contain md:h-16 md:w-16"
+                                                        className="h-12 w-12 shrink-0 object-contain md:h-16 md:w-16"
                                                     />
                                                 )}
                                                 <div className="min-w-0">
                                                     <h3
-                                                        className="text-xs font-semibold leading-tight md:text-base"
+                                                        className="line-clamp-2 text-sm font-semibold leading-tight md:text-base"
                                                         style={{
                                                             color:
                                                                 promoCardsRes
@@ -720,7 +775,7 @@ const HomeThemeOne = () => {
                                                         {card.mainText}
                                                     </h3>
                                                     <p
-                                                        className="mt-1 text-xs leading-tight md:text-sm"
+                                                        className="mt-1 line-clamp-2 text-xs leading-tight md:text-sm"
                                                         style={{
                                                             color:
                                                                 promoCardsRes
@@ -739,6 +794,100 @@ const HomeThemeOne = () => {
                             </ThemeSlider>
                         </div>
                     </div>
+                </section>
+            )}
+
+            {shouldShowOnSaleProducts && (
+                <section id="on-sale-products" className="!mt-2.5">
+                    <motion.div
+                        variants={containerAnimation}
+                        initial="initial"
+                        whileInView="whileInView"
+                        viewport={{ once: true }}
+                        className="container"
+                    >
+                        <div
+                            className="overflow-hidden rounded-[5px] px-3.5 py-5 md:px-6 md:py-7"
+                            style={{
+                                backgroundColor:
+                                    onSaleProductRes.data?.backgroundColor ||
+                                    '#B3052A',
+                            }}
+                        >
+                            <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-white/25 pb-3">
+                                <div className="flex flex-wrap items-end gap-x-5 gap-y-2">
+                                    <h2 className="text-xl font-normal leading-tight text-white md:text-2xl">
+                                        <span className="font-semibold">
+                                            {translate('On Sale')}
+                                        </span>{' '}
+                                        {translate('Products')}
+                                    </h2>
+                                    <OnSaleCountdown
+                                        endsAt={onSaleProductRes.data?.endsAt}
+                                    />
+                                </div>
+
+                                <Link
+                                    to="/on-sale-products"
+                                    className="inline-flex h-9 items-center justify-center rounded-[3px] border border-white/45 px-4 text-xs font-semibold text-white transition hover:bg-white hover:text-primary"
+                                >
+                                    {translate('View More')}
+                                </Link>
+                            </div>
+
+                            <p className="mb-4 text-sm font-medium text-white">
+                                {translate('Winter Special Offer')}
+                            </p>
+
+                            <ProductsSlider
+                                withDefaultBreakpoints={false}
+                                slidesPerView={2}
+                                spaceBetween={12}
+                                loop={false}
+                                rewind={onSaleProducts.length > 2}
+                                pagination={
+                                    onSaleProducts.length > 2
+                                        ? {
+                                              bulletActiveClass:
+                                                  'w-10 bg-white',
+                                              renderBullet: function (
+                                                  _index,
+                                                  className,
+                                              ) {
+                                                  return `<span class="size-1.5 inline-block rounded-full bg-white/60 transition-all cursor-pointer ${className}"></span>`;
+                                              },
+                                          }
+                                        : false
+                                }
+                                paginationContainerClass="mt-6"
+                                breakpoints={{
+                                    640: {
+                                        slidesPerView: 3,
+                                        spaceBetween: 14,
+                                    },
+                                    1024: {
+                                        slidesPerView: 4,
+                                        spaceBetween: 16,
+                                    },
+                                    1280: {
+                                        slidesPerView: 5,
+                                        spaceBetween: 20,
+                                    },
+                                }}
+                            >
+                                {onSaleProducts.map((product) => (
+                                    <SwiperSlide key={product.id}>
+                                        <motion.div
+                                            variants={itemAnimation}
+                                            className="h-full"
+                                        >
+                                            <ProductCard product={product} />
+                                        </motion.div>
+                                    </SwiperSlide>
+                                ))}
+                            </ProductsSlider>
+                        </div>
+                    </motion.div>
                 </section>
             )}
 

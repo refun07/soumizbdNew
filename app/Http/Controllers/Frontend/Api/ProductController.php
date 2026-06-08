@@ -54,6 +54,17 @@ class ProductController extends Controller
             }
         }
 
+        // admin-selected on sale products
+        if ($request->onSaleProducts) {
+            $onSaleProductIds = $this->themeOneOnSaleProductIds();
+
+            if (count($onSaleProductIds) < 1) {
+                $products = $products->whereRaw('1 = 0');
+            } else {
+                $products = $products->whereIn('id', $onSaleProductIds);
+            }
+        }
+
         // by search keyword
         if ($request->searchKey != null) {
             $products = $products->where('name', 'like', '%' . $request->searchKey . '%'); // [TODO:: Search with translations also]
@@ -189,5 +200,20 @@ class ProductController extends Controller
         }
 
         return $data;
+    }
+
+    private function themeOneOnSaleProductIds(): array
+    {
+        $products = getSetting('themeOneOnSaleProducts');
+        if ($products == null) {
+            return [];
+        }
+
+        $products = json_decode($products, true);
+        if (!is_array($products)) {
+            return [];
+        }
+
+        return array_values(array_unique(array_filter(array_map('intval', $products))));
     }
 }

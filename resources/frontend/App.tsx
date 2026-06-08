@@ -25,6 +25,7 @@ const Shops = lazy(() => import('./pages/shops/Shops'));
 const ProductDetails = lazy(() => import('./pages/ProductDetails'));
 const Brand = lazy(() => import('./pages/search-filter/Brand'));
 const Category = lazy(() => import('./pages/search-filter/Category'));
+const OnSaleProducts = lazy(() => import('./pages/search-filter/OnSaleProducts'));
 const Search = lazy(() => import('./pages/search-filter/Search'));
 
 const SellerSignup = lazy(() => import('./pages/seller/Signup'));
@@ -158,6 +159,7 @@ const App = () => {
                     element={<Category />}
                 />
                 <Route path="/products" element={<Search />} />
+                <Route path="/on-sale-products" element={<OnSaleProducts />} />
                 {/* end::uses search and filter */}
 
                 {appMode === 'multiVendor' ? (

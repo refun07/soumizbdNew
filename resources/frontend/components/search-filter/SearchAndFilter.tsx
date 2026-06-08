@@ -26,6 +26,8 @@ interface Props {
     brandSlug?: string;
     shopSlug?: string;
     discounted?: boolean;
+    onSaleProducts?: boolean;
+    title?: string;
 }
 
 const SearchAndFilter = ({
@@ -34,6 +36,8 @@ const SearchAndFilter = ({
     brandSlug,
     shopSlug,
     discounted = false,
+    onSaleProducts = false,
+    title,
 }: Props) => {
     const dispatch = useAppDispatch();
     const location = useLocation();
@@ -115,7 +119,14 @@ const SearchAndFilter = ({
             setCurrentPage(1);
             hasTriggeredRef.current = false;
         }
-    }, [categorySlug, brandSlug, shopSlug, isInfiniteScrollEnabled]);
+    }, [
+        categorySlug,
+        brandSlug,
+        shopSlug,
+        discounted,
+        onSaleProducts,
+        isInfiniteScrollEnabled,
+    ]);
 
     // Track valid category when selectedCategory is available
     useEffect(() => {
@@ -159,10 +170,14 @@ const SearchAndFilter = ({
             return;
         }
 
-        filters.categorySlug = categorySlug;
-        filters.brandSlug = brandSlug;
-        filters.shopSlug = shopSlug;
-        if (discounted) filters.discounted = discounted;
+        const scopedFilters: URLFilterParams = {
+            ...filters,
+            categorySlug,
+            brandSlug,
+            shopSlug,
+            ...(discounted ? { discounted } : {}),
+            ...(onSaleProducts ? { onSaleProducts } : {}),
+        };
 
         // For infinite scroll, only fetch page 1 on initial load or filter change (not page change)
         if (isInfiniteScrollEnabled) {
@@ -182,19 +197,19 @@ const SearchAndFilter = ({
             }
 
             setCurrentPage(validPage);
-            filters.page = validPage;
+            scopedFilters.page = validPage;
         }
 
         // stringify the filters object
         const queryStr = qs.stringify(
-            { ...filters, searchKey: filters.query },
+            { ...scopedFilters, searchKey: scopedFilters.query },
             {
                 addQueryPrefix: true,
                 arrayFormat: 'brackets',
             },
         );
         getProducts(queryStr, true);
-    }, [location.search, location.pathname, isInfiniteScrollEnabled]);
+    }, [location.search, location.pathname, isInfiniteScrollEnabled, categorySlug, brandSlug, shopSlug, discounted, onSaleProducts]);
 
     // Load more products for infinite scroll
     const loadMoreProducts = useCallback(() => {
@@ -209,7 +224,15 @@ const SearchAndFilter = ({
         setIsLoadingMore(true);
         setCurrentPage(nextPage);
 
-        const newFilters = { ...filters, page: nextPage };
+        const newFilters = {
+            ...filters,
+            categorySlug,
+            brandSlug,
+            shopSlug,
+            ...(discounted ? { discounted } : {}),
+            ...(onSaleProducts ? { onSaleProducts } : {}),
+            page: nextPage,
+        };
         const queryStr = qs.stringify(
             { ...newFilters, searchKey: newFilters.query },
             {
@@ -225,7 +248,19 @@ const SearchAndFilter = ({
         // Use history.pushState to update URL without triggering React Router's location change
         const newUrl = `${window.location.pathname}?${newSearchParams.toString()}`;
         window.history.pushState(null, '', newUrl);
-    }, [pagination, isFetching, isLoadingMore, filters, searchParams, getProducts]);
+    }, [
+        pagination,
+        isFetching,
+        isLoadingMore,
+        filters,
+        categorySlug,
+        brandSlug,
+        shopSlug,
+        discounted,
+        onSaleProducts,
+        searchParams,
+        getProducts,
+    ]);
 
     // Intersection Observer for infinite scroll
     useEffect(() => {
@@ -305,6 +340,7 @@ const SearchAndFilter = ({
     };
 
     const pageTitle =
+        title ||
         (categorySlug || brandSlug || shopSlug)?.replace(/[-_]/g, ' ') ||
         (filters.query &&
             `${translate('Search result for')} '${filters.query || ''}'`) ||

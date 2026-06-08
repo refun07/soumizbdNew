@@ -112,6 +112,7 @@ Route::group(['prefix' => config('app.api_version')], function () {
         Route::group(['prefix' => 'theme-one'], function () {
             Route::get('/banner', [HomePageThemeOneController::class, 'banner']);
             Route::get('/promo-cards', [HomePageThemeOneController::class, 'promoCards']);
+            Route::get('/on-sale-products', [HomePageThemeOneController::class, 'onSaleProducts'])->middleware('zone');
             Route::get('/sliders', [HomePageThemeOneController::class, 'sliders']);
             Route::get('/featured-categories', [HomePageThemeOneController::class, 'featuredCategories']);
             Route::get('/top-products', [HomePageThemeOneController::class, 'topProducts'])->middleware('zone');
