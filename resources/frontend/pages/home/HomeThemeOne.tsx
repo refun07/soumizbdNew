@@ -891,6 +891,78 @@ const HomeThemeOne = () => {
                 </section>
             )}
 
+            {/* start::featured-category */}
+            {featuredCategoryRes.isLoading ? (
+                <ProductSectionSkeleton />
+            ) : featuredCategoryRes.data?.showFeaturedCategories === '1' ? (
+                <section
+                    className="featured-category-section"
+                    id="featured-categories"
+                >
+                    <motion.div
+                        variants={containerAnimation}
+                        initial="initial"
+                        whileInView="whileInView"
+                        viewport={{ once: true }}
+                        className="container"
+                    >
+                        <SectionTitle
+                            animated
+                            title={translate('[Featured] Categories')}
+                            highlightClassName="text-[#B3052A]"
+                            subTitle={translate('Handpicked')}
+                            onClick={() => dispatch(togglePopup('categories'))}
+                        />
+                        {featuredCategoryRes.data?.categories?.length > 4 ? (
+                            <CategorySlider>
+                                {featuredCategoryRes.data?.categories.map(
+                                    (category) => (
+                                        <SwiperSlide key={category.id}>
+                                            <motion.div
+                                                variants={itemAnimation}
+                                            >
+                                                <CategoryCard
+                                                    title={category.name}
+                                                    quantity={
+                                                        category.productsCount
+                                                    }
+                                                    to={`/categories/${category.slug}`}
+                                                    image={
+                                                        category.thumbnailImage
+                                                    }
+                                                />
+                                            </motion.div>
+                                        </SwiperSlide>
+                                    ),
+                                )}
+                            </CategorySlider>
+                        ) : (
+                            <div className="flex justify-center">
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 ">
+                                    {featuredCategoryRes.data?.categories.map(
+                                        (category) => (
+                                            <div key={category.id}>
+                                                <CategoryCard
+                                                    title={category.name}
+                                                    quantity={
+                                                        category.productsCount
+                                                    }
+                                                    to={`/categories/${category.slug}`}
+                                                    image={
+                                                        category.thumbnailImage
+                                                    }
+                                                />
+                                            </div>
+                                        ),
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </motion.div>
+                </section>
+            ) : null}
+            {/* end::featured-category */}
+
             {bannerSliderRes.data?.[0]?.showThemeOneSliderSection == '1' && (
                 <motion.section
                     variants={{
@@ -960,71 +1032,6 @@ const HomeThemeOne = () => {
                     </ThemeSlider>
                 </motion.section>
             )}
-
-            {/* start::featured-category */}
-            {featuredCategoryRes.isLoading ? (
-                <ProductSectionSkeleton />
-            ) : featuredCategoryRes.data?.showFeaturedCategories === '1' ? (
-                <section
-                    className="featured-category-section"
-                    id="featured-categories"
-                >
-                    <motion.div
-                        variants={containerAnimation}
-                        initial="initial"
-                        whileInView="whileInView"
-                        viewport={{ once: true }}
-                        className="container"
-                    >
-                        <SectionTitle
-                            animated
-                            title={translate('[Featured] Categories')}
-                            subTitle={translate('Handpicked')}
-                            onClick={() => dispatch(togglePopup('categories'))}
-                        />
-                        {featuredCategoryRes.data?.categories?.length > 4 ? (
-                            <CategorySlider>
-                                {featuredCategoryRes.data?.categories.map(
-                                    (category) => (
-                                        <SwiperSlide key={category.id}>
-                                            <motion.div
-                                                variants={itemAnimation}
-                                            >
-                                                <CategoryCard
-                                                    title={category.name}
-                                                    to={`/categories/${category.slug}`}
-                                                    image={
-                                                        category.thumbnailImage
-                                                    }
-                                                />
-                                            </motion.div>
-                                        </SwiperSlide>
-                                    ),
-                                )}
-                            </CategorySlider>
-                        ) : (
-                            <div className="flex justify-center">
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 ">
-                                    {featuredCategoryRes.data?.categories.map(
-                                        (category) => (
-                                            <div key={category.id}>
-                                                <CategoryCard
-                                                    title={category.name}
-                                                    to={`/categories/${category.slug}`}
-                                                    image={
-                                                        category.thumbnailImage
-                                                    }
-                                                />
-                                            </div>
-                                        ),
-                                    )}
-                                </div>
-                            </div>
-                        )}
-                    </motion.div>
-                </section>
-            ) : null}
-            {/* start::featured-category */}
 
             {/* start::top-products */}
             {topProductRes.isLoading ? (

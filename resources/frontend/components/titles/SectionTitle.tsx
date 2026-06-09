@@ -10,6 +10,7 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
     subTitle?: string;
     title: string;
     highlightFirstWord?: boolean;
+    highlightClassName?: string;
     text?: string;
 
     link?: string;
@@ -33,6 +34,7 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
 const SectionTitle = ({
     title,
     highlightFirstWord,
+    highlightClassName,
     subTitle,
     text,
 
@@ -113,6 +115,7 @@ const SectionTitle = ({
                         dangerouslySetInnerHTML={{
                             __html: highlightOnTitle(title, {
                                 highlightFirstWord,
+                                highlightClassName,
                                 renderBottomBorder: !isMultiLine,
                             }),
                         }}

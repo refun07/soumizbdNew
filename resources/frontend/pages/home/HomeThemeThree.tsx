@@ -145,6 +145,7 @@ const HomeThemeThree = () => {
                     <div className="container">
                         <SectionTitle
                             title="[Featured] categories"
+                            highlightClassName="text-[#B3052A]"
                             subTitle={
                                 featuredCategories?.themeThreeFeaturedCategoriesHeadline
                             }
@@ -196,6 +197,7 @@ const HomeThemeThree = () => {
                                 <SwiperSlide key={item.id}>
                                     <CategoryCard
                                         image={item.thumbnailImage}
+                                        quantity={item.productsCount}
                                         title={item.name}
                                         to={`/categories/${item.slug}`}
                                     />

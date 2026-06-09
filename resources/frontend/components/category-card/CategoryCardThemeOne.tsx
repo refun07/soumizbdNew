@@ -1,10 +1,14 @@
 import { Link } from 'react-router-dom';
 import { ICategoryCardProps } from '../../types/props';
+import { translate } from '../../utils/translate';
 import Image from '../Image';
 
 interface Props extends ICategoryCardProps {}
 
-const CategoryCardThemeOne = ({ title, to, image }: Props) => {
+const CategoryCardThemeOne = ({ title, quantity, to, image }: Props) => {
+    const shouldShowQuantity =
+        quantity !== undefined && quantity !== null && quantity !== '';
+
     return (
         <Link
             to={to}
@@ -19,6 +23,12 @@ const CategoryCardThemeOne = ({ title, to, image }: Props) => {
             />
 
             <h3 className="mt-4 md:mt-5 line-clamp-1">{title}</h3>
+            {shouldShowQuantity ? (
+                <p className="mt-2 text-sm text-black/70">
+                    <span className="text-[#B3052A]">{quantity}</span>{' '}
+                    <span className="lowercase">{translate('items')}</span>
+                </p>
+            ) : null}
         </Link>
     );
 };

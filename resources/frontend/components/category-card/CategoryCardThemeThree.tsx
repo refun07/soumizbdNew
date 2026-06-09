@@ -1,9 +1,18 @@
 import { FaArrowRight } from 'react-icons/fa6';
 import { Link } from 'react-router-dom';
 import { ICategoryCardProps } from '../../types/props';
+import { translate } from '../../utils/translate';
 import Image from '../Image';
 
-const CategoryCardThemeThree = ({ image, title, to }: ICategoryCardProps) => {
+const CategoryCardThemeThree = ({
+    image,
+    quantity,
+    title,
+    to,
+}: ICategoryCardProps) => {
+    const shouldShowQuantity =
+        quantity !== undefined && quantity !== null && quantity !== '';
+
     return (
         <Link
             to={to}
@@ -21,9 +30,19 @@ const CategoryCardThemeThree = ({ image, title, to }: ICategoryCardProps) => {
 
             <Image src={image} alt={title} className="w-full h-full" />
 
-            <h3 className="font-semibold text-white absolute bottom-5 left-5 z-[1] line-clamp-2">
-                {title}
-            </h3>
+            <div className="absolute bottom-5 left-5 right-5 z-[1]">
+                <h3 className="line-clamp-2 font-semibold text-white">
+                    {title}
+                </h3>
+                {shouldShowQuantity ? (
+                    <p className="mt-1 text-sm text-white/85">
+                        <span className="text-[#B3052A]">{quantity}</span>{' '}
+                        <span className="lowercase">
+                            {translate('items')}
+                        </span>
+                    </p>
+                ) : null}
+            </div>
         </Link>
     );
 };

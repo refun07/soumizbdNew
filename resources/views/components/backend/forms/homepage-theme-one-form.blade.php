@@ -469,6 +469,64 @@
     </div>
 </div>
 
+{{-- featured category --}}
+<div class="ac !mt-0">
+    <h2 class="ac-header">
+        <button type="button" class="ac-trigger !px-8 !rounded-none !bg-background !text-foreground">
+            <span class="">{{ translate('Featured Categories') }}</span>
+        </button>
+    </h2>
+    <div class="ac-panel">
+        <div class="pt-0 pb-7 px-3 md:px-6 xl:px-10">
+            <form action="" class="space-y-3 homepage-form" method="POST" enctype="multipart/form-data">
+                @csrf
+                @php
+                    $featuredCategories =
+                        getSetting('themeOneFeaturedCategories') != null
+                            ? collect(json_decode(getSetting('themeOneFeaturedCategories')))
+                            : collect();
+                @endphp
+                <div class="pt-2">
+
+                    <input type="hidden" name="types[]" value="showThemeOneFeaturedCategories">
+                    <div class="flex items-center justify-between mb-5">
+                        <p>{{ translate('Show/Hide Featured Categories') }}</p>
+                        <x-backend.inputs.checkbox toggler="true" name="showThemeOneFeaturedCategories"
+                            value="1" isChecked="{{ getSetting('showThemeOneFeaturedCategories') ?? false }}" />
+                    </div>
+
+
+                    <input type="hidden" name="types[]" value="themeOneFeaturedCategories">
+                    <x-backend.inputs.select :labelInline="false" label="Featured Categories"
+                        name="themeOneFeaturedCategories[]" multiple data-selection-css-class="multi-select2"
+                        data-placeholder="{{ translate('Select categories') }}" :isRequired="false">
+
+                        @foreach ($categories as $cat)
+                            <x-backend.inputs.select-option name="{{ $cat->collectTranslation('name', $langKey) }}"
+                                value="{{ $cat->id }}"
+                                selected="{{ $featuredCategories->contains($cat->id) ? $cat->id : 0 }}" />
+
+                            @foreach ($cat->childrenCategories as $childCategory)
+                                @include('backend.admin.categories.subCategory', [
+                                    'subCategory' => $childCategory,
+                                    'langKey' => $langKey,
+                                    'category' => null,
+                                    'featuredCategories' => $featuredCategories,
+                                ])
+                            @endforeach
+                        @endforeach
+                    </x-backend.inputs.select>
+
+                    <div class="flex justify-end pt-2">
+                        <x-backend.inputs.button type="submit" buttonText="{{ translate('Save Changes') }}"
+                            class="submit-btn mt-3" />
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 {{-- secondary banner --}}
 <div class="ac !mt-0 ">
     <h2 class="ac-header">
@@ -626,64 +684,6 @@
                 <div class="flex justify-end pt-2">
                     <x-backend.inputs.button type="submit" buttonText="{{ translate('Save Changes') }}"
                         class="submit-btn" />
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-{{-- featured category --}}
-<div class="ac !mt-0">
-    <h2 class="ac-header">
-        <button type="button" class="ac-trigger !px-8 !rounded-none !bg-background !text-foreground">
-            <span class="">{{ translate('Featured Categories') }}</span>
-        </button>
-    </h2>
-    <div class="ac-panel">
-        <div class="pt-0 pb-7 px-3 md:px-6 xl:px-10">
-            <form action="" class="space-y-3 homepage-form" method="POST" enctype="multipart/form-data">
-                @csrf
-                @php
-                    $featuredCategories =
-                        getSetting('themeOneFeaturedCategories') != null
-                            ? collect(json_decode(getSetting('themeOneFeaturedCategories')))
-                            : collect();
-                @endphp
-                <div class="pt-2">
-
-                    <input type="hidden" name="types[]" value="showThemeOneFeaturedCategories">
-                    <div class="flex items-center justify-between mb-5">
-                        <p>{{ translate('Show/Hide Featured Categories') }}</p>
-                        <x-backend.inputs.checkbox toggler="true" name="showThemeOneFeaturedCategories"
-                            value="1" isChecked="{{ getSetting('showThemeOneFeaturedCategories') ?? false }}" />
-                    </div>
-
-
-                    <input type="hidden" name="types[]" value="themeOneFeaturedCategories">
-                    <x-backend.inputs.select :labelInline="false" label="Featured Categories"
-                        name="themeOneFeaturedCategories[]" multiple data-selection-css-class="multi-select2"
-                        data-placeholder="{{ translate('Select categories') }}" :isRequired="false">
-
-                        @foreach ($categories as $cat)
-                            <x-backend.inputs.select-option name="{{ $cat->collectTranslation('name', $langKey) }}"
-                                value="{{ $cat->id }}"
-                                selected="{{ $featuredCategories->contains($cat->id) ? $cat->id : 0 }}" />
-
-                            @foreach ($cat->childrenCategories as $childCategory)
-                                @include('backend.admin.categories.subCategory', [
-                                    'subCategory' => $childCategory,
-                                    'langKey' => $langKey,
-                                    'category' => null,
-                                    'featuredCategories' => $featuredCategories,
-                                ])
-                            @endforeach
-                        @endforeach
-                    </x-backend.inputs.select>
-
-                    <div class="flex justify-end pt-2">
-                        <x-backend.inputs.button type="submit" buttonText="{{ translate('Save Changes') }}"
-                            class="submit-btn mt-3" />
-                    </div>
                 </div>
             </form>
         </div>

@@ -81,7 +81,7 @@ const SectionHeading = ({
                         <span
                             className={cn(
                                 'font-bold',
-                                inverse ? 'text-white' : 'text-[#b3052a]',
+                                inverse ? 'text-white' : 'text-[#B3052A]',
                             )}
                         >
                             {firstWord}
@@ -102,8 +102,8 @@ const SectionHeading = ({
                     className={cn(
                         'hidden h-[42px] shrink-0 items-center rounded-[3px] border px-5 text-sm font-medium md:flex',
                         inverse
-                            ? 'border-white/60 text-white hover:bg-white hover:text-[#b3052a]'
-                            : 'border-black/35 text-[#b3052a] hover:border-[#b3052a]',
+                            ? 'border-white/60 text-white hover:bg-white hover:text-[#B3052A]'
+                            : 'border-black/35 text-[#B3052A] hover:border-[#B3052A]',
                     )}
                 >
                     {translate('View More')}
@@ -302,10 +302,10 @@ const CategoryTile = ({
             {category.name}
         </h3>
         <p className="mt-2 text-sm text-black/70">
-            <span className="text-[#b3052a]">
-                {String(category.productsCount || 0).padStart(2, '0')}
+            <span className="text-[#B3052A]">
+                {category.productsCount || 0}
             </span>{' '}
-            {translate('Items')}
+            <span className="lowercase">{translate('items')}</span>
         </p>
     </Link>
 );
