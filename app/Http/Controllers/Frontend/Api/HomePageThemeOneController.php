@@ -235,7 +235,7 @@ class HomePageThemeOneController extends Controller
         $settings = getSetting('themeOneOnSaleProductSettings') != null
             ? json_decode(getSetting('themeOneOnSaleProductSettings'), true)
             : [];
-        $onSaleProductIds = array_slice($this->themeOneOnSaleProductIds(), 0, 16);
+        $onSaleProductIds = array_slice($this->themeOneOnSaleProductIds(), 0, 20);
         $products = collect();
 
         if (count($onSaleProductIds) > 0) {

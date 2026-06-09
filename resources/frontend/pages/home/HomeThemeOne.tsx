@@ -369,7 +369,7 @@ const HomeThemeOne = () => {
         promoCards.length > 0;
     const allOnSaleProducts = onSaleProductRes.data?.products ?? [];
     const onSaleProducts = allOnSaleProducts.slice(0, 15);
-    const secondaryOnSaleProducts = allOnSaleProducts.slice(0, 16);
+    const secondaryOnSaleProducts = allOnSaleProducts.slice(0, 20);
     const shouldShowOnSaleProducts =
         onSaleProductRes.data?.showThemeOneOnSaleProducts === '1' &&
         onSaleProducts.length > 0;
@@ -1285,7 +1285,7 @@ const HomeThemeOne = () => {
                             link="/on-sale-products"
                         />
 
-                        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4 xl:gap-5">
+                        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 xl:gap-5">
                             {secondaryOnSaleProducts.map((product) => (
                                 <motion.div
                                     variants={itemAnimation}
