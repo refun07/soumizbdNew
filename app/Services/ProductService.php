@@ -300,7 +300,14 @@ class ProductService
         $limit         = $request->limit ?? perPage();
         $warehouseIds  = Warehouse::pluck('id')->toArray();
 
-        $products = Product::shop()->latest();
+        $products = Product::shop()
+            ->with([
+                'categories',
+                'brand',
+                'unit',
+                'variations' => fn($query) => $query->withSum('productVariationStocks as stock_total', 'stock_qty'),
+            ])
+            ->latest();
 
         if ($request->isPublished != null) {
             $products = $products->where('is_published', $request->isPublished);

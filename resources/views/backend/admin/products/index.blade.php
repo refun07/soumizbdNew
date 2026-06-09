@@ -153,18 +153,11 @@
             <table class="product-list-table footable w-full [&_td]:">
                 <thead class="uppercase text-left bg-primary/10">
                     <tr>
-                        <th>
-                            {{ translate('Product DETAILS') }}
-                        </th>
-                        <th data-breakpoints="xs sm md lg">
-                            {{ translate('Categories') }}
-                        </th>
-                        <th data-breakpoints="xs sm" class="min-w-[150px]">
-                            {{ translate('Stock') }}
-                        </th>
-
-                        <th data-breakpoints="xs sm">{{ translate('Show/Hide') }}</th>
-                        <th data-breakpoints="xs sm">{{ translate('Price') }}</th>
+                        <th class="min-w-[340px]">{{ translate('Product Information') }}</th>
+                        <th data-breakpoints="xs sm" class="min-w-[180px]">{{ translate('Inventory') }}</th>
+                        <th data-breakpoints="xs sm" class="min-w-[180px]">{{ translate('Pricing') }}</th>
+                        <th data-breakpoints="xs sm md" class="min-w-[190px]">{{ translate('Status') }}</th>
+                        <th data-breakpoints="xs sm md lg" class="min-w-[140px]">{{ translate('Dates') }}</th>
                         <th data-breakpoints="xs sm md" class="w-[130px]">
                             {{ translate('Options') }}
                         </th>
@@ -172,67 +165,130 @@
                 </thead>
                 <tbody>
                     @foreach ($products as $product)
+                        @php
+                            $stockQty = (int) $product->variations->sum('stock_total');
+                            $firstVariation = $product->variations->first();
+                            $variationCount = $product->variations->count();
+                            $discountValues = $product->variations
+                                ->filter(fn($variation) => (float) $variation->discount_value > 0)
+                                ->map(function ($variation) {
+                                    return $variation->discount_type === 'percentage'
+                                        ? $variation->discount_value . '%'
+                                        : formatPrice($variation->discount_value);
+                                })
+                                ->unique()
+                                ->values();
+                            $isLowStock = $stockQty <= (int) $product->alert_qty;
+                            $stockStatusLabel = $stockQty <= 0
+                                ? translate('Out of Stock')
+                                : ($isLowStock ? translate('Low Stock') : translate('In Stock'));
+                            $stockStatusClass = $stockQty <= 0
+                                ? 'bg-red-500/10 text-red-500'
+                                : ($isLowStock ? 'bg-orange-500/10 text-orange-500' : 'bg-green-500/10 text-green-500');
+                            $isPreOrder = (bool) data_get($product->pre_order, 'is_active', false);
+                        @endphp
                         <tr>
-                            <td class="">
-                                <div class="inline-flex items-center gap-4">
-                                    <div class="max-xs:hidden">
+                            <td>
+                                <div class="flex items-start gap-4">
+                                    <div class="max-xs:hidden shrink-0">
                                         <img src="{{ uploadedAsset($product->thumbnail_image) }}" alt=""
-                                            class="w-12 h-12 lg:w-[70px] lg:h-[80px] rounded-md"
+                                            class="w-16 h-16 rounded-md object-cover border border-border"
                                             onerror="this.onerror=null;this.src='{{ asset('images/image-error.png') }}';" />
                                     </div>
-                                    <div class=" line-clamp-2 max-w-[350px]">
-                                        {{ $product->collectTranslation('name') }}
+                                    <div class="min-w-0 space-y-2">
+                                        <div>
+                                            <a href="{{ route('admin.products.edit', ['product' => $product->id, 'lang_key' => config('app.default_language')]) }}&translate"
+                                                class="font-semibold text-foreground hover:text-secondary line-clamp-2 max-w-[420px]">
+                                                {{ $product->collectTranslation('name') }}
+                                            </a>
+                                            <div class="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted">
+                                                <span>#{{ $product->id }}</span>
+                                                <span>{{ translate('SKU') }}: {{ $firstVariation?->sku ?: translate('N/A') }}</span>
+                                                <span>{{ translate('Unit') }}: {{ $product->unit?->collectTranslation('name') ?: translate('N/A') }}</span>
+                                                <span>{{ translate('Brand') }}: {{ $product->brand?->collectTranslation('name') ?: translate('N/A') }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-1.5 flex-wrap">
+                                            @forelse ($product->categories as $category)
+                                                <span class="px-2 py-1 text-[11px] bg-secondary/10 text-secondary rounded-md leading-none">
+                                                    {{ $category->collectTranslation('name') }}
+                                                </span>
+                                            @empty
+                                                <span class="text-xs text-muted">{{ translate('No category') }}</span>
+                                            @endforelse
+                                        </div>
                                     </div>
                                 </div>
                             </td>
                             <td>
-                                <div class="inline-flex items-center gap-2 flex-wrap">
-                                    @forelse ($product->categories as $category)
-                                        <a
-                                            class="px-2 py-1 text-xs bg-secondary text-white rounded-md leading-none cursor-default">{{ $category->collectTranslation('name') }}</a>
-                                    @empty
-                                        <a
-                                            class="px-2 py-1 text-xs bg-secondary text-white rounded-md leading-none cursor-default">{{ translate('N/A') }}</a>
-                                    @endforelse
-                                </div>
-                            </td>
-                            <td>
-                                <div class="inline-flex items-center gap-2">
-                                    @php
-                                        $stockQty = $product->getStockQuantity();
-                                    @endphp
-
-                                    <span>{{ $stockQty }}</span>
-
-                                    @if ($stockQty <= $product->alert_qty)
-                                        <span class="tooltip">
-                                            <span class="tooltip__toggler text-orange-400 text-lg md:text-[26px]">
-                                                <i class="far fa-exclamation-circle"></i>
-                                            </span>
-                                            <span
-                                                class="tooltip__content">{{ translate('This shows your stock is low') }}</span>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-semibold text-foreground">{{ $stockQty }}</span>
+                                        <span class="px-2 py-1 text-[11px] rounded-full {{ $stockStatusClass }}">
+                                            {{ $stockStatusLabel }}
                                         </span>
-                                    @endif
+                                    </div>
+                                    <div class="text-xs text-muted">
+                                        {{ $product->has_variation ? translate('Variable Product') : translate('Simple Product') }}
+                                    </div>
+                                    <div class="text-xs text-muted">
+                                        {{ translate('Variations') }}: {{ $variationCount }}
+                                        <span class="mx-1">•</span>
+                                        {{ translate('Alert') }}: {{ $product->alert_qty }}
+                                    </div>
                                 </div>
                             </td>
-
                             <td>
-                                @can('edit_products')
-                                    <x-backend.inputs.checkbox toggler="true" data-route="{{ route('admin.products.status') }}"
-                                        name="isActiveCheckbox" value="{{ $product->id }}"
-                                        data-status="{{ $product->is_published }}"
-                                        isChecked="{{ (int) $product->is_published == 1 }}" />
-                                @endcan
+                                <div class="space-y-2">
+                                    <div class="font-semibold text-foreground">
+                                        @if ($product->max_price != $product->min_price)
+                                            {{ formatPrice($product->min_price) }} - {{ formatPrice($product->max_price) }}
+                                        @else
+                                            {{ formatPrice($product->min_price) }}
+                                        @endif
+                                    </div>
+                                    <div class="text-xs text-muted">
+                                        {{ translate('Discount') }}:
+                                        {{ $discountValues->isNotEmpty() ? $discountValues->join(', ') : translate('None') }}
+                                    </div>
+                                </div>
                             </td>
-
                             <td>
-                                @if ($product->max_price != $product->min_price)
-                                    {{ formatPrice($product->min_price) }}
-                                    -
-                                    {{ formatPrice($product->max_price) }}
-                                @else
-                                    {{ formatPrice($product->min_price) }}
-                                @endif
+                                <div class="space-y-2">
+                                    <div class="flex items-center justify-between gap-3">
+                                        <span class="text-xs text-muted">{{ translate('Published') }}</span>
+                                        @can('edit_products')
+                                            <x-backend.inputs.checkbox toggler="true" data-route="{{ route('admin.products.status') }}"
+                                                name="isActiveCheckbox" value="{{ $product->id }}"
+                                                data-status="{{ $product->is_published }}"
+                                                isChecked="{{ (int) $product->is_published == 1 }}" />
+                                        @else
+                                            <span>{{ $product->is_published ? translate('Yes') : translate('No') }}</span>
+                                        @endcan
+                                    </div>
+                                    <div class="flex flex-wrap gap-1.5">
+                                        <span class="px-2 py-1 text-[11px] rounded-full {{ $product->hide_on_ecom ? 'bg-red-500/10 text-red-500' : 'bg-green-500/10 text-green-500' }}">
+                                            {{ $product->hide_on_ecom ? translate('Hidden on Ecom') : translate('Showing on Ecom') }}
+                                        </span>
+                                        @if ($isPreOrder)
+                                            <span class="px-2 py-1 text-[11px] rounded-full bg-blue-500/10 text-blue-500">
+                                                {{ translate('Pre Order') }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="space-y-1 text-xs">
+                                    <div>
+                                        <span class="text-muted">{{ translate('Created') }}:</span>
+                                        <span class="text-foreground">{{ $product->created_at?->format('d M, Y') }}</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-muted">{{ translate('Updated') }}:</span>
+                                        <span class="text-foreground">{{ $product->updated_at?->format('d M, Y') }}</span>
+                                    </div>
+                                </div>
                             </td>
                             <td>
                                 <x-backend.inputs.action-dropdown label="{{ translate('Actions') }}" class="w-[130px]">
