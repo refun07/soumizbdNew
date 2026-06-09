@@ -61,7 +61,18 @@ interface Order {
     agentId?: number | null;
     agentName?: string | null;
     createdDate?: string;
-    orderCount?: string;
+    orderCount?: number;
+    totalItemQuantity?: number;
+    firstItem?: {
+        name: string;
+        variationCode?: string | null;
+        quantity: number;
+        image?: string | null;
+    } | null;
+    subtotalAmount: number;
+    shippingChargeAmount: number;
+    discountAmount: number;
+    couponDiscountAmount: number;
     totalAmount: number;
     deliveryStatus?: string;
     deliveryStatusToShow?: string;
@@ -80,6 +91,9 @@ interface Order {
     originalOrderRawCode?: string;
     originalOrderId?: number;
     source?: string;
+    courier_partner?: string;
+    courier_devlivery_status?: string;
+    tracking_number?: string;
     latestDeliveryUpdate?: {
         status: string;
         note: string;
@@ -726,6 +740,9 @@ const OrderPage: React.FC = () => {
                                         <div className="text-sm text-muted">
                                             {order.customerPhone}
                                         </div>
+                                        <div className="mt-1 text-xs text-muted">
+                                            {order.shipping_address || 'No shipping address'}
+                                        </div>
                                     </div>
 
                                     {order.agentName && (
@@ -802,6 +819,10 @@ const OrderPage: React.FC = () => {
                                                 order.totalAmount,
                                             )}
                                         </div>
+                                        <div className="text-xs text-muted">
+                                            Subtotal {currencyFormatter(order.subtotalAmount)}
+                                            {' · '}Delivery {currencyFormatter(order.shippingChargeAmount)}
+                                        </div>
                                         {order.paymentStatus === 'paid' ? (
                                             <div className="inline-flex items-center gap-1.5 text-green-600 text-sm">
                                                 <i className="fa-solid fa-circle-check"></i>
@@ -819,9 +840,21 @@ const OrderPage: React.FC = () => {
                                             Items
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <span className="text-sm">
-                                                {order.orderCount}
-                                            </span>
+                                            {order.firstItem?.image && (
+                                                <img
+                                                    src={order.firstItem.image}
+                                                    alt={order.firstItem.name}
+                                                    className="h-10 w-10 rounded border border-border object-cover"
+                                                />
+                                            )}
+                                            <div className="min-w-0">
+                                                <div className="line-clamp-1 text-sm font-medium">
+                                                    {order.firstItem?.name || 'No product'}
+                                                </div>
+                                                <div className="text-xs text-muted">
+                                                    Qty {order.totalItemQuantity || 0} · {order.orderCount || 0} item{order.orderCount === 1 ? '' : 's'}
+                                                </div>
+                                            </div>
                                             <button
                                                 onClick={(e) =>
                                                     handleProductListClick(
@@ -949,47 +982,38 @@ const OrderPage: React.FC = () => {
 
                 {/* Desktop Table View */}
                 <div className="hidden lg:block overflow-x-auto">
-                    <table className="divide-y divide-border product-list-table w-full">
+                    <table className="divide-y divide-border product-list-table w-full min-w-[1450px]">
                         <thead>
                             <tr className="theme-table__head">
-                                <th className="px-4 py-4"></th>
-                                <th className="px-6 py-4 text-left text-xs font-medium text-muted uppercase">
-                                    Customer
+                                <th className="px-3 py-3"></th>
+                                <th className="px-3 py-3 text-left text-xs font-medium text-muted uppercase">
+                                    Order
                                 </th>
-                                <th className="px-6 py-4 text-left text-xs font-medium text-muted uppercase">
-                                    Agent
+                                <th className="px-3 py-3 text-left text-xs font-medium text-muted uppercase">
+                                    Customer & Address
                                 </th>
-                                <th className="px-6 py-4 text-left text-xs font-medium text-muted uppercase">
-                                    Shipping Address
+                                <th className="px-3 py-3 text-left text-xs font-medium text-muted uppercase">
+                                    Products
                                 </th>
-                                <th className="px-6 py-4 text-left text-xs font-medium text-muted uppercase">
-                                    ITEM
+                                <th className="px-3 py-3 text-left text-xs font-medium text-muted uppercase">
+                                    Amounts
                                 </th>
-                                <th className="px-6 py-4 text-left text-xs font-medium text-muted uppercase max-w-[150px]">
-                                    Date
-                                </th>
-                                <th className="px-6 py-4 text-left text-xs font-medium text-muted uppercase">
-                                    Invoice No
-                                </th>
-                                <th className="px-6 py-4 text-left text-xs font-medium text-muted uppercase">
-                                    Source
-                                </th>
-                                <th className="px-6 py-4 text-left text-xs font-medium text-muted uppercase">
-                                    Value
-                                </th>
-                                <th className="px-6 py-4 text-left text-xs font-medium text-muted uppercase min-w-[170px]">
+                                <th className="px-3 py-3 text-left text-xs font-medium text-muted uppercase min-w-[190px]">
                                     Order Status
                                 </th>
-                                <th className="px-6 py-4 text-left text-xs font-medium text-muted uppercase">
-                                    Delivery
+                                <th className="px-3 py-3 text-left text-xs font-medium text-muted uppercase min-w-[190px]">
+                                    Courier
                                 </th>
-                                <th className="px-6 py-4 text-right text-xs font-medium text-muted uppercase"></th>
+                                <th className="px-3 py-3 text-left text-xs font-medium text-muted uppercase">
+                                    Assigned To
+                                </th>
+                                <th className="px-3 py-3 text-right text-xs font-medium text-muted uppercase"></th>
                             </tr>
                         </thead>
                         <tbody className="theme-table__body divide-y divide-border">
-                            {orders.map((order, index) => (
-                                <tr key={order.code}>
-                                    <td className="px-4 py-4">
+                            {orders.map((order) => (
+                                <tr key={order.code} className="align-top hover:bg-muted/10">
+                                    <td className="px-3 !py-4">
                                         <input
                                             type="checkbox"
                                             checked={selectedOrderIds.includes(
@@ -1000,27 +1024,73 @@ const OrderPage: React.FC = () => {
                                             }
                                         />
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="flex items-center gap-3">
-                                            <div className="line-clamp-2">
-                                                {order.customerName}
-                                                <div className="line-clamp-2">
-                                                    {order.customerPhone}
+                                    <td className="px-3 !py-4 min-w-[150px]">
+                                        <a
+                                            href={`/admin/orders/${order.code}`}
+                                            className="font-semibold text-primary hover:underline"
+                                        >
+                                            {order.orderPrefix}{order.code}
+                                        </a>
+                                        <div className="mt-1 flex flex-wrap gap-1">
+                                            <span className="rounded bg-sky-100 px-1.5 py-0.5 text-[10px] font-semibold text-sky-700 dark:bg-sky-900/40 dark:text-sky-300">
+                                                {formatOrderSource(order.isPosOrder, order.source) || 'Website'}
+                                            </span>
+                                            {order.isExchangeOrder && (
+                                                <a href={`/admin/orders/${order.originalOrderRawCode}`} className="rounded bg-purple-100 px-1.5 py-0.5 text-[10px] font-semibold text-purple-700 dark:bg-purple-900/40 dark:text-purple-300">
+                                                    EXCHANGE
+                                                </a>
+                                            )}
+                                            {order.hasExchange && !order.isExchangeOrder && (
+                                                <a href={`/admin/orders/${order.exchangeOrderRawCode}`} className="rounded bg-indigo-100 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">
+                                                    HAS EXCHANGE
+                                                </a>
+                                            )}
+                                        </div>
+                                        <div className="mt-1 text-xs text-muted">
+                                            {formatOrderDate(order.createdDate || '')}
+                                        </div>
+                                    </td>
+                                    <td className="px-3 !py-4 min-w-[220px] max-w-[280px]">
+                                        <div className="font-semibold text-foreground">
+                                            {order.customerName || 'Guest customer'}
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={(e) => handleFraudCheckClick(e, order.customerPhone)}
+                                            className="mt-0.5 text-xs text-primary hover:underline"
+                                            title="Check courier information"
+                                        >
+                                            {order.customerPhone || 'No phone'}
+                                        </button>
+                                        <div className="mt-1 line-clamp-2 text-xs leading-4 text-muted" title={order.shipping_address}>
+                                            {order.shipping_address || 'No shipping address'}
+                                        </div>
+                                    </td>
+                                    <td className="px-3 !py-4 min-w-[260px] max-w-[330px]">
+                                        <div className="flex items-start gap-2.5">
+                                            <div className="h-12 w-12 shrink-0 overflow-hidden rounded border border-border bg-muted/20">
+                                                {order.firstItem?.image ? (
+                                                    <img
+                                                        src={order.firstItem.image}
+                                                        alt={order.firstItem.name}
+                                                        className="h-full w-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <div className="flex h-full w-full items-center justify-center text-muted">
+                                                        <i className="fa-regular fa-image"></i>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="min-w-0">
+                                                <div className="line-clamp-2 text-sm font-medium leading-5">
+                                                    {order.firstItem?.name || 'No product'}
+                                                </div>
+                                                <div className="mt-0.5 text-xs text-muted">
+                                                    {order.firstItem?.variationCode && `SKU: ${order.firstItem.variationCode} · `}
+                                                    Qty: {order.totalItemQuantity || order.firstItem?.quantity || 0}
+                                                    {' · '}{order.orderCount || 0} item{order.orderCount === 1 ? '' : 's'}
                                                 </div>
                                             </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-muted">
-                                        {order.agentName || '—'}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-pre-wrap">
-                                        <div className="whitespace-pre-wrap break-words">
-                                            {order.shipping_address}
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="flex items-center gap-2">
-                                            <span>{order.orderCount}</span>
                                             <button
                                                 onClick={(e) =>
                                                     handleProductListClick(
@@ -1028,94 +1098,38 @@ const OrderPage: React.FC = () => {
                                                         e,
                                                     )
                                                 }
-                                                className="text-muted hover:text-foreground focus:outline-none"
-                                                title="View Items"
+                                                className="ml-auto shrink-0 rounded border border-border px-2 py-1 text-xs text-primary hover:bg-muted/20"
+                                                title="View all products"
                                             >
-                                                <i className="fa-solid fa-chevron-down text-xs"></i>
+                                                View
                                             </button>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        {formatOrderDate(
-                                            order.createdDate || '',
+                                    <td className="px-3 !py-4 min-w-[175px] text-xs">
+                                        <div className="flex justify-between gap-3 text-muted">
+                                            <span>Subtotal</span>
+                                            <span>{currencyFormatter(order.subtotalAmount)}</span>
+                                        </div>
+                                        <div className="mt-0.5 flex justify-between gap-3 text-muted">
+                                            <span>Delivery</span>
+                                            <span>{currencyFormatter(order.shippingChargeAmount)}</span>
+                                        </div>
+                                        {(Number(order.discountAmount) + Number(order.couponDiscountAmount)) > 0 && (
+                                            <div className="mt-0.5 flex justify-between gap-3 text-red-500">
+                                                <span>Discount</span>
+                                                <span>-{currencyFormatter(Number(order.discountAmount) + Number(order.couponDiscountAmount))}</span>
+                                            </div>
                                         )}
-                                    </td>
-                                    <td className="text-center">
-                                        <a
-                                            title="Download Invoice"
-                                            href={route(
-                                                'admin.orders.downloadInvoice',
-                                                { id: order.id },
-                                            )}
-                                            target="_blank"
-                                        >
-                                            {order.orderPrefix} {order.code}
-                                            <span className="text-lg text-theme-orange pl-1">
-                                                <i className="fa-solid fa-file-arrow-down"></i>
-                                            </span>
-                                        </a>
-                                        {!!order.isPosOrder && (
-                                            <a
-                                                title="Download Challan"
-                                                href={route(
-                                                    'admin.orders.downloadChallan',
-                                                    { id: order.id },
-                                                )}
-                                                target="_blank"
-                                            >
-                                                <span className="text-lg text-theme-orange pl-1">
-                                                    <i className="fa-light fa-file-contract"></i>
-                                                </span>
-                                            </a>
-                                        )}
-                                        {order.isExchangeOrder && (
-                                            <a
-                                                href={`/admin/orders/${order.originalOrderRawCode}`}
-                                                title="Exchange order - click to view original"
-                                                className="ml-1"
-                                            >
-                                                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300">
-                                                    EXC
-                                                </span>
-                                            </a>
-                                        )}
-                                        {order.hasExchange && !order.isExchangeOrder && (
-                                            <a
-                                                href={`/admin/orders/${order.exchangeOrderRawCode}`}
-                                                title="Has exchange - click to view exchange order"
-                                                className="ml-1"
-                                            >
-                                                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300">
-                                                    EXC
-                                                </span>
-                                            </a>
-                                        )}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        {formatOrderSource(
-                                            order.isPosOrder,
-                                            order.source,
-                                        )}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="line-clamp-2">
-                                            <h6>
-                                                {currencyFormatter(
-                                                    order.totalAmount,
-                                                )}
-                                            </h6>
-                                            {order.paymentStatus === 'paid' ? (
-                                                <div className="inline-flex items-center gap-1.5">
-                                                    <i className="fa-solid fa-circle-check text-green-500"></i>
-                                                    <span>Paid Online</span>
-                                                </div>
-                                            ) : (
-                                                <div>Cash On Delivery</div>
-                                            )}
+                                        <div className="mt-1 flex justify-between gap-3 border-t border-border pt-1 text-sm font-bold text-foreground">
+                                            <span>Total</span>
+                                            <span>{currencyFormatter(order.totalAmount)}</span>
+                                        </div>
+                                        <div className={`mt-1 text-[11px] font-semibold ${order.paymentStatus === 'paid' ? 'text-green-600' : 'text-amber-600'}`}>
+                                            {order.paymentStatus === 'paid' ? 'Paid' : 'Cash on delivery / Unpaid'}
                                         </div>
                                     </td>
-                                    <td className="px-0 py-0">
-                                        <div className="px-3 py-3">
+                                    <td className="px-3 !py-4">
+                                        <div>
                                             <SelectInput
                                                 name="delivery_status"
                                                 placeholder=""
@@ -1172,14 +1186,45 @@ const OrderPage: React.FC = () => {
                                             {renderLatestDeliveryUpdate(order)}
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 w-16">
+                                    <td className="px-3 !py-4">
                                         <SelectPartner order={order} />
+                                        {(order.tracking_number || order.courier_devlivery_status) && (
+                                            <div className="mt-1 text-[11px] leading-4 text-muted">
+                                                {order.tracking_number && <div>Tracking: {order.tracking_number}</div>}
+                                                {order.courier_devlivery_status && <div>Status: {order.courier_devlivery_status.replace(/[_-]/g, ' ')}</div>}
+                                            </div>
+                                        )}
                                     </td>
-                                    <td className="px-6 py-4 text-right text-sm font-medium">
-                                        <div className="flex flex-col items-end gap-1">
-                                            <div className="flex items-center gap-1">
+                                    <td className="px-3 !py-4 min-w-[115px]">
+                                        <div className="text-sm font-medium">
+                                            {order.agentName || 'Not assigned'}
+                                        </div>
+                                        <div className="mt-1 text-xs text-muted">
+                                            {order.agentName ? 'Order agent' : 'Needs assignment'}
+                                        </div>
+                                    </td>
+                                    <td className="px-3 !py-4 text-right text-sm font-medium">
+                                        <div className="flex items-start justify-end gap-1">
+                                            <a
+                                                title="Download Invoice"
+                                                href={route('admin.orders.downloadInvoice', { id: order.id })}
+                                                target="_blank"
+                                                className="p-1 text-theme-orange hover:text-orange-600"
+                                            >
+                                                <i className="fa-solid fa-file-arrow-down"></i>
+                                            </a>
+                                            {!!order.isPosOrder && (
+                                                <a
+                                                    title="Download Challan"
+                                                    href={route('admin.orders.downloadChallan', { id: order.id })}
+                                                    target="_blank"
+                                                    className="p-1 text-theme-orange hover:text-orange-600"
+                                                >
+                                                    <i className="fa-light fa-file-contract"></i>
+                                                </a>
+                                            )}
                                                 <button
-                                                    className="text-primary hover:text-primary/80 text-lg p-1"
+                                                    className="p-1 text-primary hover:text-primary/80"
                                                     title="View Order Details"
                                                     onClick={() =>
                                                         handleViewOrder(
@@ -1190,7 +1235,7 @@ const OrderPage: React.FC = () => {
                                                     <i className="fa-solid fa-eye"></i>
                                                 </button>
                                                 <button
-                                                    className="text-blue-500 hover:text-blue-700 text-lg p-1"
+                                                    className="p-1 text-blue-500 hover:text-blue-700"
                                                     title="Edit Order"
                                                     onClick={() =>
                                                         handleEditOrder(
@@ -1200,34 +1245,6 @@ const OrderPage: React.FC = () => {
                                                 >
                                                     <i className="fa-solid fa-pen-to-square"></i>
                                                 </button>
-                                            </div>
-                                            <div className="flex items-center gap-1">
-                                                <button
-                                                    className="text-red-500 hover:text-red-700 text-lg p-1"
-                                                    title="Check Courier Information"
-                                                    onClick={(e) =>
-                                                        handleFraudCheckClick(
-                                                            e,
-                                                            order.customerPhone,
-                                                        )
-                                                    }
-                                                >
-                                                    <i className="fa-solid fa-user-shield"></i>
-                                                </button>
-                                                <button
-                                                    className="text-orange-500 hover:text-orange-700 text-lg p-1"
-                                                    title="Delete Order"
-                                                    onClick={() => {
-                                                        // TODO: Implement delete functionality
-                                                        console.log(
-                                                            'Delete order:',
-                                                            order.id,
-                                                        );
-                                                    }}
-                                                >
-                                                    <i className="fa-solid fa-trash"></i>
-                                                </button>
-                                            </div>
                                         </div>
                                     </td>
                                 </tr>
@@ -1235,7 +1252,7 @@ const OrderPage: React.FC = () => {
                             {orders.length === 0 && (
                                 <tr>
                                     <td
-                                        colSpan={11}
+                                        colSpan={9}
                                         className="text-center py-4 text-muted"
                                     >
                                         No orders found.

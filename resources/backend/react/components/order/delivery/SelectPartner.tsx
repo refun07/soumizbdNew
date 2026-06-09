@@ -62,7 +62,7 @@ function formatStatusString(str:string) {
     .join(' ');
 }
   return (
-    <div className="flex items-center space-x-2 p-4 ">
+    <div className="flex items-center space-x-2">
       {(order.courier_partner && order.courier_partner!='') || orderSuccess ? (
         <div className="flex flex-col">
           {/* <span className="text-sm font-bold text-gray-300">{formatStatusString(orderStatus ?? '')}</span> */}

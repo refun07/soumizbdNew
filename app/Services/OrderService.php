@@ -22,13 +22,16 @@ class OrderService
     {
         $orders = Order::shopOrders()->with([
             'orderGroup.shippingAddress',
+            'orderItems.productVariation.product',
             'user',
             'agent',
             'latestDeliveryStatusUpdate.creator',
             'latestDeliveryStatusUpdate.user',
             'exchangeAsOriginal.exchangeOrder',
             'originalOrder',
-        ])->latest();
+        ])->withCount('orderItems')
+            ->withSum('orderItems as total_item_quantity', 'qty')
+            ->latest();
 
         if (auth()->user()->user_type === 'staff' && !auth()->user()->can('view_orders') && !auth()->user()->can('manage_orders')) {
             $orders->where('agent_id', auth()->id());

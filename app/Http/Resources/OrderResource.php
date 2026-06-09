@@ -72,15 +72,26 @@ class OrderResource extends JsonResource
         }
         if (Route::currentRouteName() == 'admin.allorders') {
             $orderGroup = $this->orderGroup;
+            $firstOrderItem = $this->relationLoaded('orderItems') ? $this->orderItems->first() : null;
+            $productVariation = $firstOrderItem?->productVariation;
+            $product = $productVariation?->product;
+            $productImage = $productVariation?->image ?: $product?->thumbnail_image;
 
-            $additionalData['courier_partner'] = $orderGroup->courier_partner ?? '';
-            $additionalData['courier_devlivery_status'] = $orderGroup->delivery_status ?? '';
-            $additionalData['tracking_number'] = $orderGroup->tracking_number ?? '';
+            $additionalData['courier_partner'] = $orderGroup?->courier_partner ?: ($this->courier_name ?? '');
+            $additionalData['courier_devlivery_status'] = $orderGroup?->delivery_status ?? '';
+            $additionalData['tracking_number'] = $orderGroup?->tracking_number ?: ($this->tracking_number ?? '');
             $additionalData['customerName'] = $orderGroup?->name ?? $this->user?->name;
             $additionalData['customerPhone'] = $orderGroup?->phone ?? $this->user?->phone;
-            $additionalData['address'] = $orderGroup->shipping_address ?? '';
-            $additionalData['shipping_address'] = $orderGroup->shipping_address ?? '';
-            $additionalData['orderCount'] = $this->orderItems()->count();
+            $additionalData['address'] = $orderGroup?->shipping_address ?? '';
+            $additionalData['shipping_address'] = $orderGroup?->shipping_address ?? '';
+            $additionalData['orderCount'] = (int) ($this->order_items_count ?? $this->orderItems->count());
+            $additionalData['totalItemQuantity'] = (int) ($this->total_item_quantity ?? $this->orderItems->sum('qty'));
+            $additionalData['firstItem'] = $firstOrderItem ? [
+                'name' => $product?->collectTranslation('name') ?? $product?->name ?? 'Product unavailable',
+                'variationCode' => $productVariation?->code,
+                'quantity' => (int) $firstOrderItem->qty,
+                'image' => $productImage ? uploadedAsset($productImage) : null,
+            ] : null;
             $additionalData['orderPrefix'] = getSetting('orderCodePrefix');
             $additionalData['agentId'] = $this->agent_id;
             $additionalData['agentName'] = $this->agent?->name;
