@@ -527,6 +527,56 @@
     </div>
 </div>
 
+{{-- featured products --}}
+<div class="ac !mt-0">
+    <h2 class="ac-header">
+        <button type="button" class="ac-trigger !px-8 !rounded-none !bg-background !text-foreground">
+            <span class="">{{ translate('Featured Products') }}</span>
+        </button>
+    </h2>
+    <div class="ac-panel">
+        <div class="pt-0 pb-7 px-3 md:px-6 xl:px-10">
+            <form action="" class="space-y-3 homepage-form" method="POST" enctype="multipart/form-data">
+                @csrf
+                @php
+                    $featuredProducts =
+                        getSetting('themeOneTopProducts') != null
+                            ? collect(json_decode(getSetting('themeOneTopProducts')))
+                            : collect();
+                @endphp
+                <div class="pt-2">
+
+                    <input type="hidden" name="types[]" value="showThemeOneTopProducts">
+                    <div class="flex items-center justify-between mb-5">
+                        <p>{{ translate('Show/Hide Featured Products') }}</p>
+                        <x-backend.inputs.checkbox toggler="true" name="showThemeOneTopProducts" value="1"
+                            isChecked="{{ getSetting('showThemeOneTopProducts') ?? false }}" />
+                    </div>
+
+
+                    <input type="hidden" name="types[]" value="themeOneTopProducts">
+                    <x-backend.inputs.select :labelInline="false" label="Featured Products" name="themeOneTopProducts[]"
+                        multiple data-selection-css-class="multi-select2"
+                        data-placeholder="{{ translate('Select products') }}" :isRequired="false">
+
+                        @foreach ($products as $product)
+                            <x-backend.inputs.select-option
+                                name="{{ $product->collectTranslation('name', $langKey) }}"
+                                value="{{ $product->id }}"
+                                selected="{{ $featuredProducts->contains($product->id) ? $product->id : 0 }}" />
+                        @endforeach
+                    </x-backend.inputs.select>
+
+                    <div class="flex justify-end pt-2">
+                        <x-backend.inputs.button type="submit" buttonText="{{ translate('Save Changes') }}"
+                            class="submit-btn mt-3" />
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 {{-- secondary banner --}}
 <div class="ac !mt-0 ">
     <h2 class="ac-header">
@@ -684,56 +734,6 @@
                 <div class="flex justify-end pt-2">
                     <x-backend.inputs.button type="submit" buttonText="{{ translate('Save Changes') }}"
                         class="submit-btn" />
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-{{-- top products --}}
-<div class="ac !mt-0">
-    <h2 class="ac-header">
-        <button type="button" class="ac-trigger !px-8 !rounded-none !bg-background !text-foreground">
-            <span class="">{{ translate('Top Products') }}</span>
-        </button>
-    </h2>
-    <div class="ac-panel">
-        <div class="pt-0 pb-7 px-3 md:px-6 xl:px-10">
-            <form action="" class="space-y-3 homepage-form" method="POST" enctype="multipart/form-data">
-                @csrf
-                @php
-                    $featuredProducts =
-                        getSetting('themeOneTopProducts') != null
-                            ? collect(json_decode(getSetting('themeOneTopProducts')))
-                            : collect();
-                @endphp
-                <div class="pt-2">
-
-                    <input type="hidden" name="types[]" value="showThemeOneTopProducts">
-                    <div class="flex items-center justify-between mb-5">
-                        <p>{{ translate('Show/Hide Top Products') }}</p>
-                        <x-backend.inputs.checkbox toggler="true" name="showThemeOneTopProducts" value="1"
-                            isChecked="{{ getSetting('showThemeOneTopProducts') ?? false }}" />
-                    </div>
-
-
-                    <input type="hidden" name="types[]" value="themeOneTopProducts">
-                    <x-backend.inputs.select :labelInline="false" label="Featured Products" name="themeOneTopProducts[]"
-                        multiple data-selection-css-class="multi-select2"
-                        data-placeholder="{{ translate('Select products') }}" :isRequired="false">
-
-                        @foreach ($products as $product)
-                            <x-backend.inputs.select-option
-                                name="{{ $product->collectTranslation('name', $langKey) }}"
-                                value="{{ $product->id }}"
-                                selected="{{ $featuredProducts->contains($product->id) ? $product->id : 0 }}" />
-                        @endforeach
-                    </x-backend.inputs.select>
-
-                    <div class="flex justify-end pt-2">
-                        <x-backend.inputs.button type="submit" buttonText="{{ translate('Save Changes') }}"
-                            class="submit-btn mt-3" />
-                    </div>
                 </div>
             </form>
         </div>

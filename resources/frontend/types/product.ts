@@ -1,4 +1,4 @@
-import { ICategory } from '.';
+import { ICategory, ICategoryShort } from '.';
 import { IBrandShort } from './brand';
 import { IShop } from './shop';
 import { IUser } from './state';
@@ -91,6 +91,7 @@ export interface IProductShort {
     stockQty: number;
     hasVariation: number;
     badges: IBadge[];
+    categories?: ICategoryShort[];
     tags: { id: number; name: string }[];
     rating: {
         average: number;

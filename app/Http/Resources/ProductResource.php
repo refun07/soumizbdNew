@@ -102,6 +102,7 @@ class ProductResource extends JsonResource
             'shop_id'       => $this->shop_id,
             'shipping_class_id' => $this->shipping_class_id,
             'badges'        => $badgesEnabled ? ProductBadgeResource::collection($this->productBadges) : [],
+            'categories'    => CategoryResource::collection($this->whenLoaded('categories')),
             'shop'          => $this->shopInfo ? [
                 'id' => $this->shopInfo->id,
                 'name' => $this->shopInfo->name,

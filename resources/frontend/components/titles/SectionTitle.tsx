@@ -128,7 +128,7 @@ const SectionTitle = ({
                         />
                     ) : null}
                 </div>
-                {connector && <hr className="border-b border-primary-14" />}
+                {connector && <hr className="border-b border-[#EDEDED]" />}
 
                 {/* for small device */}
                 {countTo ? (

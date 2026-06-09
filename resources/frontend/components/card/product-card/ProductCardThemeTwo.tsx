@@ -28,7 +28,10 @@ const ProductCardThemeTwo = (props: Props) => {
     } = useProductActions(props.product);
     const priceChanged = product.basePrice !== product.discountedBasePrice;
     const categoryLabel =
-        product.tags?.[0]?.name || product.shop?.name || translate('Womens Care');
+        product.categories?.[0]?.name ||
+        product.tags?.[0]?.name ||
+        product.shop?.name ||
+        translate('Womens Care');
     const cartDisabled =
         loading.gettingProduct ||
         loading.addingToCart ||

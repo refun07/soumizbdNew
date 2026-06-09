@@ -340,6 +340,8 @@ const OnSaleCountdown = ({ endsAt }: { endsAt?: string | null }) => {
 
 const HomeThemeOne = () => {
     const dispatch = useAppDispatch();
+    const [activeFeaturedProductCategory, setActiveFeaturedProductCategory] =
+        useState<number | 'all'>('all');
     const { data: banner, isLoading: isBannerLoading } = useGetBannerQuery();
     const promoCardsRes = useGetPromoCardsQuery();
     const onSaleProductRes = useGetOnSaleProductsQuery();
@@ -371,6 +373,47 @@ const HomeThemeOne = () => {
     const shouldShowOnSaleProducts =
         onSaleProductRes.data?.showThemeOneOnSaleProducts === '1' &&
         onSaleProducts.length > 0;
+    const featuredProducts = topProductRes.data?.products ?? [];
+    const shouldShowFeaturedProducts =
+        topProductRes.data?.showThemeOneTopProducts === '1' &&
+        featuredProducts.length > 0;
+    const featuredProductCategoryTabs = featuredProducts.reduce<
+        { id: number; name: string }[]
+    >((categories, product) => {
+        product.categories?.forEach((category) => {
+            if (!categories.some((item) => item.id === category.id)) {
+                categories.push({
+                    id: category.id,
+                    name: category.name,
+                });
+            }
+        });
+
+        return categories;
+    }, []);
+    const visibleFeaturedProductCategoryTabs =
+        featuredProductCategoryTabs.slice(0, 4);
+    const visibleFeaturedProducts =
+        activeFeaturedProductCategory === 'all'
+            ? featuredProducts
+            : featuredProducts.filter((product) =>
+                  product.categories?.some(
+                      (category) =>
+                          category.id === activeFeaturedProductCategory,
+                  ),
+              );
+
+    useEffect(() => {
+        if (activeFeaturedProductCategory === 'all') return;
+
+        const activeCategoryStillExists = visibleFeaturedProductCategoryTabs.some(
+            (category) => category.id === activeFeaturedProductCategory,
+        );
+
+        if (!activeCategoryStillExists) {
+            setActiveFeaturedProductCategory('all');
+        }
+    }, [activeFeaturedProductCategory, visibleFeaturedProductCategoryTabs]);
 
     return (
         <div className="space-y-10 lg:space-y-16 pb-5">
@@ -963,6 +1006,114 @@ const HomeThemeOne = () => {
             ) : null}
             {/* end::featured-category */}
 
+            {/* start::featured-products */}
+            {topProductRes.isLoading ? (
+                <ProductSectionSkeleton withCategoryImage />
+            ) : shouldShowFeaturedProducts ? (
+                <section
+                    className="featured-products-section"
+                    id="featured-products"
+                >
+                    <motion.div
+                        variants={containerAnimation}
+                        initial="initial"
+                        whileInView="whileInView"
+                        viewport={{ once: true }}
+                        className="container"
+                    >
+                        <div className="relative mb-10 flex items-start justify-between gap-3 max-lg:flex-col">
+                            <div className="relative z-[1] grow sm:pr-4">
+                                <motion.p
+                                    variants={itemAnimation}
+                                    className="ek-headline"
+                                >
+                                    {translate('Popular')}
+                                </motion.p>
+
+                                <div className="flex items-center max-sm:justify-between sm:gap-10">
+                                    <motion.h2
+                                        variants={itemAnimation}
+                                        className="ek-h2 pb-4 font-light capitalize"
+                                    >
+                                        <span className="border-b-[5px] border-[#F2C488] pb-3.5 font-bold text-[#B3052A]">
+                                            {translate('Featured')}
+                                        </span>{' '}
+                                        {translate('Products')}
+                                    </motion.h2>
+                                </div>
+
+                                <hr className="border-b border-[#EDEDED]" />
+                            </div>
+
+                            {featuredProductCategoryTabs.length > 0 ? (
+                                <motion.div
+                                    variants={itemAnimation}
+                                    className="relative z-[1] flex h-[42px] max-w-full shrink-0 items-center gap-6 overflow-x-auto pb-1 max-lg:w-full lg:mt-16 lg:max-w-[52%] lg:justify-end"
+                                >
+                                        <button
+                                            type="button"
+                                            className={cn(
+                                                'shrink-0 whitespace-nowrap text-xs font-medium transition md:text-sm',
+                                                activeFeaturedProductCategory ===
+                                                    'all'
+                                                    ? 'text-[#B3052A]'
+                                                    : 'text-foreground hover:text-[#B3052A]',
+                                            )}
+                                            onClick={() =>
+                                                setActiveFeaturedProductCategory(
+                                                    'all',
+                                                )}
+                                            aria-pressed={
+                                                activeFeaturedProductCategory ===
+                                                'all'
+                                            }
+                                        >
+                                            {translate('All Products')}
+                                        </button>
+                                        {visibleFeaturedProductCategoryTabs.map(
+                                            (category) => (
+                                                <button
+                                                    type="button"
+                                                    key={category.id}
+                                                    className={cn(
+                                                        'shrink-0 whitespace-nowrap text-xs font-medium transition md:text-sm',
+                                                        activeFeaturedProductCategory ===
+                                                            category.id
+                                                            ? 'text-[#B3052A]'
+                                                            : 'text-foreground hover:text-[#B3052A]',
+                                                    )}
+                                                    onClick={() =>
+                                                        setActiveFeaturedProductCategory(
+                                                            category.id,
+                                                        )
+                                                    }
+                                                    aria-pressed={
+                                                        activeFeaturedProductCategory ===
+                                                        category.id
+                                                    }
+                                                >
+                                                    {category.name}
+                                                </button>
+                                            ),
+                                        )}
+                                </motion.div>
+                            ) : null}
+                        </div>
+
+                        <ProductsSlider key={activeFeaturedProductCategory}>
+                            {visibleFeaturedProducts.map((product) => (
+                                <SwiperSlide key={product.id}>
+                                    <motion.div variants={itemAnimation}>
+                                        <ProductCard product={product} />
+                                    </motion.div>
+                                </SwiperSlide>
+                            ))}
+                        </ProductsSlider>
+                    </motion.div>
+                </section>
+            ) : null}
+            {/* end::featured-products */}
+
             {bannerSliderRes.data?.[0]?.showThemeOneSliderSection == '1' && (
                 <motion.section
                     variants={{
@@ -1032,39 +1183,6 @@ const HomeThemeOne = () => {
                     </ThemeSlider>
                 </motion.section>
             )}
-
-            {/* start::top-products */}
-            {topProductRes.isLoading ? (
-                <ProductSectionSkeleton withCategoryImage />
-            ) : topProductRes.data?.showThemeOneTopProducts === '1' ? (
-                <section className="top-products-section" id="top-products">
-                    <motion.div
-                        variants={containerAnimation}
-                        initial="initial"
-                        whileInView="whileInView"
-                        viewport={{ once: true }}
-                        className="container"
-                    >
-                        <SectionTitle
-                            animated
-                            title={translate('[Top] Products')}
-                            subTitle={translate('Popular')}
-                            link="/products"
-                        />
-
-                        <ProductsSlider>
-                            {topProductRes.data.products.map((product) => (
-                                <SwiperSlide key={product.id}>
-                                    <motion.div variants={itemAnimation}>
-                                        <ProductCard product={product} />
-                                    </motion.div>
-                                </SwiperSlide>
-                            ))}
-                        </ProductsSlider>
-                    </motion.div>
-                </section>
-            ) : null}
-            {/* start::top-products */}
 
             {/* end::banner */}
             {banner?.showThemeOneSecondaryBanner === '1' && (

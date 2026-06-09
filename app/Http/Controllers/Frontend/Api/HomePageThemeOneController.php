@@ -204,13 +204,20 @@ class HomePageThemeOneController extends Controller
     # get top products
     public function topProducts(Request $request)
     {
-        $topProducts = collect();
+        $topProducts = [];
 
         if (getSetting('themeOneTopProducts') != null) {
-            $topProducts = json_decode(getSetting('themeOneTopProducts'), true);
+            $topProducts = json_decode(getSetting('themeOneTopProducts'), true) ?: [];
         }
 
-        $products = Product::fromPublishedShops()->isPublished()->hideOnEcom()->whereIn('id', $topProducts)->get();
+        $products = Product::fromPublishedShops()
+            ->isPublished()
+            ->hideOnEcom()
+            ->with('categories')
+            ->whereIn('id', $topProducts)
+            ->get()
+            ->sortBy(fn ($product) => array_search($product->id, $topProducts))
+            ->values();
         return [
             'success'   => true,
             'status'    => 200,
