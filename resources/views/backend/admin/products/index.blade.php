@@ -389,7 +389,7 @@
                         <div class="theme-input-wrapper">
                             <input type="text" id="product_slug" name="slug" required
                                 class="theme-input" placeholder="{{ translate('product-slug') }}">
-                            <p class="text-xs text-gray-500 mt-1">{{ translate('Auto-generated from name, but you can edit it') }}</p>
+                            <p class="text-xs text-muted mt-1">{{ translate('Auto-generated from name, but you can edit it') }}</p>
                         </div>
                     </div>
 
@@ -423,7 +423,7 @@
                         <div class="theme-input-wrapper">
                             <input type="number" id="product_stock" name="stock" 
                                 class="theme-input" placeholder="0">
-                            <p id="stock_help" class="text-xs text-gray-500 mt-1"></p>
+                            <p id="stock_help" class="text-xs text-muted mt-1"></p>
                         </div>
                     </div>
                 </form>
@@ -590,13 +590,13 @@
             if (useInventory) {
                 // Inventory enabled - stock is read-only (sum across warehouses)
                 stockInput.readOnly = true;
-                stockInput.classList.add('bg-gray-100');
+                stockInput.classList.add('bg-background-hover', 'text-muted', 'cursor-not-allowed');
                 stockLabel.innerHTML = '{{ translate("Stock") }}';
                 stockHelp.textContent = '{{ translate("Read-only: Calculated from inventory across all warehouses") }}';
             } else {
                 // Inventory disabled - stock is editable
                 stockInput.readOnly = false;
-                stockInput.classList.remove('bg-gray-100');
+                stockInput.classList.remove('bg-background-hover', 'text-muted', 'cursor-not-allowed');
                 stockLabel.innerHTML = '{{ translate("Stock") }} <span class="text-red-500">*</span>';
                 
                 var allowBackorder = '{{ getSetting("allowBackorder") }}' === '1';
