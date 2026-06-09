@@ -330,6 +330,88 @@ const HeaderConfigurationApp: React.FC<HeaderConfigurationAppProps> = ({
 
                         {headerId === 'header-two' && (
                             <>
+                                {/* Top Bar Section */}
+                                <div className="bg-[#f8f9fa] rounded-lg p-4 mb-6">
+                                    <h3 className="text-sm font-semibold text-[#1a1a2e]">Top Bar</h3>
+                                </div>
+
+                                <div className="space-y-6 mb-8">
+                                    <div className="flex items-center">
+                                        <label className="w-56 text-xs font-medium text-[#6b7280] uppercase tracking-wide">
+                                            Show/Hide Top Bar
+                                        </label>
+                                        <Toggle enabled={showTopBar} onChange={setShowTopBar} />
+                                    </div>
+
+                                    <div className="flex items-center">
+                                        <label className="w-56 text-xs font-medium text-[#6b7280] uppercase tracking-wide">
+                                            Hotline (Full Line)
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={hotline}
+                                            onChange={(e) => setHotline(e.target.value)}
+                                            placeholder="Our Hotline +88 01961 177726"
+                                            className="flex-1 max-w-2xl px-4 py-2.5 border border-gray-200 rounded-md text-sm text-gray-600 focus:outline-none focus:border-gray-300"
+                                        />
+                                    </div>
+
+                                    <div className="flex items-center">
+                                        <label className="w-56 text-xs font-medium text-[#6b7280] uppercase tracking-wide">
+                                            Top Bar Promo Text
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={promoText}
+                                            onChange={(e) => setPromoText(e.target.value)}
+                                            className="flex-1 max-w-2xl px-4 py-2.5 border border-gray-200 rounded-md text-sm text-gray-600 focus:outline-none focus:border-gray-300"
+                                        />
+                                    </div>
+
+                                    <div className="flex items-center">
+                                        <label className="w-56 text-xs font-medium text-[#6b7280] uppercase tracking-wide">
+                                            Promo Text Icon
+                                        </label>
+                                        <div>
+                                            <div className="flex items-center">
+                                                <label className="px-6 py-2.5 bg-[#4f5bd5] text-white text-sm font-medium rounded-l-md hover:bg-[#4450c0] cursor-pointer">
+                                                    Browse
+                                                    <input
+                                                        type="file"
+                                                        accept=".png,.svg,.jpg,.jpeg"
+                                                        onChange={handlePromoTextIconUpload}
+                                                        className="hidden"
+                                                    />
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={promoTextIcon}
+                                                    placeholder="Select File (png or svg)"
+                                                    className="w-64 px-4 py-2.5 border border-gray-200 border-l-0 rounded-r-md text-sm text-gray-400 focus:outline-none"
+                                                    readOnly
+                                                />
+                                            </div>
+                                            <p className="text-xs text-gray-500 mt-1">Recommended: 32x32 pixels</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center">
+                                        <ColorPicker
+                                            value={backgroundColor}
+                                            onChange={setBackgroundColor}
+                                            label="Top Bar Background Color"
+                                        />
+                                    </div>
+
+                                    <div className="flex items-center">
+                                        <ColorPicker
+                                            value={textColor}
+                                            onChange={setTextColor}
+                                            label="Top Bar Text Color"
+                                        />
+                                    </div>
+                                </div>
+
                                 {/* Header Two Section */}
                                 <div className="bg-[#f8f9fa] rounded-lg p-4 mb-6">
                                     <h3 className="text-sm font-semibold text-[#1a1a2e]">Header Two Configuration</h3>
@@ -373,23 +455,6 @@ const HeaderConfigurationApp: React.FC<HeaderConfigurationAppProps> = ({
                                         />
                                     </div>
 
-                                    {/* Header Background Color */}
-                                    <div className="flex items-center">
-                                        <ColorPicker
-                                            value={backgroundColor}
-                                            onChange={setBackgroundColor}
-                                            label="Header Background Color"
-                                        />
-                                    </div>
-
-                                    {/* Header Text Color */}
-                                    <div className="flex items-center">
-                                        <ColorPicker
-                                            value={textColor}
-                                            onChange={setTextColor}
-                                            label="Header Text Color"
-                                        />
-                                    </div>
                                 </div>
                             </>
                         )}

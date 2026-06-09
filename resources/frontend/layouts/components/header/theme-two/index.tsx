@@ -16,6 +16,20 @@ const HeaderThemeTwo = () => {
     const dispatch = useAppDispatch();
     const showCustomerMenu = window.config.customerMenu?.enabled ?? true;
     const actionButton = window.config.headerNavbarConfig?.action_button;
+    const topbarConfig = window.config.headerTopbarConfig;
+    const showTopbar = topbarConfig?.enabled ?? true;
+    const topbarHotline =
+        topbarConfig?.hotline_number || window.config.topbarHotlineLabel;
+    const topbarPromoText =
+        topbarConfig?.promo_text || window.config.topbarPromoText;
+    const topbarPhone =
+        topbarConfig?.hotline ||
+        topbarHotline?.replace(/\D/g, '') ||
+        window.config.topbarHotline;
+    const topbarStyle = {
+        backgroundColor: topbarConfig?.bg_color || '#0b0b0b',
+        color: topbarConfig?.text_color || '#ffffff',
+    };
     const actionButtonName = actionButton?.name?.trim() || '';
     const actionButtonLink = actionButton?.link?.trim() || '#';
     const showActionButton = Boolean(actionButton?.enabled && actionButtonName);
@@ -33,24 +47,32 @@ const HeaderThemeTwo = () => {
 
     return (
         <header className="sticky top-0 z-[3] bg-white shadow-sm">
-            <div className="bg-[#0b0b0b] text-white">
+            {showTopbar && <div style={topbarStyle}>
                 <div className="container grid min-h-[46px] grid-cols-2 items-center gap-3 text-[13px] font-medium md:grid-cols-3 md:text-[15px]">
-                    <div className="flex min-w-0 items-center gap-2 text-white">
+                    <a href={`tel:${topbarPhone}`} className="flex min-w-0 items-center gap-2 text-inherit">
                         <FaPhoneVolume className="shrink-0 text-[#ff8200]" />
-                        <span>{window.config.topbarHotlineLabel}</span>
-                    </div>
-                    <p className="hidden items-center justify-center gap-2 text-center text-white md:flex">
-                        <FaTag className="shrink-0 text-[#b3052a]" />
-                        {window.config.topbarPromoText}
+                        <span>{topbarHotline}</span>
+                    </a>
+                    <p className="hidden items-center justify-center gap-2 text-center text-inherit md:flex">
+                        {topbarConfig?.promo_text_icon ? (
+                            <img
+                                src={`/${topbarConfig.promo_text_icon}`}
+                                alt=""
+                                className="h-4 w-4 shrink-0 object-contain"
+                            />
+                        ) : (
+                            <FaTag className="shrink-0 text-[#b3052a]" />
+                        )}
+                        {topbarPromoText}
                     </p>
                     <Link
                         to="/track-order"
-                        className="justify-self-end text-white transition hover:text-[#ff8200]"
+                        className="justify-self-end text-inherit transition hover:text-[#ff8200]"
                     >
                         Track Order
                     </Link>
                 </div>
-            </div>
+            </div>}
             <div
                 className="flex h-[68px] items-center justify-center bg-white text-[#0f0f0f] md:h-[78px] xl:h-[86px]"
                 ref={navbarEl}
