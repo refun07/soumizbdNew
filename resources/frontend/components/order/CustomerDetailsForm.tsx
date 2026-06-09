@@ -51,7 +51,7 @@ const CustomerDetailsForm = () => {
             <div className="p-4 sm:p-5 grid sm:grid-cols-2 gap-3">
                 <InputGroup>
                     <Label className="!mb-1.5 !normal-case font-semibold text-slate-800">
-                        {translate('name')}
+                        {translate('Name')}
                         <span className="text-red-400 text-xs ml-1">
                             {translate('*')}
                         </span>
@@ -68,7 +68,7 @@ const CustomerDetailsForm = () => {
 
                 <InputGroup>
                     <Label className="!mb-1.5 !normal-case font-semibold text-slate-800">
-                        {translate('email')}
+                        {translate('Email')}
                     </Label>
                     <Input
                         name="email"
@@ -82,7 +82,7 @@ const CustomerDetailsForm = () => {
 
                 <InputGroup>
                     <Label className="!mb-1.5 !normal-case font-semibold text-slate-800">
-                        {translate('phone')}
+                        {translate('Phone')}
                         <span className="text-red-400 text-xs ml-1">
                             {translate('*')}
                         </span>

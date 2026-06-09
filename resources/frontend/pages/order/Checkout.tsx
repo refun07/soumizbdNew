@@ -9,7 +9,7 @@ import { object, string } from 'yup';
 import { sendOTP } from '../../../backend/react/utils/actions';
 import Breadcrumb from '../../components/Breadcrumb';
 import Button from '../../components/buttons/Button';
-import ProductCardWide from '../../components/card/ProductCardWide';
+import Image from '../../components/Image';
 import Input from '../../components/inputs/Input';
 import InputGroup from '../../components/inputs/InputGroup';
 import Label from '../../components/inputs/Label';
@@ -641,8 +641,8 @@ const Checkout = () => {
                 ]}
             />
 
-            <div className="container no-style grid lg:grid-cols-3 mb-12">
-                <div className="lg:col-span-2">
+            <div className="container no-style grid lg:grid-cols-5 mb-12">
+                <div className="lg:col-span-3">
                     <div className="bg-white rounded-[4px] px-3 pb-3 sm:px-5 sm:pb-5 md:px-7 md:pb-7">
                         <CustomerDetailsForm />
 
@@ -663,7 +663,7 @@ const Checkout = () => {
                                     <PaymentMethodForm />
                                 </div>
 
-                                {getPassword ? (
+                                {getPassword && (
                                     <div className="mt-4">
                                         <InputGroup>
                                             <Label>
@@ -681,21 +681,6 @@ const Checkout = () => {
                                                 }}
                                             />
                                         </InputGroup>
-                                    </div>
-                                ) : (
-                                    <div className="my-3">
-                                        <Button
-                                            size="lg"
-                                            onClick={() => {
-                                                setGetPassword(true);
-                                            }}
-                                            variant="outline"
-                                            arrow={false}
-                                        >
-                                            {translate(
-                                                ' Want To Create Account',
-                                            )}
-                                        </Button>
                                     </div>
                                 )}
                             </>
@@ -745,13 +730,38 @@ const Checkout = () => {
                     </div>
                 </div>
 
-                <div>
+                <div className="lg:col-span-2">
                     <div className="bg-white rounded-card overflow-hidden">
-                        <h3 className="py-3 px-4 sm:px-5 md:px-8 bg-primary text-white">
-                            {translate('Order Summary')}
-                        </h3>
+                        <div className="flex items-center justify-between gap-3 bg-primary py-3 px-4 text-white sm:px-5 md:px-8">
+                            <h3>{translate('Order Summary')}</h3>
+                            {!getPassword && (
+                                <button
+                                    type="button"
+                                    className="text-right text-xs font-semibold uppercase text-white/90 underline-offset-4 hover:text-white hover:underline sm:text-sm"
+                                    onClick={() => {
+                                        setGetPassword(true);
+                                    }}
+                                >
+                                    {translate('Want To Create Account')}
+                                </button>
+                            )}
+                        </div>
 
-                        <div className="">
+                        <div>
+                            <div className="grid grid-cols-[minmax(0,2fr)_minmax(64px,.75fr)_minmax(92px,1fr)_minmax(76px,.85fr)_36px] items-center gap-2 border-b border-slate-200 bg-slate-50 px-3 py-2.5 text-[10px] font-bold uppercase text-slate-600 sm:px-4 sm:text-[11px]">
+                                <span>{translate('Product')}</span>
+                                <span>{translate('Price')}</span>
+                                <span className="text-center">
+                                    {translate('Quantity')}
+                                </span>
+                                <span className="text-right">
+                                    {translate('Subtotal')}
+                                </span>
+                                <span className="text-center">
+                                    {translate('Clear')}
+                                </span>
+                            </div>
+
                             {Object.entries(selectedShopProducts).map(
                                 ([shopName, carts]) => (
                                     <div key={shopName}>
@@ -772,102 +782,101 @@ const Checkout = () => {
 
                                         {carts.map((item) => (
                                             <div
-                                                className="px-2 sm:px-4 border-b border-primary-14"
+                                                className="grid grid-cols-[minmax(0,2fr)_minmax(64px,.75fr)_minmax(92px,1fr)_minmax(76px,.85fr)_36px] items-center gap-2 border-b border-slate-200 px-3 py-3 text-xs sm:px-4 sm:text-sm"
                                                 key={item.id}
                                             >
-                                                {window.config.generalSettings
-                                                    .skipCart ? (
-                                                    // Skip cart mode: show editable cart items
-                                                    <div className="flex items-center gap-2 py-2">
-                                                        <div className="grow">
-                                                            <ProductCardWide
-                                                                cartProduct={
-                                                                    item
-                                                                }
-                                                                size="sm"
-                                                                counter={false}
-                                                                deleteBtn={
-                                                                    false
-                                                                }
-                                                                onlyPrice={
-                                                                    false
-                                                                }
-                                                            />
-                                                        </div>
-                                                        <div className="flex items-center gap-2">
-                                                            {/* Quantity Counter */}
-                                                            <div className="flex items-center border border-gray-200 rounded">
-                                                                <button
-                                                                    type="button"
-                                                                    className="px-2 py-1 text-gray-600 hover:bg-gray-100 disabled:opacity-50"
-                                                                    onClick={() =>
-                                                                        handleCartQuantityChange(
-                                                                            item,
-                                                                            'decrease',
-                                                                        )
-                                                                    }
-                                                                    disabled={
-                                                                        item.qty <=
-                                                                        1
-                                                                    }
-                                                                >
-                                                                    -
-                                                                </button>
-                                                                <span className="px-2 text-sm min-w-[24px] text-center">
-                                                                    {item.qty}
-                                                                </span>
-                                                                <button
-                                                                    type="button"
-                                                                    className="px-2 py-1 text-gray-600 hover:bg-gray-100 disabled:opacity-50"
-                                                                    onClick={() =>
-                                                                        handleCartQuantityChange(
-                                                                            item,
-                                                                            'increase',
-                                                                        )
-                                                                    }
-                                                                    disabled={
-                                                                        !window
-                                                                            .config
-                                                                            .generalSettings
-                                                                            .allowBackorder &&
-                                                                        item.qty >=
-                                                                            item
-                                                                                .product
-                                                                                .stockQty
-                                                                    }
-                                                                >
-                                                                    +
-                                                                </button>
-                                                            </div>
-                                                            {/* Delete Button */}
-                                                            <button
-                                                                type="button"
-                                                                className="p-2 text-gray-400 hover:text-red-500 transition-colors"
-                                                                onClick={() =>
-                                                                    handleRemoveFromCart(
-                                                                        item,
-                                                                    )
-                                                                }
-                                                                title={translate(
-                                                                    'Remove',
-                                                                )}
-                                                            >
-                                                                <FaTrash
-                                                                    size={14}
-                                                                />
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                ) : (
-                                                    // Normal mode: read-only cart items
-                                                    <ProductCardWide
-                                                        cartProduct={item}
-                                                        size="sm"
-                                                        counter={false}
-                                                        deleteBtn={false}
-                                                        onlyPrice={true}
+                                                <Link
+                                                    to={`/products/${item.product.slug}`}
+                                                    className="flex min-w-0 items-center gap-2 font-medium text-slate-800 hover:text-primary"
+                                                >
+                                                    <Image
+                                                        src={
+                                                            item.variation
+                                                                ?.image ||
+                                                            item.product
+                                                                .thumbnailImg
+                                                        }
+                                                        alt={item.product.name}
+                                                        className="h-10 w-10 shrink-0 rounded-[3px] border border-slate-200 object-cover sm:h-12 sm:w-12"
                                                     />
-                                                )}
+                                                    <span className="line-clamp-2">
+                                                        {item.product.name}
+                                                    </span>
+                                                </Link>
+
+                                                <span className="font-semibold text-primary">
+                                                    {currencyFormatter(
+                                                        item.variation
+                                                            .discountedBasePrice,
+                                                    )}
+                                                </span>
+
+                                                <div className="flex items-center justify-center">
+                                                    <div className="inline-flex items-center overflow-hidden rounded-[3px] border border-slate-200">
+                                                        <button
+                                                            type="button"
+                                                            className="h-7 w-7 bg-slate-50 text-base text-slate-600 hover:bg-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-40 sm:h-8 sm:w-8 sm:text-lg"
+                                                            onClick={() =>
+                                                                handleCartQuantityChange(
+                                                                    item,
+                                                                    'decrease',
+                                                                )
+                                                            }
+                                                            disabled={
+                                                                item.qty <= 1
+                                                            }
+                                                        >
+                                                            -
+                                                        </button>
+                                                        <span className="min-w-7 px-0.5 text-center font-semibold sm:min-w-9 sm:px-1">
+                                                            {item.qty}
+                                                        </span>
+                                                        <button
+                                                            type="button"
+                                                            className="h-7 w-7 bg-slate-50 text-base text-slate-600 hover:bg-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-40 sm:h-8 sm:w-8 sm:text-lg"
+                                                            onClick={() =>
+                                                                handleCartQuantityChange(
+                                                                    item,
+                                                                    'increase',
+                                                                )
+                                                            }
+                                                            disabled={
+                                                                !window.config
+                                                                    .generalSettings
+                                                                    .allowBackorder &&
+                                                                item.qty >=
+                                                                    item.product
+                                                                        .stockQty
+                                                            }
+                                                        >
+                                                            +
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                <span className="text-right font-bold text-slate-800">
+                                                    {currencyFormatter(
+                                                        item.variation
+                                                            .discountedBasePrice *
+                                                            item.qty,
+                                                    )}
+                                                </span>
+
+                                                <button
+                                                    type="button"
+                                                    className="mx-auto inline-flex h-8 w-8 items-center justify-center rounded-[3px] text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500"
+                                                    onClick={() =>
+                                                        handleRemoveFromCart(
+                                                            item,
+                                                        )
+                                                    }
+                                                    title={translate('Clear')}
+                                                    aria-label={translate(
+                                                        'Clear',
+                                                    )}
+                                                >
+                                                    <FaTrash size={13} />
+                                                </button>
                                             </div>
                                         ))}
                                     </div>
@@ -875,8 +884,8 @@ const Checkout = () => {
                             )}
                         </div>
 
-                        <div className="px-3 sm:px-8 py-4 space-y-7">
-                            <div className="border border-zinc-100 rounded-card divide-y divide-zinc-100 uppercase">
+                        <div className="space-y-7">
+                            <div className="divide-y divide-zinc-100 border-t border-zinc-100 uppercase">
                                 <div className="flex items-center justify-between py-3 sm:py-6 px-3 sm:px-6 md:px-8">
                                     <span>{translate('Subtotal')}</span>
                                     <span>{currencyFormatter(subTotal)}</span>
