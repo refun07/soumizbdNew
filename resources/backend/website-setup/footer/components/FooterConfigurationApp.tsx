@@ -100,6 +100,7 @@ const FooterConfigurationApp: React.FC<FooterConfigurationAppProps> = ({
     // Bottom
     const [copyrightText, setCopyrightText] = useState('');
     const [securedPayments, setSecuredPayments] = useState('');
+    const [securedPaymentsSize, setSecuredPaymentsSize] = useState<'small' | 'medium' | 'large'>('medium');
 
     // Colors
     const [footerBgColor, setFooterBgColor] = useState('#1a1a2e');
@@ -203,6 +204,7 @@ const FooterConfigurationApp: React.FC<FooterConfigurationAppProps> = ({
                     // Bottom
                     setCopyrightText(result.data.copyright_text || '');
                     setSecuredPayments(result.data.secured_payments || '');
+                    setSecuredPaymentsSize(result.data.secured_payments_size || 'medium');
 
                     // Colors
                     setFooterBgColor(result.data.footer_bg_color || '#1a1a2e');
@@ -468,6 +470,7 @@ const FooterConfigurationApp: React.FC<FooterConfigurationAppProps> = ({
                 appstore_link: appStoreLink,
                 copyright_text: copyrightText,
                 secured_payments: securedPayments,
+                secured_payments_size: securedPaymentsSize,
                 footer_bg_color: footerBgColor,
                 footer_text_color: footerTextColor,
                 copyright_bg_color: copyrightBgColor,
@@ -1047,6 +1050,16 @@ const FooterConfigurationApp: React.FC<FooterConfigurationAppProps> = ({
                                             readOnly
                                         />
                                     </div>
+                                    <select
+                                        value={securedPaymentsSize}
+                                        onChange={(e) => setSecuredPaymentsSize(e.target.value as 'small' | 'medium' | 'large')}
+                                        className="px-4 py-2.5 border border-gray-200 rounded-md text-sm text-gray-600 focus:outline-none focus:border-gray-300 bg-white"
+                                        aria-label="Secured payments image size"
+                                    >
+                                        <option value="small">Small (20px)</option>
+                                        <option value="medium">Mid (32px)</option>
+                                        <option value="large">Large (40px)</option>
+                                    </select>
                                     {securedPayments && (
                                         <button
                                             type="button"

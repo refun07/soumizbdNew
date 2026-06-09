@@ -113,7 +113,13 @@ const Footer = () => {
         '123 Maple Street Springfield, IL 627010 United States of America';
     const footerLogo =
         footerData?.homeFooterLogo || window.config.generalSettings.logo;
-    const paymentImage = footerData?.homeFooterSecuredPayments || '/images/payments.png';
+    const paymentImage = footerData?.homeFooterSecuredPayments;
+    const paymentImageSizeClass =
+        footerData?.homeFooterSecuredPaymentsSize === 'small'
+            ? 'h-[20px]'
+            : footerData?.homeFooterSecuredPaymentsSize === 'large'
+              ? 'h-[40px]'
+              : 'h-[32px]';
     const footerCompanyInfoAlignment =
         footerData?.homeFooterCompanyInfoAlignment === 'center' ||
         footerData?.homeFooterCompanyInfoAlignment === 'right' ||
@@ -689,11 +695,13 @@ const Footer = () => {
                                     </div>
                                 )}
 
-                            <img
-                                src={paymentImage}
-                                alt="Accepted payments"
-                                className="mt-7 h-[20px] w-auto"
-                            />
+                            {paymentImage && (
+                                <img
+                                    src={paymentImage}
+                                    alt="Accepted payments"
+                                    className={`mt-7 w-auto ${paymentImageSizeClass}`}
+                                />
+                            )}
                         </div>
                     </div>
                 </div>

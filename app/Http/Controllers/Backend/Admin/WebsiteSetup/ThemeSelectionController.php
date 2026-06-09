@@ -624,6 +624,7 @@ class ThemeSelectionController extends Controller
                 // Bottom
                 'copyright_text' => getSetting('homeFooterCopyrightText', ''),
                 'secured_payments' => getSetting('homeFooterSecuredPayments', ''),
+                'secured_payments_size' => getSetting('homeFooterSecuredPaymentsSize', 'medium'),
 
                 // Colors
                 'footer_bg_color' => getSetting('footer_bg_color', $currentFooter === 'footer-two' ? '#9b7655' : '#1a1a2e'),
@@ -703,6 +704,7 @@ class ThemeSelectionController extends Controller
                 'appstore_link' => 'nullable|string|max:255',
                 'copyright_text' => 'nullable|string|max:500',
                 'secured_payments' => 'nullable|string',
+                'secured_payments_size' => 'nullable|string|in:small,medium,large',
                 'footer_bg_color' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$/',
                 'footer_text_color' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$/',
                 'copyright_bg_color' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$/',
@@ -769,6 +771,7 @@ class ThemeSelectionController extends Controller
             // Update bottom section
             $this->updateSystemSetting('homeFooterCopyrightText', $request->input('copyright_text', ''));
             $this->updateSystemSetting('homeFooterSecuredPayments', $request->input('secured_payments', ''));
+            $this->updateSystemSetting('homeFooterSecuredPaymentsSize', $request->input('secured_payments_size', 'medium'));
 
             // Update colors
             $this->updateSystemSetting('footer_bg_color', $request->input('footer_bg_color', '#1a1a2e'));

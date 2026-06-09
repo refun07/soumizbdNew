@@ -275,6 +275,7 @@ class HomepageController extends Controller
 
                 'homeFooterCopyrightText'     => $copyrightText,
                 'homeFooterSecuredPayments'   => $processImage(getSetting('homeFooterSecuredPayments')),
+                'homeFooterSecuredPaymentsSize' => getSetting('homeFooterSecuredPaymentsSize', 'medium'),
 
                 'footer_bg_color'             => getSetting('footer_bg_color', $defaultFooter === 'footer-two' ? '#9b7655' : '#1a1a2e'),
                 'footer_text_color'           => getSetting('footer_text_color', '#ffffff'),
