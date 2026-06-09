@@ -46,9 +46,9 @@ const ThemeSlider = ({
                               enabled: true,
                               el: `.${paginationTargetClassName}`,
                               clickable: true,
-                              bulletActiveClass: 'w-10 bg-secondary',
+                              bulletActiveClass: 'w-10 !bg-[#FF8200]',
                               renderBullet: function (_index, className) {
-                                  return `<span class="size-1.5 inline-block rounded-full bg-primary transition-all cursor-pointer ${className}"></span>`;
+                                  return `<span class="size-1.5 inline-block rounded-full bg-[#B3052A] transition-all cursor-pointer ${className}"></span>`;
                               },
                               ...paginationOptions,
                           }

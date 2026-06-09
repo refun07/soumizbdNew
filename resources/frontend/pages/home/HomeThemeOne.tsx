@@ -875,12 +875,12 @@ const HomeThemeOne = () => {
                                     onSaleProducts.length > 2
                                         ? {
                                               bulletActiveClass:
-                                                  'w-10 bg-white',
+                                                  'w-10 !bg-[#FF8200]',
                                               renderBullet: function (
                                                   _index,
                                                   className,
                                               ) {
-                                                  return `<span class="size-1.5 inline-block rounded-full bg-white/60 transition-all cursor-pointer ${className}"></span>`;
+                                                  return `<span class="size-1.5 inline-block rounded-full bg-[#B3052A] transition-all cursor-pointer ${className}"></span>`;
                                               },
                                           }
                                         : false
