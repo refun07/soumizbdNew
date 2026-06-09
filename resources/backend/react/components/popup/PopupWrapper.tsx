@@ -46,7 +46,7 @@ const PopupWrapper = ({
         >
             <div
                 className={cn(
-                    'bg-white rounded-md shadow-xl max-h-[90vh] overflow-y-auto relative',
+                    'bg-background text-foreground border border-border rounded-md shadow-xl max-h-[90vh] overflow-y-auto relative',
                     sizeClasses,
                     classNames?.wrapper,
                 )}
@@ -54,7 +54,7 @@ const PopupWrapper = ({
             >
                 <button
                     className={cn(
-                        'absolute right-3 top-3 text-lg text-gray-500 hover:text-gray-700 z-10 transition-colors',
+                        'absolute right-3 top-3 text-lg text-muted hover:text-foreground z-10 transition-colors',
                         classNames?.button,
                     )}
                     onClick={closePopup}

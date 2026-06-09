@@ -130,7 +130,7 @@ const ProductListModal = () => {
             <div
                 ref={modalRef}
                 className={cn(
-                    'bg-white rounded-md shadow-lg fixed max-h-[400px] min-w-[300px] w-80 overflow-y-auto z-[3]',
+                    'bg-background text-foreground border border-border rounded-md shadow-lg fixed max-h-[400px] min-w-[300px] w-80 overflow-y-auto z-[3]',
                     {
                         'opacity-0 invisible pointer-events-none': !popup.name,
                     },
@@ -139,7 +139,7 @@ const ProductListModal = () => {
             >
                 <button
                     onClick={closePopup}
-                    className="absolute right-3 top-3 text-lg text-gray-400 hover:text-gray-600"
+                    className="absolute right-3 top-3 text-lg text-muted hover:text-foreground"
                 >
                     <LiaTimesSolid />
                 </button>
@@ -163,35 +163,35 @@ const ProductListModal = () => {
                                                 <img
                                                     src={item.product_image}
                                                     alt={item.product_name}
-                                                    className="w-12 h-12 object-cover border border-gray-200 rounded"
+                                                    className="w-12 h-12 object-cover border border-border rounded"
                                                 />
                                             ) : (
-                                                <div className="w-12 h-12 bg-gray-100 border border-gray-200 rounded flex items-center justify-center">
-                                                    <span className="text-gray-400 text-xs">No img</span>
+                                                <div className="w-12 h-12 bg-muted/20 border border-border rounded flex items-center justify-center">
+                                                    <span className="text-muted text-xs">No img</span>
                                                 </div>
                                             )}
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <h4 className="text-sm font-medium text-gray-900 truncate">
+                                            <h4 className="text-sm font-medium text-foreground truncate">
                                                 {item.product_name}
                                             </h4>
                                             {item.variant && (
-                                                <span className="inline-block mt-1 px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded">
+                                                <span className="inline-block mt-1 px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200 rounded">
                                                     {item.variant}
                                                 </span>
                                             )}
-                                            <div className="mt-1 text-xs text-gray-500">
+                                            <div className="mt-1 text-xs text-muted">
                                                 Qty: {item.quantity} × ${item.unit_price.toFixed(2)}
                                             </div>
                                         </div>
                                     </div>
                                     {index < currentOrderItems.length - 1 && (
-                                        <hr className="border-gray-200" />
+                                        <hr className="border-border" />
                                     )}
                                 </React.Fragment>
                             ))}
                             {currentOrderItems.length === 0 && (
-                                <div className="text-center py-8 text-gray-500">
+                                <div className="text-center py-8 text-muted">
                                     No items found for this order.
                                 </div>
                             )}
