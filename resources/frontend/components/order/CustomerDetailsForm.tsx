@@ -7,7 +7,6 @@ import { translate } from '../../utils/translate';
 import Input from '../inputs/Input';
 import InputGroup from '../inputs/InputGroup';
 import Label from '../inputs/Label';
-import Textarea from '../inputs/Textarea';
 
 const CustomerDetailsForm = () => {
     const dispatch = useAppDispatch();
@@ -27,21 +26,23 @@ const CustomerDetailsForm = () => {
     };
 
     return (
-        <div className="rounded-card border border-zinc-100">
-            <h3 className="py-3.5 px-4 sm:px-5 md:px-7 bg-stone-50 uppercase">
+        <div className="rounded-[4px] border border-slate-200 overflow-hidden">
+            <h3 className="py-3 px-4 sm:px-5 bg-slate-100 text-sm font-bold text-slate-800 uppercase">
                 {translate('Customer Details')}
             </h3>
 
-            <div className="py-4 sm:py-6 px-2 sm:px-5 md:px-9 grid sm:grid-cols-2 gap-4">
+            <div className="p-4 sm:p-5 grid sm:grid-cols-2 gap-3">
                 <InputGroup>
-                    <Label>
+                    <Label className="!mb-1.5 !normal-case font-semibold text-slate-800">
                         {translate('name')}
-                        <span className="text-red-400 text-xs ml-1">{translate('*')}</span>
+                        <span className="text-red-400 text-xs ml-1">
+                            {translate('*')}
+                        </span>
                     </Label>
                     <Input
                         name="name"
                         type="text"
-                        className="placeholder:text-black/40"
+                        className="!rounded-[3px] !border-slate-200 !bg-slate-50 placeholder:!text-slate-400 focus:!border-primary"
                         placeholder={translate('Type Your Full Name')}
                         value={customerDetails?.name}
                         onChange={setCustomerDetails}
@@ -49,11 +50,13 @@ const CustomerDetailsForm = () => {
                 </InputGroup>
 
                 <InputGroup>
-                    <Label>{translate('email')}</Label>
+                    <Label className="!mb-1.5 !normal-case font-semibold text-slate-800">
+                        {translate('email')}
+                    </Label>
                     <Input
                         name="email"
                         type="email"
-                        className="placeholder:text-black/40"
+                        className="!rounded-[3px] !border-slate-200 !bg-slate-50 placeholder:!text-slate-400 focus:!border-primary"
                         placeholder={translate('Type Your Email')}
                         value={customerDetails?.email}
                         onChange={setCustomerDetails}
@@ -61,14 +64,16 @@ const CustomerDetailsForm = () => {
                 </InputGroup>
 
                 <InputGroup>
-                    <Label>
+                    <Label className="!mb-1.5 !normal-case font-semibold text-slate-800">
                         {translate('phone')}
-                        <span className="text-red-400 text-xs ml-1">{translate('*')}</span>
+                        <span className="text-red-400 text-xs ml-1">
+                            {translate('*')}
+                        </span>
                     </Label>
                     <Input
                         name="phone"
                         type="text"
-                        className="placeholder:text-black/40"
+                        className="!rounded-[3px] !border-slate-200 !bg-slate-50 placeholder:!text-slate-400 focus:!border-primary"
                         placeholder={translate('Valid Phone No.')}
                         value={customerDetails?.phone}
                         onChange={setCustomerDetails}

@@ -1,37 +1,36 @@
 <?php
 
 use App\Http\Controllers\Backend\Admin\Configurations\LanguageController;
+use App\Http\Controllers\Backend\Api\DeliveryPartner\CourierOrderController;
+use App\Http\Controllers\Backend\Api\Translation\TranslationController;
 use App\Http\Controllers\Frontend\Api\AuthController;
+use App\Http\Controllers\Frontend\Api\BlogController;
 use App\Http\Controllers\Frontend\Api\BrandController;
 use App\Http\Controllers\Frontend\Api\CampaignController;
 use App\Http\Controllers\Frontend\Api\CartController;
 use App\Http\Controllers\Frontend\Api\CategoryController;
-use App\Http\Controllers\Frontend\Api\CheckoutController;
 use App\Http\Controllers\Frontend\Api\ChatController;
+use App\Http\Controllers\Frontend\Api\CheckoutController;
 use App\Http\Controllers\Frontend\Api\CouponController;
 use App\Http\Controllers\Frontend\Api\HomepageController;
 use App\Http\Controllers\Frontend\Api\HomePageThemeOneController;
 use App\Http\Controllers\Frontend\Api\HomePageThemeThreeController;
 use App\Http\Controllers\Frontend\Api\HomePageThemeTwoController;
-use App\Http\Controllers\Frontend\Api\HomepageSectionsController;
 use App\Http\Controllers\Frontend\Api\OrderController;
+use App\Http\Controllers\Frontend\Api\OTPController;
 use App\Http\Controllers\Frontend\Api\PasswordResetController;
 use App\Http\Controllers\Frontend\Api\ProductController;
 use App\Http\Controllers\Frontend\Api\ReviewController;
 use App\Http\Controllers\Frontend\Api\SearchController;
 use App\Http\Controllers\Frontend\Api\SellerController;
 use App\Http\Controllers\Frontend\Api\ShopController;
+use App\Http\Controllers\Frontend\Api\StockRequestApiController;
 use App\Http\Controllers\Frontend\Api\SubscribeController;
+use App\Http\Controllers\Frontend\Api\TicketController;
 use App\Http\Controllers\Frontend\Api\UserController;
 use App\Http\Controllers\Frontend\Api\WishlistController;
-use App\Http\Controllers\Frontend\Api\OTPController;
 use App\Http\Controllers\Installation\InstallController;
-use App\Http\Controllers\Frontend\Api\BlogController;
-use App\Http\Controllers\Frontend\Api\StockRequestApiController;
-use App\Http\Controllers\Frontend\Api\TicketController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Backend\Api\DeliveryPartner\CourierOrderController;
-use App\Http\Controllers\Backend\Api\Translation\TranslationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -44,18 +43,17 @@ use App\Http\Controllers\Backend\Api\Translation\TranslationController;
 |
 */
 
-
 Route::group(['prefix' => config('app.api_version')], function () {
 
-    # translate strings APIs
+    // translate strings APIs
     Route::post('/insert-translations-keys', [LanguageController::class, 'insertTranslationKeysToFile']);
 
-    #OTP routes
+    // OTP routes
     Route::post('/send-otp', [OTPController::class, 'sendOTP']);
     Route::post('/verify-otp', [OTPController::class, 'verifyOtpForGuest']);
     Route::post('/resend-otp', [OTPController::class, 'resendOtp']);
 
-    # installation APIs
+    // installation APIs
     Route::group(['prefix' => 'installation'], function () {
         Route::get('/checklist', [InstallController::class, 'checklist'])->name('installation.checklist');
 
@@ -65,7 +63,7 @@ Route::group(['prefix' => config('app.api_version')], function () {
         Route::post('/admin-configuration', [InstallController::class, 'storeAdmin'])->name('installation.storeAdmin');
     });
 
-    # Auth routes
+    // Auth routes
     Route::group(['prefix' => 'auth'], function () {
 
         Route::group(['middleware' => ['zone']], function () {
@@ -102,13 +100,12 @@ Route::group(['prefix' => config('app.api_version')], function () {
     Route::get('/courier/redx/areas', [CourierOrderController::class, 'getRedxAreas']);
     Route::get('/courier/status', [CourierOrderController::class, 'getDeliveryStatus']);
 
-
-    #categories
+    // categories
     Route::get('categories', [CategoryController::class, 'categories']);
 
-    # homepage
+    // homepage
     Route::group(['prefix' => 'homepage'], function () {
-        # theme-one
+        // theme-one
         Route::group(['prefix' => 'theme-one'], function () {
             Route::get('/banner', [HomePageThemeOneController::class, 'banner']);
             Route::get('/promo-cards', [HomePageThemeOneController::class, 'promoCards']);
@@ -123,7 +120,7 @@ Route::group(['prefix' => config('app.api_version')], function () {
             Route::get('/bottom-image-banner', [HomePageThemeOneController::class, 'bottomImageBanner']);
         });
 
-        # theme-two
+        // theme-two
         Route::group(['prefix' => 'theme-two'], function () {
             Route::get('/banner', [HomePageThemeTwoController::class, 'banner']);
             Route::get('/featured-categories', [HomePageThemeTwoController::class, 'featuredCategories']);
@@ -136,7 +133,7 @@ Route::group(['prefix' => config('app.api_version')], function () {
             Route::get('/reviews', [HomePageThemeTwoController::class, 'reviewSection']);
         });
 
-        # theme-three
+        // theme-three
         Route::group(['prefix' => 'theme-three'], function () {
             Route::get('/sliders', [HomePageThemeThreeController::class, 'sliders']);
             Route::get('/featured-categories', [HomePageThemeThreeController::class, 'featuredCategories']);
@@ -158,63 +155,63 @@ Route::group(['prefix' => config('app.api_version')], function () {
         Route::get('/homepage-popup', [HomepageController::class, 'homepagePopup']);
     });
 
-    # pages
+    // pages
     Route::get('/pages/{slug}', [HomepageController::class, 'pageDetails'])->name('api.pages.show');
 
-    # seller registration
+    // seller registration
     Route::post('/seller/signup', [SellerController::class, 'store']);
 
-    # search
+    // search
     Route::group(['prefix' => 'search', 'middleware' => ['zone']], function () {
         Route::get('/', [SearchController::class, 'index']);
     });
 
-    # products
+    // products
     Route::group(['prefix' => 'products', 'middleware' => ['zone']], function () {
         Route::get('/', [ProductController::class, 'index']);
         Route::get('/details/{slug}', [ProductController::class, 'show'])->name('api.products.show');
     });
 
-    # stock requests
+    // stock requests
     Route::group(['prefix' => 'stock-requests'], function () {
         Route::post('/', [StockRequestApiController::class, 'store']);
         Route::get('/check', [StockRequestApiController::class, 'check']);
     });
 
-    # brands
+    // brands
     Route::group(['prefix' => 'brands', 'middleware' => ['zone']], function () {
         Route::get('/', [BrandController::class, 'index']);
     });
 
-    # shops
+    // shops
     Route::group(['prefix' => 'shops'], function () {
         Route::get('/', [ShopController::class, 'index']);
         Route::get('/details/{slug}', [ShopController::class, 'show'])->name('api.shops.show');
 
-        # shop home sections
+        // shop home sections
         Route::get('/sections/{slug}', [ShopController::class, 'shopSections'])->middleware('zone');
 
-        # shop profile info
+        // shop profile info
         Route::get('/profile/{slug}', [ShopController::class, 'profile'])->name('api.shops.profile')->middleware('zone');
     });
 
-    # subscribe
+    // subscribe
     Route::post('subscribe', [SubscribeController::class, 'subscribe']);
 
-    # coupons
+    // coupons
     Route::group(['prefix' => 'coupons'], function () {
         Route::get('/', [CouponController::class, 'index']);
         Route::post('/apply', [CouponController::class, 'apply'])->middleware(['auth:sanctum', 'zone']);
         Route::get('/details/{code}', [CouponController::class, 'show'])->name('coupons.show')->middleware('zone');
     });
 
-    # campaigns
+    // campaigns
     Route::group(['prefix' => 'campaigns'], function () {
         Route::get('/', [CampaignController::class, 'index']);
         Route::get('/details/{slug}', [CampaignController::class, 'show'])->name('campaigns.show')->middleware('zone');
     });
 
-    # carts
+    // carts
     Route::group(['prefix' => 'carts', 'middleware' => ['zone']], function () {
         Route::get('/', [CartController::class, 'index']);
         Route::post('/create', [CartController::class, 'store']);
@@ -223,20 +220,20 @@ Route::group(['prefix' => config('app.api_version')], function () {
         Route::get('/check-abandoned', [CartController::class, 'checkAbandonedCart']);
     });
 
-    # wishlists
+    // wishlists
     Route::group(['prefix' => 'wishlists', 'middleware' => ['auth:sanctum', 'zone']], function () {
         Route::get('/', [WishlistController::class, 'index']);
         Route::post('/create', [WishlistController::class, 'store']);
         Route::post('/delete', [WishlistController::class, 'destroy']);
     });
 
-    # locations
+    // locations
     // Commented out location API routes
     Route::get('/get-states/{countryId}', [UserController::class, 'states']);
     Route::get('/get-cities/{stateId}', [UserController::class, 'cities']);
     // Route::get('/get-areas/{cityId}', [UserController::class, 'areas']);
 
-    # reviews
+    // reviews
     Route::group(['prefix' => 'reviews', 'middleware' => ['zone']], function () {
         // get all reviews of a product
         Route::get('/{productId}', [ReviewController::class, 'index']);
@@ -247,24 +244,22 @@ Route::group(['prefix' => config('app.api_version')], function () {
             Route::post('/user/store', [ReviewController::class, 'storeOrUpdate']);
             Route::get('/user/{productId}', [ReviewController::class, 'show']);
 
-            # shop review
+            // shop review
             Route::get('/shop/{shopId}', [ReviewController::class, 'showShopReview']);
             Route::post('/shop/store', [ReviewController::class, 'storeShopReview']);
         });
     });
 
-    #guest checkout
+    // guest checkout
     Route::post('/checkout/manual-order/store', [CheckoutController::class, 'store']);
 
-
-    # blogs
+    // blogs
     Route::group(['prefix' => 'blogs'], function () {
         Route::get('/', [BlogController::class, 'index']);
         Route::get('/details/{slug}', [BlogController::class, 'show'])->name('api.blogs.show');
     });
 
-
-    # customer protected routes
+    // customer protected routes
     Route::get('/orders/success/{code}', [OrderController::class, 'success'])->name('orders.success');
 
     Route::group(['middleware' => 'auth:sanctum'], function () {
@@ -311,6 +306,7 @@ Route::group(['prefix' => config('app.api_version')], function () {
     });
 
     Route::post('/checkout/get-shipping-charge', [CheckoutController::class, 'getShippingCharge']);
+    Route::post('/checkout/get-delivery-areas', [CheckoutController::class, 'getDeliveryAreas']);
 
     // checkout session management (guest checkout support)
     Route::post('/checkout/save-session', [CheckoutController::class, 'saveSession']);
@@ -320,7 +316,7 @@ Route::group(['prefix' => config('app.api_version')], function () {
         Route::get('/{code}', [OrderController::class, 'show'])->name('orders.show');
     });
 
-    # Translations API
+    // Translations API
     Route::group(['prefix' => 'translations'], function () {
         Route::get('/{locale}', [TranslationController::class, 'getTranslations']);
         Route::post('/add', [TranslationController::class, 'addTranslation'])->middleware('throttle:10,1');

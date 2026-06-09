@@ -179,6 +179,12 @@ export interface IShippingCharge {
     charge: number;
 }
 
+export interface IDeliveryArea {
+    id: number;
+    name: 'Inside Dhaka' | 'Outside Dhaka';
+    charge: number;
+}
+
 export interface IOrderPayload extends ICheckoutCustomerDetails {
     shippingAddressId: number;
     billingAddressId?: number;
@@ -189,12 +195,14 @@ export interface IOrderPayload extends ICheckoutCustomerDetails {
 }
 export interface IManualOrderPayload extends ICheckoutCustomerDetails {
     shippingAddress: IAddress;
+    shippingZoneId: number;
     billingAddress?: IAddress;
     shopIds: number[];
     couponCodes: string[];
     cartIds: number[];
     paymentMethod: string;
-    password:string;
+    password: string;
+    eventId?: string;
 }
 export interface ICheckoutCustomerDetails {
     name: string;
@@ -211,8 +219,9 @@ export interface ICheckoutData {
 
     selectedShops: Record<string, boolean>;
     shippingCharge: number;
+    shippingZoneId?: number;
+    shippingZoneName?: string;
     coupons: ICouponShort[];
-    isVerified:boolean;
+    isVerified: boolean;
     otpExpiryTimestamp?: number | null; // Unix timestamp in milliseconds
-
 }

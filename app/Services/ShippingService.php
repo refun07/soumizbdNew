@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\City;
 use App\Models\Coupon;
 use App\Models\Shop;
+use App\Models\Zone;
 use App\Models\ZoneShippingCharge;
 use Illuminate\Support\Facades\Log;
 
@@ -28,14 +29,29 @@ class ShippingService
             'coupon_codes' => $couponCodes,
         ]);
 
+        $zoneId = City::findOrFail($cityId)->zone_id;
+        Log::debug('[SHIPPING-SERVICE] Zone ID resolved', ['zone_id' => $zoneId]);
+
+        return self::calculateForZone($zoneId, $cartItems, $couponCodes);
+    }
+
+    /**
+     * Calculate total shipping charge directly from a delivery zone.
+     */
+    public static function calculateForZone(int $zoneId, array $cartItems, array $couponCodes = []): float
+    {
+        Log::debug('[SHIPPING-SERVICE] calculateForZone() called', [
+            'zone_id' => $zoneId,
+            'cart_items_count' => count($cartItems),
+            'cart_items' => $cartItems,
+            'coupon_codes' => $couponCodes,
+        ]);
+
         if (empty($cartItems)) {
             Log::debug('[SHIPPING-SERVICE] Empty cart items, returning 0');
 
             return 0.0;
         }
-
-        $zoneId = City::findOrFail($cityId)->zone_id;
-        Log::debug('[SHIPPING-SERVICE] Zone ID resolved', ['zone_id' => $zoneId]);
 
         $coupons = collect($couponCodes)->isNotEmpty()
             ? Coupon::whereIn('code', $couponCodes)->get()
@@ -110,6 +126,11 @@ class ShippingService
                 } else {
                     $defaultCharge = Shop::where('id', $shopId)->value('default_shipping_charge');
                     $baseCharge = $defaultCharge !== null ? (float) $defaultCharge : 0.0;
+
+                    if ($baseCharge <= 0) {
+                        $baseCharge = self::deliveryAreaFallbackCharge($zoneId);
+                    }
+
                     Log::debug('[SHIPPING-SERVICE] No zone charge found, using shop default', [
                         'default_charge' => $baseCharge,
                     ]);
@@ -149,6 +170,18 @@ class ShippingService
         Log::debug('[SHIPPING-SERVICE] Final result', ['total_shipping_charge' => $totalShippingCharge]);
 
         return $totalShippingCharge;
+    }
+
+    /**
+     * Reference checkout rates used only until a shop configures zone charges.
+     */
+    private static function deliveryAreaFallbackCharge(int $zoneId): float
+    {
+        return match (Zone::whereKey($zoneId)->value('name')) {
+            'Inside Dhaka' => 70.0,
+            'Outside Dhaka' => 150.0,
+            default => 0.0,
+        };
     }
 
     /**

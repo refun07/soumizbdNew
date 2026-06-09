@@ -15,8 +15,10 @@ const initialState: ICheckoutData = {
     paymentMethod: '',
     selectedShops: {},
     shippingCharge: 0,
+    shippingZoneId: undefined,
+    shippingZoneName: undefined,
     coupons: [],
-    isVerified:false,
+    isVerified: false,
     otpExpiryTimestamp: null,
 };
 

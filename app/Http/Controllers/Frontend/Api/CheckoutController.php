@@ -19,6 +19,7 @@ use App\Models\Transaction;
 use App\Models\User;
 use App\Models\UserAddress;
 use App\Models\WarehouseZone;
+use App\Models\Zone;
 use App\Models\ZoneShippingCharge;
 use App\Notifications\OrderPlacedNotification;
 use App\Services\FacebookConversionService;
@@ -57,7 +58,9 @@ class CheckoutController extends Controller
                 'all_input' => $request->all(),
             ]);
 
-            $zoneId = City::findOrFail($request->cityId)->zone_id;
+            $zoneId = $request->zoneId
+                ? Zone::isActive()->findOrFail($request->zoneId)->id
+                : City::findOrFail($request->cityId)->zone_id;
             Log::debug('[SHIPPING-API] Zone ID resolved', ['zone_id' => $zoneId]);
 
             $userId = $request->userId ?? null;
@@ -141,17 +144,13 @@ class CheckoutController extends Controller
                 'coupon_codes' => $couponCodes,
             ]);
 
-            $totalShippingCharge = ShippingService::calculate(
-                $request->cityId,
-                $cartItems,
-                $couponCodes
-            );
+            $totalShippingCharge = ShippingService::calculateForZone($zoneId, $cartItems, $couponCodes);
 
             Log::debug('[SHIPPING-API] ShippingService::calculate returned', [
                 'total_shipping_charge' => $totalShippingCharge,
             ]);
 
-            $breakdown = $this->getShippingBreakdown($request->cityId, $cartItems);
+            $breakdown = $this->getShippingBreakdown($zoneId, $cartItems);
 
             Log::debug('[SHIPPING-API] Response prepared', [
                 'total_shipping_charge' => $totalShippingCharge,
@@ -181,22 +180,65 @@ class CheckoutController extends Controller
         }
     }
 
-    private function getShippingBreakdown(int $cityId, array $cartItems): array
+    public function getDeliveryAreas(Request $request)
     {
-        $zoneId = City::findOrFail($cityId)->zone_id;
+        $cartItems = $this->getCartItemsForShipping($request);
+        $couponCodes = $request->coupons ?? [];
+
+        $areas = Zone::isActive()
+            ->whereIn('name', ['Inside Dhaka', 'Outside Dhaka'])
+            ->orderByRaw("CASE WHEN name = 'Inside Dhaka' THEN 0 ELSE 1 END")
+            ->get()
+            ->map(fn (Zone $zone) => [
+                'id' => $zone->id,
+                'name' => $zone->name,
+                'charge' => ShippingService::calculateForZone($zone->id, $cartItems, $couponCodes),
+            ])
+            ->values();
+
+        return response()->json([
+            'success' => true,
+            'status' => 200,
+            'result' => $areas,
+        ]);
+    }
+
+    private function getCartItemsForShipping(Request $request): array
+    {
+        $items = $request->items ?? [];
+
+        if (! empty($items)) {
+            $products = Product::whereIn('id', array_unique(array_column($items, 'product_id')))
+                ->pluck('shipping_class_id', 'id');
+
+            return collect($items)->map(fn ($item) => [
+                'shop_id' => $item['shop_id'],
+                'shipping_class_id' => $products[$item['product_id']] ?? null,
+                'quantity' => $item['quantity'] ?? 1,
+            ])->all();
+        }
+
+        return Cart::query()
+            ->when($request->userId, fn ($query, $userId) => $query->where('user_id', $userId))
+            ->when($request->guestUserId, fn ($query, $guestUserId) => $query->where('guest_user_id', $guestUserId))
+            ->when($request->cartIds, fn ($query, $cartIds) => $query->whereIn('id', $cartIds))
+            ->with('productVariation.product')
+            ->get()
+            ->map(fn ($cart) => [
+                'shop_id' => $cart->productVariation->product->shop_id,
+                'shipping_class_id' => $cart->productVariation->product->shipping_class_id,
+                'quantity' => $cart->qty,
+            ])
+            ->all();
+    }
+
+    private function getShippingBreakdown(int $zoneId, array $cartItems): array
+    {
         $breakdown = [];
 
         foreach ($cartItems as $item) {
             $shopId = $item['shop_id'];
-            $shippingClassId = $item['shipping_class_id'];
-
-            $zoneCharge = ZoneShippingCharge::where([
-                'shop_id' => $shopId,
-                'zone_id' => $zoneId,
-                'shipping_class_id' => $shippingClassId,
-            ])->value('charge');
-
-            $charge = $zoneCharge ?? Shop::where('id', $shopId)->value('default_shipping_charge') ?? 0;
+            $charge = ShippingService::calculateForZone($zoneId, [$item]);
 
             $breakdown[] = [
                 'shop_id' => $shopId,
@@ -244,19 +286,19 @@ class CheckoutController extends Controller
         Log::debug('[CHECKOUT] User resolved', ['user_id' => $user->id ?? null]);
 
         // Transfer guest carts to the resolved user
-        if ($request->guestUserId && !empty($request->cartIds)) {
+        if ($request->guestUserId && ! empty($request->cartIds)) {
             $transferredCount = Cart::whereIn('id', $request->cartIds)
                 ->where('guest_user_id', $request->guestUserId)
                 ->update([
                     'user_id' => $user->id,
-                    'guest_user_id' => null
+                    'guest_user_id' => null,
                 ]);
 
             Log::debug('[CHECKOUT] Transferred guest carts to user', [
                 'user_id' => $user->id,
                 'guest_user_id' => $request->guestUserId,
                 'transferred_count' => $transferredCount,
-                'cart_ids' => $request->cartIds
+                'cart_ids' => $request->cartIds,
             ]);
         }
 
@@ -278,17 +320,17 @@ class CheckoutController extends Controller
             $cityId = $requestAddress['cityId'] ?? $requestAddress['city']['id'] ?? null;
             $addressLine = $requestAddress['address'] ?? null;
 
-            if (! $countryId || ! $stateId || ! $addressLine) {
+            if (! $countryId || ! $addressLine) {
                 return response()->json([
                     'success' => false,
                     'status' => 422,
-                    'message' => translate('Please select country, district/state and provide address'),
+                    'message' => translate('Please select a delivery area and provide address'),
                     'result' => null,
                 ], 422);
             }
 
             $newAddress->country_id = (int) $countryId;
-            $newAddress->state_id = (int) $stateId;
+            $newAddress->state_id = $stateId ? (int) $stateId : null;
             $newAddress->city_id = $cityId ? (int) $cityId : null;
             $newAddress->address = $addressLine;
             $newAddress->area_id = $requestAddress['areaId'] ?? $newAddress->area_id;
@@ -350,6 +392,19 @@ class CheckoutController extends Controller
             'city_id' => $shippingAddress->city_id,
             'zone_id' => $shippingAddress->city?->zone_id,
         ]);
+
+        $shippingZone = $request->shippingZoneId
+            ? Zone::isActive()->whereIn('name', ['Inside Dhaka', 'Outside Dhaka'])->find($request->shippingZoneId)
+            : $shippingAddress->city?->zone;
+
+        if (! $shippingZone) {
+            return response()->json([
+                'success' => false,
+                'status' => 422,
+                'message' => translate('Please select a delivery area'),
+                'result' => null,
+            ], 422);
+        }
 
         // if (!$shippingAddress->area->zone) {
         //     return response()->json([
@@ -555,20 +610,14 @@ class CheckoutController extends Controller
                 $orderGroup->shipping_address_type = $address->type;
                 $orderGroup->direction = $address->direction;
                 $orderGroup->shipping_address = $address->address
-                    // .', '.($address->area?->name ?? '')
-                    .', '.($address->city?->name ?? '')
-                    .', '.($address->state?->name ?? '')
-                    // .', '.($address->postal_code ?? '')
+                    .', '.$shippingZone->name
                     .', '.($address->country?->name ?? '');
             }
             if ($orderGroup->billingAddress) {
                 $address = $orderGroup->billingAddress;
                 $orderGroup->billing_address_type = $address->type;
                 $orderGroup->billing_address = $address->address
-                    // .', '.($address->area?->name ?? '')
-                    .', '.($address->city?->name ?? '')
-                    .', '.($address->state?->name ?? '')
-                    // .', '.($address->postal_code ?? '')
+                    .', '.$shippingZone->name
                     .', '.($address->country?->name ?? '');
             }
             $orderGroup->save();
@@ -619,8 +668,8 @@ class CheckoutController extends Controller
                             $order->shop_id = $shopId;
                             $order->warehouse_id = $shopCarts->first()->warehouse_id;
                             $cleanShippingAddress = preg_replace('/\s*,\s*,+/', ', ', (string) $orderGroup->shipping_address);
-                            $cleanShippingAddress = trim((string) $cleanShippingAddress, " ,");
-                            //$order->shipping_address = $cleanShippingAddress;
+                            $cleanShippingAddress = trim((string) $cleanShippingAddress, ' ,');
+                            // $order->shipping_address = $cleanShippingAddress;
                             $order->save();
 
                             Log::debug('[CHECKOUT] Order created', [
@@ -644,22 +693,10 @@ class CheckoutController extends Controller
                                 ];
                             })->toArray();
 
-                            // Get city ID from request if provided, otherwise from database address
-                            $shippingCityId = $shippingAddress->city_id;
-                            if ($request->shippingAddress) {
-                                $requestAddress = json_decode($request->shippingAddress, true);
-                                if (isset($requestAddress['cityId'])) {
-                                    $shippingCityId = $requestAddress['cityId'];
-                                }
-                            }
-
-                            $shippingCity = City::find($shippingCityId);
-                            if ($shippingCity && $shippingCity->zone_id) {
-                                $shopShippingCharge = ShippingService::calculate(
-                                    $shippingCityId,
-                                    $cartItems
-                                );
-                            }
+                            $shopShippingCharge = ShippingService::calculateForZone(
+                                $shippingZone->id,
+                                $cartItems
+                            );
 
                             // shipping charge
                             // $shippingCharge = ZoneShippingCharge::where('shop_id', $shopId);
@@ -935,17 +972,17 @@ class CheckoutController extends Controller
                 }
             }
 
-        try {
-            $sms = app(SmsService::class);
-            $user = $orderGroup->user;
-            if ($user && $user->phone && $user->phone != '') {
-                $to = $user->phone;
-                $message = $user->name.' Your Payment has been placed successfully.'.' In '.env('APP_NAME').'Order Code:'.$orderGroup->code;
-                $sms->send(normalizeBangladeshiNumber($to), $message);
+            try {
+                $sms = app(SmsService::class);
+                $user = $orderGroup->user;
+                if ($user && $user->phone && $user->phone != '') {
+                    $to = $user->phone;
+                    $message = $user->name.' Your Payment has been placed successfully.'.' In '.env('APP_NAME').'Order Code:'.$orderGroup->code;
+                    $sms->send(normalizeBangladeshiNumber($to), $message);
+                }
+            } catch (\Exception $e) {
+                Log::error('[CHECKOUT] Failed to send SMS', ['error' => $e->getMessage()]);
             }
-        } catch (\Exception $e) {
-            Log::error('[CHECKOUT] Failed to send SMS', ['error' => $e->getMessage()]);
-        }
 
             Log::debug('[CHECKOUT] Order process completed successfully', [
                 'order_group_id' => $orderGroup->id,
@@ -1137,6 +1174,7 @@ class CheckoutController extends Controller
                 // Backorder enabled: skip stock checks, just assign warehouse
                 $cart->warehouse_id = $warehouseZone->warehouse_id;
                 $cart->save();
+
                 continue;
             }
 

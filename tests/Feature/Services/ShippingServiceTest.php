@@ -4,8 +4,8 @@ namespace Tests\Feature\Services;
 
 use App\Models\City;
 use App\Models\Coupon;
-use App\Models\Shop;
 use App\Models\ShippingClass;
+use App\Models\Shop;
 use App\Models\User;
 use App\Models\Zone;
 use App\Models\ZoneShippingCharge;
@@ -118,6 +118,29 @@ class ShippingServiceTest extends TestCase
         $result = ShippingService::calculate($this->city->id, $cartItems);
 
         $this->assertEquals(5.00, $result);
+    }
+
+    public function test_calculate_for_zone_uses_shipping_class_charge(): void
+    {
+        $cartItems = [
+            ['shop_id' => $this->shop1->id, 'shipping_class_id' => $this->shippingClass2->id, 'quantity' => 3],
+        ];
+
+        $result = ShippingService::calculateForZone($this->zone->id, $cartItems);
+
+        $this->assertEquals(14.00, $result);
+    }
+
+    public function test_delivery_area_uses_reference_rate_when_no_charge_is_configured(): void
+    {
+        $insideDhaka = Zone::create(['name' => 'Inside Dhaka']);
+        $this->shop1->update(['default_shipping_charge' => 0]);
+
+        $result = ShippingService::calculateForZone($insideDhaka->id, [
+            ['shop_id' => $this->shop1->id, 'shipping_class_id' => null, 'quantity' => 1],
+        ]);
+
+        $this->assertEquals(70.00, $result);
     }
 
     public function test_quantity_less_than_mrate_returns_single_batch(): void

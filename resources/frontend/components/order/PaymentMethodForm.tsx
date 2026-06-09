@@ -16,11 +16,11 @@ const PaymentMethodForm = () => {
     };
 
     return (
-        <div className="rounded-card border border-zinc-100">
-            <h3 className="py-3.5 px-4 sm:px-5 md:px-7 bg-stone-50">
+        <div className="rounded-[4px] border border-slate-200 overflow-hidden">
+            <h3 className="py-3 px-4 sm:px-5 bg-slate-100 text-sm font-bold text-slate-800 uppercase">
                 {translate('Select Payment Method')}
             </h3>
-            <div className="py-3 xl:py-6 px-3 md:px-6 xl:px-9 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="p-4 sm:p-5 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                 {!window.config.paymentMethods.length ? (
                     <div className="col-span-2 md:col-span-3 lg:col-span-4 text-center py-5">
                         {translate('No payment methods available')}
@@ -29,7 +29,7 @@ const PaymentMethodForm = () => {
                     window.config.paymentMethods.map((method) => (
                         <button
                             className={cn(
-                                'relative flex items-center justify-center px-4 py-4 border border-neutral-200 rounded-card',
+                                'relative flex items-center justify-center px-4 py-3 border border-slate-200 bg-slate-50 rounded-[3px]',
                                 {
                                     'ring ring-secondary/60':
                                         paymentMethod === method.value,

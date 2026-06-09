@@ -26,9 +26,7 @@ import {
     useUpdateCartProductMutation,
 } from '../../store/features/api/productApi';
 import { useAuth } from '../../store/features/auth/authSlice';
-import {
-    useLazyGetCheckoutSessionQuery,
-} from '../../store/features/checkout/checkoutApi';
+import { useLazyGetCheckoutSessionQuery } from '../../store/features/checkout/checkoutApi';
 import {
     setCheckoutData,
     useCheckoutData,
@@ -111,6 +109,7 @@ const Checkout = () => {
         coupons,
         selectedShops,
         shippingCharge,
+        shippingZoneId,
         isVerified,
     } = useCheckoutData();
 
@@ -128,7 +127,7 @@ const Checkout = () => {
     useEffect(() => {
         const loadSavedSession = async () => {
             if (isLoading) return;
-            
+
             try {
                 const session = await getCheckoutSession({
                     guestUserId: guestUserId || undefined,
@@ -146,7 +145,7 @@ const Checkout = () => {
                         dispatch(
                             setCheckoutData({
                                 customerDetails: session.customerDetails,
-                            })
+                            }),
                         );
                     }
 
@@ -155,7 +154,7 @@ const Checkout = () => {
                             setCheckoutData({
                                 shippingAddress: session.shippingAddress,
                                 billingAddress: session.shippingAddress,
-                            })
+                            }),
                         );
                     }
 
@@ -163,7 +162,7 @@ const Checkout = () => {
                         dispatch(
                             setCheckoutData({
                                 paymentMethod: session.paymentMethod,
-                            })
+                            }),
                         );
                     }
                 }
@@ -190,7 +189,8 @@ const Checkout = () => {
                     );
                     // Transform to expected structure
                     return cartItems.map((item: any) => {
-                        const basePrice = item.product.base_price ?? item.product.price;
+                        const basePrice =
+                            item.product.base_price ?? item.product.price;
                         const discountedPrice = item.product.price;
                         return {
                             id: item.product_id,
@@ -251,12 +251,16 @@ const Checkout = () => {
 
     // Auto-select all shops when skipCart is enabled
     useEffect(() => {
-        if (window.config.generalSettings.skipCart && carts.length > 0 && !isFromLanding) {
+        if (
+            window.config.generalSettings.skipCart &&
+            carts.length > 0 &&
+            !isFromLanding
+        ) {
             const allShopsSelected = carts.reduce((acc, cart) => {
                 acc[cart.shop.name] = true;
                 return acc;
             }, {} as Record<string, boolean>);
-            
+
             dispatch(setCheckoutData({ selectedShops: allShopsSelected }));
         }
     }, [carts, isLoading, isFromLanding]);
@@ -265,11 +269,13 @@ const Checkout = () => {
     useEffect(() => {
         if (!isLoading && carts.length === 0 && !isFromLanding) {
             // Clear checkout data when cart is empty
-            dispatch(setCheckoutData({ 
-                selectedShops: {},
-                shippingCharge: 0,
-                coupons: []
-            }));
+            dispatch(
+                setCheckoutData({
+                    selectedShops: {},
+                    shippingCharge: 0,
+                    coupons: [],
+                }),
+            );
             navigate('/products');
             toast(translate('Your cart is empty'), { icon: '🛒' });
         }
@@ -292,7 +298,10 @@ const Checkout = () => {
 
         await updateCartProduct({
             id: cartProduct.id,
-            action: action === 'decrease' && cartProduct.qty === 1 ? 'delete' : action,
+            action:
+                action === 'decrease' && cartProduct.qty === 1
+                    ? 'delete'
+                    : action,
             guestUserId,
             warehouseId: cartProduct.variation.stocks[0]?.warehouseId!,
         }).unwrap();
@@ -498,11 +507,17 @@ const Checkout = () => {
             .map((products) => products.map((product) => product.id))
             .flat(1);
 
-        if (
-            shippingAddress &&
-            shippingAddress.cityId &&
-            shippingAddress.address
-        ) {
+        if (!shippingAddress?.address) {
+            toast.error('Please enter your full delivery address');
+            return;
+        }
+
+        if (!shippingZoneId) {
+            toast.error('Please select a delivery area');
+            return;
+        }
+
+        if (shippingAddress && shippingZoneId && shippingAddress.address) {
             const eventId = `purchase_${Date.now()}_${Math.random()
                 .toString(36)
                 .slice(2)}`;
@@ -510,6 +525,7 @@ const Checkout = () => {
             const payload: IManualOrderPayload = {
                 ...customerDetails,
                 shippingAddress: shippingAddress,
+                shippingZoneId,
                 billingAddress: billingAddress,
                 shopIds: selectedShopIds,
                 couponCodes: coupons.map((coupon) => coupon.code),
@@ -568,8 +584,6 @@ const Checkout = () => {
                 toast.error(err.data.message);
                 navigate(`/orders/failed`);
             }
-        } else {
-            toast.error('Please Fill Address Form');
         }
     };
 
@@ -601,7 +615,6 @@ const Checkout = () => {
             selectedShops,
         });
 
-
         gtmEvent({
             event: 'begin_checkout',
             ecommerce: {
@@ -630,16 +643,16 @@ const Checkout = () => {
 
             <div className="container no-style grid lg:grid-cols-3 mb-12">
                 <div className="lg:col-span-2">
-                    <div className="bg-white rounded-card p-3 sm:p-6 md:p-9">
+                    <div className="bg-white rounded-[4px] p-3 sm:p-5 md:p-7">
                         <CustomerDetailsForm />
 
                         {showFullForm && (
                             <>
-                                <div className="rounded-card border border-zinc-100 mt-8">
-                                    <h3 className="py-3.5 px-4 sm:px-5 md:px-7 bg-stone-50 uppercase">
+                                <div className="rounded-[4px] border border-slate-200 mt-4 overflow-hidden">
+                                    <h3 className="py-3 px-4 sm:px-5 bg-slate-100 text-sm font-bold text-slate-800 uppercase">
                                         SHIPPING ADDRESS
                                     </h3>
-                                    <div className=" px-3 md:px-6 xl:px-9">
+                                    <div className="px-4 pt-4 sm:px-5">
                                         <SimpleAddressForm />
                                     </div>
                                 </div>
@@ -692,14 +705,18 @@ const Checkout = () => {
                             {currentStep === 1 ? (
                                 <Button
                                     as="link"
-                                    to={window.config.generalSettings.skipCart ? "/products" : "/cart"}
+                                    to={
+                                        window.config.generalSettings.skipCart
+                                            ? '/products'
+                                            : '/cart'
+                                    }
                                     size="lg"
                                     onClick={handlePrev}
                                     variant="outline"
                                     arrow={'left'}
                                 >
-                                    {window.config.generalSettings.skipCart 
-                                        ? translate('Continue Shopping') 
+                                    {window.config.generalSettings.skipCart
+                                        ? translate('Continue Shopping')
                                         : translate('Back To Cart')}
                                 </Button>
                             ) : (
@@ -717,6 +734,8 @@ const Checkout = () => {
                                     variant="primary"
                                     size="lg"
                                     onClick={handleNext}
+                                    arrow={false}
+                                    className="grow !rounded-[3px] !bg-none !bg-[#e8174f] hover:!bg-[#c91343] !text-white"
                                     isLoading={creatingMnualOrder}
                                     disabled={
                                         creatingMnualOrder ||
@@ -726,7 +745,7 @@ const Checkout = () => {
                                     }
                                 >
                                     {currentStep === steps.length
-                                        ? translate('Place Order')
+                                        ? translate('Complete Order')
                                         : translate('Next Step')}
                                 </Button>
                             ) : (
@@ -752,18 +771,19 @@ const Checkout = () => {
                             {Object.entries(selectedShopProducts).map(
                                 ([shopName, carts]) => (
                                     <div key={shopName}>
-                                        {window.config.generalSettings.appMode === 'multiVendor' && (
-                                        <div className="flex items-center justify-between text-sm border-b border-primary-14 h-8 sm:h-12 px-4 bg-stone-50">
-                                            <h5 className="text-black/70 uppercase">
-                                                {translate('Seller')}
-                                            </h5>
-                                            <Link
-                                                to="#"
-                                                className="text-primary"
-                                            >
-                                                {shopName}
-                                            </Link>
-                                        </div>
+                                        {window.config.generalSettings
+                                            .appMode === 'multiVendor' && (
+                                            <div className="flex items-center justify-between text-sm border-b border-primary-14 h-8 sm:h-12 px-4 bg-stone-50">
+                                                <h5 className="text-black/70 uppercase">
+                                                    {translate('Seller')}
+                                                </h5>
+                                                <Link
+                                                    to="#"
+                                                    className="text-primary"
+                                                >
+                                                    {shopName}
+                                                </Link>
+                                            </div>
                                         )}
 
                                         {carts.map((item) => (
@@ -771,16 +791,23 @@ const Checkout = () => {
                                                 className="px-2 sm:px-4 border-b border-primary-14"
                                                 key={item.id}
                                             >
-                                                {window.config.generalSettings.skipCart ? (
+                                                {window.config.generalSettings
+                                                    .skipCart ? (
                                                     // Skip cart mode: show editable cart items
                                                     <div className="flex items-center gap-2 py-2">
                                                         <div className="grow">
                                                             <ProductCardWide
-                                                                cartProduct={item}
+                                                                cartProduct={
+                                                                    item
+                                                                }
                                                                 size="sm"
                                                                 counter={false}
-                                                                deleteBtn={false}
-                                                                onlyPrice={false}
+                                                                deleteBtn={
+                                                                    false
+                                                                }
+                                                                onlyPrice={
+                                                                    false
+                                                                }
                                                             />
                                                         </div>
                                                         <div className="flex items-center gap-2">
@@ -789,17 +816,41 @@ const Checkout = () => {
                                                                 <button
                                                                     type="button"
                                                                     className="px-2 py-1 text-gray-600 hover:bg-gray-100 disabled:opacity-50"
-                                                                    onClick={() => handleCartQuantityChange(item, 'decrease')}
-                                                                    disabled={item.qty <= 1}
+                                                                    onClick={() =>
+                                                                        handleCartQuantityChange(
+                                                                            item,
+                                                                            'decrease',
+                                                                        )
+                                                                    }
+                                                                    disabled={
+                                                                        item.qty <=
+                                                                        1
+                                                                    }
                                                                 >
                                                                     -
                                                                 </button>
-                                                                <span className="px-2 text-sm min-w-[24px] text-center">{item.qty}</span>
+                                                                <span className="px-2 text-sm min-w-[24px] text-center">
+                                                                    {item.qty}
+                                                                </span>
                                                                 <button
                                                                     type="button"
                                                                     className="px-2 py-1 text-gray-600 hover:bg-gray-100 disabled:opacity-50"
-                                                                    onClick={() => handleCartQuantityChange(item, 'increase')}
-                                                                    disabled={!window.config.generalSettings.allowBackorder && item.qty >= item.product.stockQty}
+                                                                    onClick={() =>
+                                                                        handleCartQuantityChange(
+                                                                            item,
+                                                                            'increase',
+                                                                        )
+                                                                    }
+                                                                    disabled={
+                                                                        !window
+                                                                            .config
+                                                                            .generalSettings
+                                                                            .allowBackorder &&
+                                                                        item.qty >=
+                                                                            item
+                                                                                .product
+                                                                                .stockQty
+                                                                    }
                                                                 >
                                                                     +
                                                                 </button>
@@ -808,10 +859,18 @@ const Checkout = () => {
                                                             <button
                                                                 type="button"
                                                                 className="p-2 text-gray-400 hover:text-red-500 transition-colors"
-                                                                onClick={() => handleRemoveFromCart(item)}
-                                                                title={translate('Remove')}
+                                                                onClick={() =>
+                                                                    handleRemoveFromCart(
+                                                                        item,
+                                                                    )
+                                                                }
+                                                                title={translate(
+                                                                    'Remove',
+                                                                )}
                                                             >
-                                                                <FaTrash size={14} />
+                                                                <FaTrash
+                                                                    size={14}
+                                                                />
                                                             </button>
                                                         </div>
                                                     </div>
@@ -850,7 +909,7 @@ const Checkout = () => {
                                     <span>{translate('Shipping Charge')}</span>
                                     <span>
                                         {Number(shippingCharge) <= 0 &&
-                                        Boolean(shippingAddress?.cityId)
+                                        Boolean(shippingZoneId)
                                             ? translate('Free shipping')
                                             : currencyFormatter(shippingCharge)}
                                     </span>

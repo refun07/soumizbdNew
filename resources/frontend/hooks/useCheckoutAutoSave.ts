@@ -28,7 +28,7 @@ export const useCheckoutAutoSave = ({
 }: UseCheckoutAutoSaveProps) => {
     const dispatch = useAppDispatch();
     const [saveSession] = useSaveCheckoutSessionMutation();
-    
+
     const {
         customerDetails,
         shippingAddress,
@@ -59,7 +59,7 @@ export const useCheckoutAutoSave = ({
         if (paymentMethod) {
             return 'payment';
         }
-        if (shippingAddress?.address && shippingAddress?.cityId) {
+        if (shippingAddress?.address) {
             return 'shipping';
         }
         return 'details';
@@ -110,9 +110,9 @@ export const useCheckoutAutoSave = ({
                         console.debug('Auto-save failed:', error);
                     }
                 },
-                1000 // 1 second debounce
+                1000, // 1 second debounce
             ),
-        [saveSession]
+        [saveSession],
     );
 
     // Watch for changes and trigger save

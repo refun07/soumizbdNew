@@ -2,6 +2,7 @@ import {
     IAddress,
     ICity,
     ICountry,
+    IDeliveryArea,
     IState,
 } from '../../../types/checkout';
 import { objectToFormData } from '../../../utils/ObjectFormData';
@@ -46,6 +47,7 @@ interface CheckoutSessionPayload {
     }>;
     cartTotal?: number;
     shippingCharge?: number;
+    shippingZoneId?: number;
 }
 
 interface CheckoutSessionResponse {
@@ -152,11 +154,13 @@ const checkoutApi = apiSlice
             getShippingCharge: builder.query<
                 number,
                 {
-                    cityId: number;
-                    userId: number;
-                    guestUserId: number;
+                    addressId?: number;
+                    cityId?: number;
+                    zoneId?: number;
+                    userId?: number;
+                    guestUserId?: number;
                     shopIds: number[];
-                    cartIds: number[];
+                    cartIds?: number[];
                     coupons: string[];
                     items?: Array<{
                         product_id: number;
@@ -176,6 +180,34 @@ const checkoutApi = apiSlice
                         },
                     };
                 },
+                providesTags: ['ShippingCharges'],
+                transformResponse: (res: any) => res.result,
+            }),
+
+            getDeliveryAreas: builder.query<
+                IDeliveryArea[],
+                {
+                    userId: number;
+                    guestUserId: number;
+                    shopIds: number[];
+                    cartIds: number[];
+                    coupons: string[];
+                    items?: Array<{
+                        product_id: number;
+                        variation_id: number;
+                        quantity: number;
+                        shop_id: number;
+                    }>;
+                }
+            >({
+                query: (body) => ({
+                    url: `checkout/get-delivery-areas`,
+                    method: 'POST',
+                    body,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                }),
                 providesTags: ['ShippingCharges'],
                 transformResponse: (res: any) => res.result,
             }),
@@ -219,6 +251,7 @@ export const {
 
     useLazyGetAddressesQuery,
     useLazyGetShippingChargeQuery,
+    useLazyGetDeliveryAreasQuery,
     useUpdateAddressMutation,
 
     useLazyGetCitiesQuery,
