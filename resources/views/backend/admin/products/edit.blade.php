@@ -32,7 +32,8 @@
 
     <!-- start::product-form -->
     <x-backend.forms.product-form :product="$product" langKey="{{ $lang_key }}" :categories="$categories" :brands="$brands"
-        :units="$units" :variations="$variations" :taxes="$taxes" :tags="$tags" :badges="$badges" :shippingClasses="$shippingClasses" />
+        :units="$units" :variations="$variations" :taxes="$taxes" :tags="$tags" :badges="$badges" :shippingClasses="$shippingClasses"
+        :simplifiedAdmin="true" />
     <!-- end::product-form -->
 @endsection
 

@@ -21,7 +21,8 @@ class ProductForm extends Component
         public $badges               = [],
         public $shippingClasses      = [],
         public $product              = null,
-        public $langKey              = null
+        public $langKey              = null,
+        public $simplifiedAdmin      = false
     ) {
         //
     }

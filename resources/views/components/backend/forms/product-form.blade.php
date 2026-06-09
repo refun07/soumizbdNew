@@ -29,15 +29,48 @@
         $showOtherInfoCard = $showEstimatedDeliveryTimeField || $showEmiField || $showWarrantyField || $showAlertQtyField;
     @endphp
 
-    <div class="grid md:grid-cols-12 gap-3">
-        <div class="md:col-span-8 md:row-span-2">
+    @if ($simplifiedAdmin)
+        <div class="card mb-3" id="admin-product-essentials">
+            <div class="card__title flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    @if ($product)
+                        <div id="admin-product-language-selector"></div>
+                    @endif
+                    <span>{{ translate('Required Product Information') }}</span>
+                    <span class="ml-2 text-xs font-normal text-muted">{{ translate('Complete these fields first') }}</span>
+                </div>
+                <x-backend.inputs.button buttonText="Save Product" type="submit" form="product-form" />
+            </div>
+            <div class="card__content">
+                <div id="admin-product-essentials-grid" class="grid md:grid-cols-2 gap-4"></div>
+            </div>
+        </div>
+
+        <div class="card mb-3" id="admin-product-variations">
+            <div class="card__title flex items-center justify-between">
+                <span>{{ translate('Product Variations') }}</span>
+                <div id="admin-product-variation-toggle"></div>
+            </div>
+            <div class="card__content" id="admin-product-variations-content"></div>
+        </div>
+
+        <div class="mb-3 mt-6">
+            <h3 class="text-base font-semibold">{{ translate('Optional Product Information') }}</h3>
+            <p class="text-sm text-muted mt-1">{{ translate('Open a section only when you need it.') }}</p>
+        </div>
+    @endif
+
+    <div class="{{ $simplifiedAdmin ? 'admin-product-layout space-y-3' : 'grid md:grid-cols-12 gap-3' }}">
+        <div class="{{ $simplifiedAdmin ? 'space-y-3' : 'md:col-span-8 md:row-span-2' }}">
             {{-- Name & Slug --}}
-            <div class="card">
+            <div class="card" data-product-section="general">
                 <div class="card__title flex justify-between items-center">
                     {{ translate('General Informations') }}
                     @if ($product)
-                        <x-backend.inputs.change-languages class="!text-sm !font-normal"
-                            langKey="{{ $langKey }}" />
+                        <div class="product-language-selector">
+                            <x-backend.inputs.change-languages class="!text-sm !font-normal"
+                                langKey="{{ $langKey }}" />
+                        </div>
                     @endif
                 </div>
 
@@ -149,7 +182,7 @@
 
             @if (!$product || ($product && $langKey == config('app.default_language')))
                 {{-- Images --}}
-                <div class="card mt-3">
+                <div class="card mt-3" data-product-section="images">
                     <div class="card__title">
                         {{ translate('Product Images') }}
                     </div>
@@ -172,11 +205,11 @@
                 </div>
 
                 {{-- Product Price & Stock --}}
-                <div class="card mt-3">
+                <div class="card mt-3" data-product-section="price-stock">
                     <div class="card__title">
                         <div class="flex items-center justify-between">
                             <span>{{ translate('Product Price & Stock') }}</span>
-                            <span>
+                                    <span id="product-variation-toggle">
                                 <span class="flex items-center">
                                     <label for="is_variant" class="cursor-pointer">
                                         {{ translate('Has Variations?') }}
@@ -429,7 +462,7 @@
 
             @endif
             {{-- Description --}}
-            <div class="card mt-3">
+            <div class="card mt-3" data-product-section="description">
                 <div class="card__title">
                     {{ translate('Product Description') }}
                 </div>
@@ -446,7 +479,7 @@
 
             @if (!$product || ($product && $langKey == config('app.default_language')))
                 {{-- SEO --}}
-                <div class="card mt-3">
+                <div class="card mt-3" data-product-section="seo">
                     <div class="card__title">
                         {{ translate('Product SEO Informations') }}
                     </div>
@@ -463,17 +496,19 @@
             @endif
 
 
-            {{-- submit button --}}
-            <div class="justify-end mt-6 hidden md:flex">
-                <x-backend.inputs.button buttonText="Save Product" type="submit" />
-            </div>
+            @unless ($simplifiedAdmin)
+                {{-- submit button --}}
+                <div class="justify-end mt-6 hidden md:flex">
+                    <x-backend.inputs.button buttonText="Save Product" type="submit" />
+                </div>
+            @endunless
         </div>
 
         {{-- right bar --}}
         @if (!$product || ($product && $langKey == config('app.default_language')))
-            <div class="md:col-span-4 space-y-3">
+            <div class="{{ $simplifiedAdmin ? 'space-y-3' : 'md:col-span-4 space-y-3' }}">
                 {{-- Status --}}
-                <div class="card">
+                <div class="card" data-product-section="status">
                     <div class="card__title">
                         {{ translate('Product Status') }}
                     </div>
@@ -497,13 +532,13 @@
                                     </span>
                                 </a>
                             @endif
-                            <div class="flex items-center justify-between">
+                            <div class="admin-status-toggle flex items-center justify-between">
                                 <p>{{ translate('Published') }}</p>
                                 <x-backend.inputs.checkbox toggler="true" name="is_published" value="1"
                                     :isChecked="$product?->is_published" />
                             </div>
 
-                            <div class="flex items-center justify-between">
+                            <div class="admin-status-toggle flex items-center justify-between">
                                 <p>{{ translate('Hide on E-commerce') }}</p>
                                 <x-backend.inputs.checkbox toggler="true" name="hide_on_ecom" value="1"
                                     :isChecked="$product?->hide_on_ecom" />
@@ -522,7 +557,7 @@
 
                 {{-- QR Code & Links --}}
                 @if ($product && $showQrCodeSection)
-                    <div class="card">
+                    <div class="card" data-product-section="qr-code">
                         <div class="card__title">
                             {{ translate('Product QR Code') }}
                         </div>
@@ -899,7 +934,7 @@
                 @endif
 
                 {{-- Categories --}}
-                <div class="card">
+                <div class="card" data-product-section="categories">
                     <div class="card__title">
                         {{ translate('Product Categories') }}
                     </div>
@@ -933,7 +968,7 @@
                 </div>
 
                 {{-- Brand --}}
-                <div class="card">
+                <div class="card" data-product-section="brand">
                     <div class="card__title">
                         {{ translate('Product Brand') }}
                     </div>
@@ -963,7 +998,7 @@
 
                 @if ($showTagsBadgesCard)
                     {{-- Tags and Badges --}}
-                    <div class="card">
+                    <div class="card" data-product-section="tags-badges">
                         <div class="card__title">
                             {{ translate('Tags and Badges') }}
                         </div>
@@ -1045,7 +1080,7 @@
 
                 @if ($showTaxesCard)
                     {{-- Taxes --}}
-                    <div class="card">
+                    <div class="card" data-product-section="taxes">
                         <div class="card__title flex items-center justify-between">
                             <span>
                                 {{ translate('Product Taxes') }}
@@ -1092,7 +1127,7 @@
                 @endif
 
                 @if ($showOtherInfoCard)
-                    <div class="card">
+                    <div class="card" data-product-section="other-info">
                         <div class="card__title flex items-center justify-between">
                             <span>
                                 {{ translate('Other Informations') }}
@@ -1153,7 +1188,7 @@
                     </div>
                 @endif
                 {{-- Shipping Class --}}
-                <div class="card">
+                <div class="card" data-product-section="shipping">
                     <div class="card__title">
                         <span>
                             {{ translate('Shipping Class') }}
@@ -1186,7 +1221,7 @@
                         $expectedReleaseDate = $preOrder['expected_release_date'] ?? '';
                         $preOrderDescription = $preOrder['description'] ?? '';
                     @endphp
-                    <div class="card">
+                    <div class="card" data-product-section="pre-order">
                         <div class="card__title flex items-center justify-between">
                             <span>{{ translate('Pre-Order Settings') }}</span>
                             <x-backend.inputs.checkbox toggler="true" name="pre_order_is_active" value="1"
@@ -1237,7 +1272,7 @@
                                 }
                             }
                         @endphp
-                        <div class="card">
+                        <div class="card" data-product-section="pre-order-variations">
                             <div class="card__title">
                                 {{ translate('Pre-Order per Variation') }}
                             </div>
@@ -1284,11 +1319,347 @@
             </div>
         @endif
     </div>
-    {{-- submit button --}}
-    <div class="flex justify-end mt-6 md:hidden">
-        <x-backend.inputs.button buttonText="Save Product" type="submit" />
-    </div>
+    @unless ($simplifiedAdmin)
+        {{-- submit button --}}
+        <div class="flex justify-end mt-6 md:hidden">
+            <x-backend.inputs.button buttonText="Save Product" type="submit" />
+        </div>
+    @endunless
 </form>
+
+@if ($simplifiedAdmin)
+    <style>
+        #admin-product-essentials .admin-essential-field {
+            min-width: 0;
+        }
+
+        #admin-product-essentials .theme-input-group {
+            display: block;
+        }
+
+        #admin-product-essentials .theme-input-label {
+            display: flex;
+            padding-top: 0;
+            padding-bottom: 0.5rem;
+        }
+
+        #admin-product-essentials .admin-unit-field .theme-input-label {
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #admin-product-essentials .admin-unit-field .theme-input-label.input-required::after {
+            order: 1;
+        }
+
+        #admin-product-essentials .admin-unit-field .unit-create-modal {
+            order: 2;
+            margin-left: auto;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: none;
+        }
+
+        #admin-product-essentials .theme-input-wrapper {
+            width: 100%;
+            min-width: 0;
+        }
+
+        #admin-product-essentials .theme-input--file-upload > div:first-child {
+            margin-bottom: 0.5rem;
+        }
+
+        #admin-product-essentials .file-preview {
+            min-height: 0;
+        }
+
+        #admin-product-essentials .admin-essential-panel {
+            min-width: 0;
+            border: 1px solid rgb(var(--border));
+            border-radius: 0.75rem;
+            padding: 1rem;
+            background: rgb(var(--background-primary-light));
+            color: rgb(var(--foreground));
+        }
+
+        #admin-product-essentials .admin-essential-panel .card__content {
+            padding: 0;
+        }
+
+        #admin-product-essentials .admin-essential-panel .cateogry-tree,
+        #admin-product-essentials .admin-essential-panel .brand-tree-data {
+            max-height: 9rem;
+            overflow-y: auto;
+        }
+
+        #admin-product-essentials .admin-status-toggle-row {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+        }
+
+        #admin-product-essentials .admin-status-toggle {
+            min-height: 3rem;
+            border: 1px solid rgb(var(--border));
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            background: rgb(var(--background));
+            color: rgb(var(--foreground));
+        }
+
+        #admin-product-essentials .admin-essential-panel-status label,
+        #admin-product-essentials .admin-essential-panel-status p,
+        #admin-product-essentials .admin-essential-panel-status > .card__content > .space-y-5 > div > span:first-child {
+            color: rgb(var(--foreground));
+        }
+
+        #admin-product-essentials .admin-essential-panel-status .theme-input {
+            border-color: rgb(var(--border));
+            background: rgb(var(--background));
+            color: rgb(var(--foreground));
+        }
+
+        #admin-product-essentials .admin-essential-panel-status a {
+            color: rgb(var(--secondary-light));
+        }
+
+        .dark #admin-product-essentials .admin-essential-panel-status .text-muted {
+            color: rgb(var(--muted));
+        }
+
+        .admin-product-layout .admin-product-accordion > .card__title {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .admin-product-layout .admin-product-accordion > .card__title::after {
+            content: '';
+            width: 0.55rem;
+            height: 0.55rem;
+            margin-left: auto;
+            border-right: 2px solid rgb(var(--muted));
+            border-bottom: 2px solid rgb(var(--muted));
+            transform: rotate(45deg);
+            transition: transform 150ms ease;
+        }
+
+        .admin-product-layout .admin-product-accordion.is-open > .card__title::after {
+            transform: rotate(225deg);
+        }
+
+        .admin-product-layout .admin-product-accordion:not(.is-open) > .card__content {
+            display: none;
+        }
+
+        .admin-product-layout > div,
+        .admin-product-layout .card {
+            width: 100%;
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const essentialsGrid = document.getElementById('admin-product-essentials-grid');
+            const productLayout = document.querySelector('.admin-product-layout');
+            const variationToggleContainer = document.getElementById('admin-product-variation-toggle');
+            const variationsContent = document.getElementById('admin-product-variations-content');
+            const languageSelectorContainer = document.getElementById('admin-product-language-selector');
+
+            if (!essentialsGrid || !productLayout || !variationToggleContainer || !variationsContent) {
+                return;
+            }
+
+            const addField = (selector, extraClasses = '') => {
+                const input = document.querySelector(selector);
+                const field = input?.closest('.theme-input-group');
+
+                if (!field) {
+                    return;
+                }
+
+                const wrapper = document.createElement('div');
+                wrapper.className = `admin-essential-field ${extraClasses}`.trim();
+                wrapper.appendChild(field);
+                essentialsGrid.appendChild(wrapper);
+            };
+
+            const addContainer = (selector, extraClasses = '') => {
+                const container = document.querySelector(selector);
+
+                if (!container) {
+                    return;
+                }
+
+                const wrapper = document.createElement('div');
+                wrapper.className = `admin-essential-field ${extraClasses}`.trim();
+                wrapper.appendChild(container);
+                essentialsGrid.appendChild(wrapper);
+            };
+
+            const addPanel = (sectionName, title, extraClasses = '') => {
+                const section = productLayout.querySelector(`[data-product-section="${sectionName}"]`);
+                const content = section?.querySelector(':scope > .card__content');
+
+                if (!section || !content) {
+                    return;
+                }
+
+                const panel = document.createElement('div');
+                panel.className = `admin-essential-panel admin-essential-panel-${sectionName} ${extraClasses}`.trim();
+                panel.innerHTML = `<h4 class="mb-3 text-sm font-semibold text-foreground">${title}</h4>`;
+                panel.appendChild(content);
+                essentialsGrid.appendChild(panel);
+                section.hidden = true;
+            };
+
+            addField('#name');
+            addContainer('.unit-tree-data', 'admin-unit-field');
+            addField('#thumbnail_image');
+            addField('#gallery_images');
+            addField('#sku', 'non-variant-essential');
+            addField('#price', 'non-variant-essential');
+            addField('#discount_value');
+            addField('#stock_qty', 'non-variant-essential');
+            addField('select[name="discount_type"]');
+            addField('#date_range', 'md:col-span-2');
+
+            const unitField = essentialsGrid.querySelector('.admin-unit-field');
+            const unitLabel = unitField?.querySelector('.theme-input-label');
+            const addUnitAction = productLayout.querySelector('.unit-create-modal');
+            const addUnitActionWrapper = addUnitAction?.closest('.text-end');
+
+            if (unitLabel && addUnitAction) {
+                unitLabel.appendChild(addUnitAction);
+                addUnitActionWrapper?.remove();
+            }
+
+            const languageSelector = productLayout.querySelector('.product-language-selector');
+            if (languageSelector && languageSelectorContainer) {
+                languageSelectorContainer.appendChild(languageSelector);
+            }
+
+            const variationToggle = document.getElementById('product-variation-toggle');
+            if (variationToggle) {
+                variationToggleContainer.appendChild(variationToggle);
+            }
+
+            const variationForm = productLayout.querySelector('[data-product-section="price-stock"] .hasVariation');
+            if (variationForm) {
+                variationsContent.appendChild(variationForm);
+            }
+
+            addPanel('description', `{{ translate('Product Description') }}`, 'md:col-span-2');
+            addPanel('status', `{{ translate('Product Status') }}`, 'md:col-span-2');
+            addPanel('categories', `{{ translate('Product Categories') }}`);
+            addPanel('brand', `{{ translate('Product Brand') }}`);
+
+            const statusPanel = essentialsGrid.querySelector('.admin-essential-panel .admin-status-toggle');
+            const statusContent = statusPanel?.closest('.card__content');
+            const statusToggles = statusContent?.querySelectorAll('.admin-status-toggle');
+
+            if (statusContent && statusToggles?.length) {
+                const toggleRow = document.createElement('div');
+                toggleRow.className = 'admin-status-toggle-row';
+                statusToggles.forEach((toggle) => toggleRow.appendChild(toggle));
+                statusContent.querySelector(':scope > .space-y-5')?.prepend(toggleRow);
+            }
+
+            const priceStockSection = productLayout.querySelector('[data-product-section="price-stock"]');
+            if (priceStockSection) {
+                priceStockSection.hidden = true;
+            }
+
+            const generalSection = productLayout.querySelector('[data-product-section="general"]');
+            if (generalSection) {
+                generalSection.hidden = true;
+            }
+
+            const setAccordionState = (card, isOpen) => {
+                card.classList.toggle('is-open', isOpen);
+                card.querySelector(':scope > .card__title')?.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            };
+
+            productLayout.querySelectorAll('.card[data-product-section]').forEach((card) => {
+                if (card.hidden) {
+                    return;
+                }
+
+                const title = card.querySelector(':scope > .card__title');
+                const content = card.querySelector(':scope > .card__content');
+
+                const hasFormContent = content?.querySelector(
+                    'input, select, textarea, button, a, .jodit-container',
+                );
+
+                if (!title || !content || !hasFormContent) {
+                    card.hidden = true;
+                    return;
+                }
+
+                card.classList.add('admin-product-accordion');
+                title.setAttribute('role', 'button');
+                title.setAttribute('tabindex', '0');
+                setAccordionState(card, false);
+
+                const toggleCard = (event) => {
+                    if (event.target.closest('input, button, a, select, textarea, label')) {
+                        return;
+                    }
+
+                    setAccordionState(card, !card.classList.contains('is-open'));
+                };
+
+                title.addEventListener('click', toggleCard);
+                title.addEventListener('keydown', function(event) {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        setAccordionState(card, !card.classList.contains('is-open'));
+                    }
+                });
+
+                title.querySelectorAll('input').forEach((input) => {
+                    input.addEventListener('change', function() {
+                        if (this.checked) {
+                            setAccordionState(card, true);
+                        }
+                    });
+                });
+            });
+
+            const openContainingAccordion = (element) => {
+                const card = element?.closest('.admin-product-accordion');
+                if (card) {
+                    setAccordionState(card, true);
+                }
+            };
+
+            document.getElementById('product-form')?.addEventListener('invalid', function(event) {
+                openContainingAccordion(event.target);
+            }, true);
+
+            const variantToggle = document.getElementById('is_variant');
+            const syncVariantEssentials = () => {
+                const hasVariations = variantToggle?.checked ?? false;
+
+                essentialsGrid.querySelectorAll('.non-variant-essential').forEach((field) => {
+                    field.hidden = hasVariations;
+                });
+
+                variationsContent.hidden = !hasVariations;
+            };
+
+            variantToggle?.addEventListener('change', syncVariantEssentials);
+            syncVariantEssentials();
+
+            const refreshMediaPreviews = () => {
+                window.mediaManager?.getPreviouslySelectedMedia?.();
+            };
+
+            refreshMediaPreviews();
+            window.setTimeout(refreshMediaPreviews, 100);
+        });
+    </script>
+@endif
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {

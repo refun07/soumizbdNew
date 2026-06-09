@@ -27,7 +27,7 @@
     <!-- end::dashboard breadcrumb -->
     <!-- start::product-form -->
     <x-backend.forms.product-form :categories="$categories" :brands="$brands" :units="$units" :variations="$variations" :taxes="$taxes"
-        :tags="$tags" :badges="$badges" :shippingClasses="$shippingClasses" />
+        :tags="$tags" :badges="$badges" :shippingClasses="$shippingClasses" :simplifiedAdmin="true" />
     <!-- end::product-form -->
 @endsection
 
@@ -35,4 +35,3 @@
 @section('scripts')
     <x-backend.inc.product-scripts />
 @endsection
-
