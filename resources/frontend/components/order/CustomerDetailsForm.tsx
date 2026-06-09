@@ -1,3 +1,5 @@
+import { IoArrowBack } from 'react-icons/io5';
+import { Link } from 'react-router-dom';
 import {
     setCheckoutData,
     useCheckoutData,
@@ -27,9 +29,24 @@ const CustomerDetailsForm = () => {
 
     return (
         <div className="rounded-[4px] border border-slate-200 overflow-hidden">
-            <h3 className="py-3 px-4 sm:px-5 bg-slate-100 text-sm font-bold text-slate-800 uppercase">
-                {translate('Customer Details')}
-            </h3>
+            <div className="flex items-center justify-between gap-3 bg-slate-100 py-3 px-4 sm:px-5">
+                <h3 className="text-sm font-bold text-slate-800 uppercase">
+                    {translate('Customer Details')}
+                </h3>
+                <Link
+                    to={
+                        window.config.generalSettings.skipCart
+                            ? '/products'
+                            : '/cart'
+                    }
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary transition-colors hover:text-secondary sm:text-sm"
+                >
+                    <IoArrowBack />
+                    {window.config.generalSettings.skipCart
+                        ? translate('Continue Shopping')
+                        : translate('Back To Cart')}
+                </Link>
+            </div>
 
             <div className="p-4 sm:p-5 grid sm:grid-cols-2 gap-3">
                 <InputGroup>

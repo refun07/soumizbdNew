@@ -643,7 +643,7 @@ const Checkout = () => {
 
             <div className="container no-style grid lg:grid-cols-3 mb-12">
                 <div className="lg:col-span-2">
-                    <div className="bg-white rounded-[4px] p-3 sm:p-5 md:p-7">
+                    <div className="bg-white rounded-[4px] px-3 pb-3 sm:px-5 sm:pb-5 md:px-7 md:pb-7">
                         <CustomerDetailsForm />
 
                         {showFullForm && (
@@ -701,30 +701,14 @@ const Checkout = () => {
                             </>
                         )}
 
-                        <div className="flex justify-between mt-7">
-                            {currentStep === 1 ? (
-                                <Button
-                                    as="link"
-                                    to={
-                                        window.config.generalSettings.skipCart
-                                            ? '/products'
-                                            : '/cart'
-                                    }
-                                    size="lg"
-                                    onClick={handlePrev}
-                                    variant="outline"
-                                    arrow={'left'}
-                                >
-                                    {window.config.generalSettings.skipCart
-                                        ? translate('Continue Shopping')
-                                        : translate('Back To Cart')}
-                                </Button>
-                            ) : (
+                        <div className="flex justify-end mt-7">
+                            {currentStep > 1 && (
                                 <Button
                                     size="lg"
                                     onClick={handlePrev}
                                     variant="outline"
                                     arrow={'left'}
+                                    className="mr-auto"
                                 >
                                     {translate('Previous Step')}
                                 </Button>
