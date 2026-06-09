@@ -1373,6 +1373,21 @@
             min-height: 0;
         }
 
+        #admin-product-essentials .admin-direct-upload-button {
+            white-space: nowrap;
+        }
+
+        #admin-product-essentials .admin-direct-upload-status {
+            display: block;
+            margin-top: 0.4rem;
+            font-size: 0.75rem;
+            color: rgb(var(--muted));
+        }
+
+        #admin-product-essentials .admin-direct-upload-status.is-error {
+            color: rgb(239 68 68);
+        }
+
         #admin-product-essentials .admin-essential-panel {
             min-width: 0;
             border: 1px solid rgb(var(--border));
@@ -1655,8 +1670,132 @@
                 window.mediaManager?.getPreviouslySelectedMedia?.();
             };
 
+            const setupDirectImageUpload = (inputId, multiple) => {
+                const mediaInput = document.getElementById(inputId);
+                const inputGroup = mediaInput?.closest('.theme-input--file-upload');
+                const actionRow = inputGroup?.querySelector('.theme-input-wrapper > .flex');
+
+                if (!mediaInput || !inputGroup || !actionRow) {
+                    return;
+                }
+
+                const fileInput = document.createElement('input');
+                fileInput.type = 'file';
+                fileInput.accept = 'image/*';
+                fileInput.multiple = multiple;
+                fileInput.hidden = true;
+
+                const uploadButton = document.createElement('button');
+                uploadButton.type = 'button';
+                uploadButton.className = 'admin-direct-upload-button button button--secondary ml-2';
+                uploadButton.innerHTML = multiple
+                    ? '<i class="fa-solid fa-upload mr-1"></i>{{ translate('Upload Images') }}'
+                    : '<i class="fa-solid fa-upload mr-1"></i>{{ translate('Upload Image') }}';
+
+                const status = document.createElement('span');
+                status.className = 'admin-direct-upload-status';
+
+                actionRow.appendChild(uploadButton);
+                inputGroup.querySelector('.theme-input-wrapper')?.appendChild(fileInput);
+                inputGroup.querySelector('.theme-input-wrapper')?.appendChild(status);
+
+                const setStatus = (message = '', isError = false) => {
+                    status.textContent = message;
+                    status.classList.toggle('is-error', isError);
+                };
+
+                const renderUploadedPreviews = (uploadedFiles) => {
+                    const preview = inputGroup.querySelector('.file-preview');
+                    const mediaCount = inputGroup.querySelector('.media-count');
+
+                    if (!preview || !mediaCount || !window.mediaManager?.markups?.inputMediaPreviewMarkup) {
+                        refreshMediaPreviews();
+                        return;
+                    }
+
+                    if (!multiple) {
+                        preview.innerHTML = '';
+                    }
+
+                    uploadedFiles.forEach((file) => {
+                        preview.insertAdjacentHTML(
+                            'beforeend',
+                            window.mediaManager.markups.inputMediaPreviewMarkup(file),
+                        );
+                    });
+
+                    const selectedCount = mediaInput.value.split(',').filter(Boolean).length;
+                    mediaCount.textContent = selectedCount === 1
+                        ? '1 media selected'
+                        : `${selectedCount} media selected`;
+                };
+
+                uploadButton.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    fileInput.click();
+                });
+
+                fileInput.addEventListener('change', async function() {
+                    const files = Array.from(fileInput.files || []);
+                    if (!files.length) {
+                        return;
+                    }
+
+                    if (files.some((file) => !file.type.startsWith('image/'))) {
+                        setStatus('{{ translate('Please select image files only') }}', true);
+                        fileInput.value = '';
+                        return;
+                    }
+
+                    uploadButton.disabled = true;
+                    setStatus(`{{ translate('Uploading') }} ${files.length} ${files.length === 1 ? '{{ translate('image') }}' : '{{ translate('images') }}'}...`);
+
+                    try {
+                        const uploadedFiles = [];
+
+                        for (const file of files) {
+                            const formData = new FormData();
+                            formData.append('media_file', file);
+
+                            const response = await fetch(`{{ url('/file-manager/upload') }}`, {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': `{{ csrf_token() }}`,
+                                    'Accept': 'application/json',
+                                },
+                                body: formData,
+                            });
+
+                            const uploadedFile = await response.json();
+                            if (!response.ok || !uploadedFile?.id) {
+                                throw new Error('{{ translate('Image upload failed') }}');
+                            }
+
+                            uploadedFiles.push(uploadedFile);
+                        }
+
+                        const existingIds = multiple
+                            ? mediaInput.value.split(',').filter(Boolean)
+                            : [];
+                        const uploadedIds = uploadedFiles.map((file) => String(file.id));
+                        mediaInput.value = [...existingIds, ...uploadedIds].join(',');
+                        mediaInput.dispatchEvent(new Event('change', { bubbles: true }));
+                        renderUploadedPreviews(uploadedFiles);
+                        setStatus('{{ translate('Upload complete') }}');
+                    } catch (error) {
+                        setStatus(error?.message || '{{ translate('Image upload failed') }}', true);
+                    } finally {
+                        uploadButton.disabled = false;
+                        fileInput.value = '';
+                    }
+                });
+            };
+
             refreshMediaPreviews();
             window.setTimeout(refreshMediaPreviews, 100);
+            setupDirectImageUpload('thumbnail_image', false);
+            setupDirectImageUpload('gallery_images', true);
         });
     </script>
 @endif
