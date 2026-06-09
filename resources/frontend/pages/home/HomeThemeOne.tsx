@@ -1080,90 +1080,90 @@ const HomeThemeOne = () => {
                             },
                         },
                     }}
-                    className="!mt-2.5 px-3.5"
+                    className="!mt-2.5"
                     id="banner-slider"
                 >
-                    <ThemeSlider
-                        slidesPerView={1}
-                        spaceBetween={15}
-                        autoplay={{
-                            delay: 2000,
-                            pauseOnMouseEnter: true,
-                        }}
-                        modules={[Autoplay]}
-                        breakpoints={{
-                            568: {
-                                slidesPerView: 2,
-                            },
-                            768: {
-                                slidesPerView: 3,
-                            },
-                            992: {
-                                slidesPerView: 4,
-                            },
-                        }}
-                    >
-                        {bannerSliderRes.isLoading
-                            ? [1, 2, 3, 4].map((item) => (
-                                  <SwiperSlide key={item}>
-                                      <div className="skeleton h-auto w-full rounded-banner aspect-[14/10]" />
-                                  </SwiperSlide>
-                              ))
-                            : bannerSliderRes?.data?.map((item, idx) => (
-                                  <SwiperSlide key={idx}>
-                                      <Link
-                                          to={item.url}
-                                          className="w-full h-full"
-                                      >
-                                          <motion.img
-                                              variants={{
-                                                  hidden: {
-                                                      y: 20,
-                                                      opacity: 0,
-                                                  },
-                                                  whileInView: {
-                                                      y: 0,
-                                                      opacity: 1,
-                                                  },
-                                              }}
-                                              viewport={{ once: true }}
-                                              src={item.image}
-                                              alt=""
-                                              className="w-full h-full rounded-banner"
-                                          />
-                                      </Link>
-                                  </SwiperSlide>
-                              ))}
-                    </ThemeSlider>
+                    <div className="container">
+                        <ThemeSlider
+                            slidesPerView={1}
+                            spaceBetween={15}
+                            autoplay={{
+                                delay: 2000,
+                                pauseOnMouseEnter: true,
+                            }}
+                            modules={[Autoplay]}
+                            breakpoints={{
+                                568: {
+                                    slidesPerView: 2,
+                                },
+                                768: {
+                                    slidesPerView: 3,
+                                },
+                                992: {
+                                    slidesPerView: 4,
+                                },
+                            }}
+                        >
+                            {bannerSliderRes.isLoading
+                                ? [1, 2, 3, 4].map((item) => (
+                                      <SwiperSlide key={item}>
+                                          <div className="skeleton aspect-[14/10] h-auto w-full rounded-banner" />
+                                      </SwiperSlide>
+                                  ))
+                                : bannerSliderRes?.data?.map((item, idx) => (
+                                      <SwiperSlide key={idx}>
+                                          <Link
+                                              to={item.url}
+                                              className="block h-full w-full"
+                                          >
+                                              <motion.img
+                                                  variants={{
+                                                      hidden: {
+                                                          y: 20,
+                                                          opacity: 0,
+                                                      },
+                                                      whileInView: {
+                                                          y: 0,
+                                                          opacity: 1,
+                                                      },
+                                                  }}
+                                                  viewport={{ once: true }}
+                                                  src={item.image}
+                                                  alt=""
+                                                  className="block aspect-[14/10] h-full w-full rounded-banner object-cover"
+                                              />
+                                          </Link>
+                                      </SwiperSlide>
+                                  ))}
+                        </ThemeSlider>
+                    </div>
                 </motion.section>
             )}
 
             {/* end::banner */}
             {banner?.showThemeOneSecondaryBanner === '1' && (
-                <section
-                    id="secondary-banner"
-                    className="relative w-screen left-1/2 -translate-x-1/2 overflow-hidden"
-                >
-                    {(() => {
-                        const item = banner.secondaryBanner;
-                        const shouldShowVideo =
-                            item.useBackgroundVideo === '1' &&
-                            !!item.backgroundVideoLink;
-                        const secondaryContentAlignment =
-                            item.contentAlignment ?? 'left';
+                <section id="secondary-banner">
+                    <div className="container">
+                        {(() => {
+                            const item = banner.secondaryBanner;
+                            const shouldShowVideo =
+                                item.useBackgroundVideo === '1' &&
+                                !!item.backgroundVideoLink;
+                            const secondaryContentAlignment =
+                                item.contentAlignment ?? 'left';
 
-                        return (
-                            <div
-                                className="relative h-[520px] md:h-[510px] w-full overflow-hidden bg-center"
-                                style={{
-                                    backgroundImage: item.backgroundImage
-                                        ? `url(${item.backgroundImage})`
-                                        : 'none',
-                                    backgroundSize: 'cover',
-                                    backgroundRepeat: 'no-repeat',
-                                    backgroundPosition: 'center center',
-                                }}
-                            >
+                            return (
+                                <div
+                                    className="relative h-[520px] w-full overflow-hidden rounded-banner bg-center md:h-[510px]"
+                                    style={{
+                                        backgroundImage: item.backgroundImage
+                                            ? `url(${item.backgroundImage})`
+                                            : 'none',
+                                        backgroundSize: 'cover',
+                                        backgroundRepeat: 'no-repeat',
+                                        backgroundPosition: 'center center',
+                                    }}
+                                >
                                 {shouldShowVideo && (
                                     <>
                                         <LazyBackgroundVideo
@@ -1258,9 +1258,10 @@ const HomeThemeOne = () => {
                                         )}
                                     </div>
                                 </div>
-                            </div>
-                        );
-                    })()}
+                                </div>
+                            );
+                        })()}
+                    </div>
                 </section>
             )}
 
