@@ -14,7 +14,6 @@ import ProductSectionSkeleton from '../../components/skeletons/ProductSectionSke
 import CategorySlider from '../../components/slider/CategorySlider';
 import ProductsSlider from '../../components/slider/ProductsSlider';
 import ThemeSlider from '../../components/slider/ThemeSlider';
-import SmallProductsColumn from '../../components/SmallProductsColumn';
 import SectionTitle from '../../components/titles/SectionTitle';
 import {
     useGetBannerQuery,
@@ -1813,8 +1812,6 @@ const HomeThemeOne = () => {
                     theme="theme-one"
                 />
             )}
-
-            <SmallProductsColumn />
         </div>
     );
 };

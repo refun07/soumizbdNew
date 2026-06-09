@@ -1071,35 +1071,6 @@ value="{{ $cat->id }}"   />
     </div>
 </div>
 
-{{-- product sections --}}
-<div class="ac !mt-0">
-    <h2 class="ac-header">
-        <button type="button" class="ac-trigger !px-8 !rounded-none !bg-background !text-foreground">
-            <span class="">{{ translate('Product Sections') }}</span>
-        </button>
-    </h2>
-    <div class="ac-panel">
-        <div class="pt-0 pb-7 px-3 md:px-6 xl:px-10">
-            <form action="" class="space-y-3 homepage-form" method="POST" enctype="multipart/form-data">
-                @csrf
-                <div class="pt-2">
-                    <input type="hidden" name="types[]" value="hideProductSections">
-                    <div class="flex items-center justify-between mb-5">
-                        <p>{{ translate('Hide Product Sections (New Arrivals, Best Sellers, Highest Rated)') }}</p>
-                        <x-backend.inputs.checkbox toggler="true" name="hideProductSections" value="1"
-                            isChecked="{{ getSetting('hideProductSections') ?? false }}" />
-                    </div>
-
-                    <div class="flex justify-end pt-2">
-                        <x-backend.inputs.button type="submit" buttonText="{{ translate('Save Changes') }}"
-                            class="submit-btn mt-3" />
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
 {{-- bottom 4 image banner --}}
 <div class="ac !mt-0 ">
     <h2 class="ac-header">
