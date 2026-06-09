@@ -1872,6 +1872,9 @@ class ProductService
 
         $langKey = app()->getLocale();
         $translation = $product->productTranslations->where('lang_key', $langKey)->first();
+        $defaultWarehouse = Warehouse::where('shop_id', $product->shop_id)
+            ->orderByDesc('is_default')
+            ->first();
         
         $data = [
             'id' => $product->id,
@@ -1883,13 +1886,12 @@ class ProductService
 
         // Get variations if product has variations
         if ($product->has_variation) {
-            $variations = $product->variations->map(function ($variation) use ($product) {
-                $stockQty = 0;
-                if (useInventory()) {
-                    $stockQty = $variation->productVariationStocks->sum('stock_qty');
-                } else {
-                    $stockQty = $variation->stock_qty ?? 0;
-                }
+            $variations = $product->variations->map(function ($variation) use ($defaultWarehouse) {
+                $stockQty = useInventory()
+                    ? $variation->productVariationStocks->sum('stock_qty')
+                    : $variation->productVariationStocks
+                        ->where('warehouse_id', $defaultWarehouse?->id)
+                        ->sum('stock_qty');
                 
                 return [
                     'id' => $variation->id,
@@ -1911,11 +1913,12 @@ class ProductService
             // Simple product
             $data['price'] = $product->min_price;
             
-            if (useInventory()) {
-                $data['stock_qty'] = $product->getStockQuantity();
-            } else {
-                $data['stock_qty'] = $product->stock_qty;
-            }
+            $data['stock_qty'] = useInventory()
+                ? $product->getStockQuantity()
+                : $product->variations
+                    ->flatMap->productVariationStocks
+                    ->where('warehouse_id', $defaultWarehouse?->id)
+                    ->sum('stock_qty');
         }
 
         return [
@@ -2031,30 +2034,40 @@ class ProductService
                 $product->max_price = max($prices);
             }
 
-            // Update stock only if inventory is disabled - always update product_variations table
+            // Without inventory, stock is stored against the shop's default warehouse.
             if (!useInventory() && isset($validated['stock'])) {
+                $defaultWarehouse = Warehouse::where('shop_id', $product->shop_id)
+                    ->orderByDesc('is_default')
+                    ->first();
+
+                if (!$defaultWarehouse) {
+                    throw new \RuntimeException(translate('No warehouse is configured for this shop'));
+                }
+
                 if (!empty($validated['variation_id'])) {
-                    // Variant product: Update the selected specific variation stock
                     $variation = ProductVariation::where('id', $validated['variation_id'])
                         ->where('product_id', $productId)
                         ->first();
-                    
-                    if ($variation) {
-                        $variation->stock_qty = $validated['stock'];
-                        $variation->save();
-                    }
                 } else {
-                    // Simple product: Find and update the single variation stock
                     $variation = ProductVariation::where('product_id', $productId)->first();
-                    
-                    if ($variation) {
-                        $variation->stock_qty = $validated['stock'];
-                        $variation->save();
-                    }
                 }
-                
-                // Recalculate product stock (sum of all variations)
-                $product->stock_qty = $product->variations->sum('stock_qty');
+
+                if ($variation) {
+                    $variationStock = $variation->productVariationStocks()
+                        ->where('warehouse_id', $defaultWarehouse->id)
+                        ->first() ?? new ProductVariationStock();
+
+                    $variationStock->product_variation_id = $variation->id;
+                    $variationStock->warehouse_id = $defaultWarehouse->id;
+                    $variationStock->stock_qty = $validated['stock'];
+                    $variationStock->save();
+                }
+
+                $product->stock_qty = ProductVariationStock::whereHas('productVariation', function ($query) use ($productId) {
+                    $query->where('product_id', $productId);
+                })
+                    ->where('warehouse_id', $defaultWarehouse->id)
+                    ->sum('stock_qty');
             }
 
             $product->save();
