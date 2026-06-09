@@ -677,6 +677,34 @@
     </div>
 </div>
 
+{{-- secondary on sale products --}}
+<div class="ac !mt-0">
+    <h2 class="ac-header">
+        <button type="button" class="ac-trigger !px-8 !rounded-none !bg-background !text-foreground">
+            <span class="">{{ translate('Secondary On Sale Products') }}</span>
+        </button>
+    </h2>
+    <div class="ac-panel">
+        <div class="pt-0 pb-7 px-3 md:px-6 xl:px-10">
+            <form action="" class="space-y-3 homepage-form" method="POST" enctype="multipart/form-data">
+                @csrf
+
+                <input type="hidden" name="types[]" value="showThemeOneSecondaryOnSaleProducts">
+                <div class="flex items-center justify-between mb-5">
+                    <p>{{ translate('Show/Hide Secondary On Sale Products') }}</p>
+                    <x-backend.inputs.checkbox toggler="true" name="showThemeOneSecondaryOnSaleProducts"
+                        value="1" isChecked="{{ getSetting('showThemeOneSecondaryOnSaleProducts') ?? '1' }}" />
+                </div>
+
+                <div class="flex justify-end pt-2">
+                    <x-backend.inputs.button type="submit" buttonText="{{ translate('Save Changes') }}"
+                        class="submit-btn" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 {{-- slider section --}}
 <div class="ac !mt-0 ">
     <h2 class="ac-header">

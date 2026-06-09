@@ -53,6 +53,7 @@ export interface IGetPromoCards {
 
 export interface IGetOnSaleProducts {
     showThemeOneOnSaleProducts: 0 | '0' | '1';
+    showThemeOneSecondaryOnSaleProducts: 0 | '0' | '1';
     backgroundColor: string;
     endsAt: string | null;
     products: IProductShort[];

@@ -367,10 +367,15 @@ const HomeThemeOne = () => {
     const shouldShowPromoCards =
         promoCardsRes.data?.showThemeOnePromoCards === '1' &&
         promoCards.length > 0;
-    const onSaleProducts = onSaleProductRes.data?.products?.slice(0, 15) ?? [];
+    const allOnSaleProducts = onSaleProductRes.data?.products ?? [];
+    const onSaleProducts = allOnSaleProducts.slice(0, 15);
+    const secondaryOnSaleProducts = allOnSaleProducts.slice(0, 16);
     const shouldShowOnSaleProducts =
         onSaleProductRes.data?.showThemeOneOnSaleProducts === '1' &&
         onSaleProducts.length > 0;
+    const shouldShowSecondaryOnSaleProducts =
+        (onSaleProductRes.data?.showThemeOneSecondaryOnSaleProducts ?? '1') ===
+            '1' && secondaryOnSaleProducts.length > 0;
     const featuredProducts = topProductRes.data?.products ?? [];
     const shouldShowFeaturedProducts =
         topProductRes.data?.showThemeOneTopProducts === '1' &&
@@ -1263,6 +1268,47 @@ const HomeThemeOne = () => {
                     </div>
                 </section>
             )}
+
+            {shouldShowSecondaryOnSaleProducts ? (
+                <section id="secondary-on-sale-products">
+                    <motion.div
+                        variants={containerAnimation}
+                        initial="initial"
+                        whileInView="whileInView"
+                        viewport={{ once: true }}
+                        className="container"
+                    >
+                        <SectionTitle
+                            animated
+                            title={translate('[On Sale] Products')}
+                            subTitle={translate('Popular')}
+                            link="/on-sale-products"
+                        />
+
+                        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4 xl:gap-5">
+                            {secondaryOnSaleProducts.map((product) => (
+                                <motion.div
+                                    variants={itemAnimation}
+                                    key={product.id}
+                                    className="h-full"
+                                >
+                                    <ProductCard product={product} />
+                                </motion.div>
+                            ))}
+                        </div>
+
+                        <div className="mt-6 flex justify-end md:hidden">
+                            <Button
+                                as="link"
+                                to="/on-sale-products"
+                                variant="outline"
+                            >
+                                {translate('View More')}
+                            </Button>
+                        </div>
+                    </motion.div>
+                </section>
+            ) : null}
 
             {singleImageBannerRes.data?.showThemeOneSingleImageBanner ? (
                 <section id="single-image-banner">

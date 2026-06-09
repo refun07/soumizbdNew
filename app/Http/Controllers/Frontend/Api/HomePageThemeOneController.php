@@ -235,7 +235,7 @@ class HomePageThemeOneController extends Controller
         $settings = getSetting('themeOneOnSaleProductSettings') != null
             ? json_decode(getSetting('themeOneOnSaleProductSettings'), true)
             : [];
-        $onSaleProductIds = array_slice($this->themeOneOnSaleProductIds(), 0, 15);
+        $onSaleProductIds = array_slice($this->themeOneOnSaleProductIds(), 0, 16);
         $products = collect();
 
         if (count($onSaleProductIds) > 0) {
@@ -254,10 +254,11 @@ class HomePageThemeOneController extends Controller
             'status'    => 200,
             'message'   => '',
             'result'    => [
-                'showThemeOneOnSaleProducts' => getSetting('showThemeOneOnSaleProducts') ?? 0,
-                'backgroundColor'            => $settings['backgroundColor'] ?? '#B3052A',
-                'endsAt'                     => $settings['endsAt'] ?? null,
-                'products'                   => ProductResource::collection($products),
+                'showThemeOneOnSaleProducts'          => getSetting('showThemeOneOnSaleProducts') ?? 0,
+                'showThemeOneSecondaryOnSaleProducts' => getSetting('showThemeOneSecondaryOnSaleProducts') ?? '1',
+                'backgroundColor'                     => $settings['backgroundColor'] ?? '#B3052A',
+                'endsAt'                              => $settings['endsAt'] ?? null,
+                'products'                            => ProductResource::collection($products),
             ],
         ];
     }
