@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { FaArrowRight } from 'react-icons/fa';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Autoplay } from 'swiper/modules';
@@ -838,7 +839,7 @@ const HomeThemeOne = () => {
                             <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-white/25 pb-3">
                                 <div className="flex flex-wrap items-end gap-x-5 gap-y-2">
                                     <h2 className="text-xl font-normal leading-tight text-white md:text-2xl">
-                                        <span className="font-semibold">
+                                        <span className="border-b-[5px] border-[#F2C488] pb-2 font-semibold">
                                             {translate('On Sale')}
                                         </span>{' '}
                                         {translate('Products')}
@@ -850,9 +851,13 @@ const HomeThemeOne = () => {
 
                                 <Link
                                     to="/on-sale-products"
-                                    className="inline-flex h-9 items-center justify-center rounded-[3px] border border-white/45 px-4 text-xs font-semibold text-white transition hover:bg-white hover:text-primary"
+                                    className="inline-flex h-9 items-center justify-center gap-2 rounded-[3px] border border-white/45 px-4 text-xs font-semibold text-white transition hover:bg-white hover:text-primary"
                                 >
                                     {translate('View More')}
+                                    <FaArrowRight
+                                        className="text-[10px]"
+                                        aria-hidden="true"
+                                    />
                                 </Link>
                             </div>
 
