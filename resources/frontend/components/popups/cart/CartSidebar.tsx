@@ -1,10 +1,9 @@
+import { useEffect } from 'react';
 import { LiaTimesSolid } from 'react-icons/lia';
 import { PiShoppingCartSimpleLight } from 'react-icons/pi';
-import { Link } from 'react-router-dom';
 import { useAuth } from '../../../store/features/auth/authSlice';
 import {
     closePopup,
-    togglePopup,
     usePopup,
 } from '../../../store/features/popup/popupSlice';
 import { useAppDispatch } from '../../../store/store';
@@ -15,11 +14,26 @@ import ProductCardWide from '../../card/ProductCardWide';
 
 const CartSidebar = () => {
     const { popup } = usePopup();
-    const { user, carts } = useAuth();
+    const { carts } = useAuth();
     const dispatch = useAppDispatch();
     const isActive = popup === 'cart';
 
     const groupedByShop = groupBy(carts, ({ shop }) => shop.name);
+
+    useEffect(() => {
+        if (!isActive) return;
+
+        const previousBodyOverflow = document.body.style.overflow;
+        const previousHtmlOverflow = document.documentElement.style.overflow;
+
+        document.body.style.overflow = 'hidden';
+        document.documentElement.style.overflow = 'hidden';
+
+        return () => {
+            document.body.style.overflow = previousBodyOverflow;
+            document.documentElement.style.overflow = previousHtmlOverflow;
+        };
+    }, [isActive]);
 
     return (
         <aside
@@ -52,18 +66,6 @@ const CartSidebar = () => {
                 ) : (
                     Object.entries(groupedByShop).map(([shopName, carts]) => (
                         <div key={shopName}>
-                            <div className="flex items-center justify-between text-sm border-b border-primary-14 h-12 px-4 bg-stone-50">
-                                <h5 className="text-black/70">
-                                    {translate('seller')}
-                                </h5>
-                                <Link
-                                    to={`/shops/${carts[0].shop.slug}`}
-                                    className="text-primary"
-                                >
-                                    {shopName}
-                                </Link>
-                            </div>
-
                             {carts.map((item) => (
                                 <div
                                     className="px-4 border-b border-primary-14"
