@@ -297,8 +297,8 @@ const Footer = () => {
                                     <p
                                         className={
                                             footerData?.homeFooterLogo
-                                                ? 'mt-8 text-base leading-8'
-                                                : 'text-base leading-8'
+                                                ? 'mt-8 text-base leading-8 whitespace-pre-line'
+                                                : 'text-base leading-8 whitespace-pre-line'
                                         }
                                         style={{
                                             textAlign:
@@ -499,7 +499,7 @@ const Footer = () => {
                             )}
 
                             <p
-                                className="mt-7 max-w-[430px] text-[13px] leading-[23px] text-white/70"
+                                className="mt-7 max-w-[430px] whitespace-pre-line text-[13px] leading-[23px] text-white/70"
                                 style={{
                                     color:
                                         footerData?.footer_text_color ||
