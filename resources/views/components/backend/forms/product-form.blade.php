@@ -1325,6 +1325,13 @@
             <x-backend.inputs.button buttonText="Save Product" type="submit" />
         </div>
     @endunless
+
+    @if ($simplifiedAdmin)
+        {{-- bottom submit button --}}
+        <div class="flex justify-end mt-6 mb-8">
+            <x-backend.inputs.button buttonText="Save Product" type="submit" />
+        </div>
+    @endif
 </form>
 
 @if ($simplifiedAdmin)
