@@ -12,6 +12,7 @@ import AvatarDropdownMenu from '../AvatarDropdownMenu';
 import HeaderSocialLinks from '../HeaderSocialLinks';
 import NavLinks from '../NavLinks';
 import SearchDropdown from '../SearchDropdown';
+import BottomBar from '../theme-one/BottomBar';
 
 const HeaderThemeTwo = () => {
     const navbarEl = useRef<HTMLDivElement>(null);
@@ -52,6 +53,7 @@ const HeaderThemeTwo = () => {
     const totalProductInCart = carts.reduce((total, item) => total + item.qty, 0);
 
     return (
+        <>
         <header className="sticky top-0 z-[3] bg-white shadow-sm">
             {showTopbar && <div style={topbarStyle}>
                 <div className="container grid min-h-[46px] grid-cols-2 items-center gap-3 text-[13px] font-medium md:grid-cols-3 md:text-[15px]">
@@ -138,7 +140,7 @@ const HeaderThemeTwo = () => {
                         </div>
 
                         <button
-                            className={iconButtonClassName}
+                            className={`${iconButtonClassName} max-lg:hidden`}
                             onClick={() => dispatch(togglePopup('cart'))}
                             aria-label="Cart"
                             title="Cart"
@@ -152,7 +154,7 @@ const HeaderThemeTwo = () => {
                         </button>
 
                         {showCustomerMenu ? (
-                            <div className="option-dropdown flex items-center" tabIndex={0}>
+                            <div className="option-dropdown flex items-center max-lg:hidden" tabIndex={0}>
                                 <button className={`option-dropdown__toggler no-style ${iconButtonClassName}`}>
                                     <FaRegUserCircle />
                                 </button>
@@ -162,12 +164,14 @@ const HeaderThemeTwo = () => {
                                 </div>
                             </div>
                         ) : (
-                            <HeaderSocialLinks linkClassName="border-current/30 hover:text-inherit hover:opacity-80" />
+                            <HeaderSocialLinks linkClassName="max-lg:hidden border-current/30 hover:text-inherit hover:opacity-80" />
                         )}
                     </div>
                 </div>
             </div>
         </header>
+        <BottomBar showShop={false} showSearch={false} accentColor="#b3052a" />
+        </>
     );
 };
 
