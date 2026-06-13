@@ -623,6 +623,7 @@ class ThemeSelectionController extends Controller
 
                 // Bottom
                 'copyright_text' => getSetting('homeFooterCopyrightText', ''),
+                'copyright_alignment' => getSetting('homeFooterCopyrightAlignment', 'center'),
                 'secured_payments' => getSetting('homeFooterSecuredPayments', ''),
                 'secured_payments_size' => getSetting('homeFooterSecuredPaymentsSize', 'medium'),
 
@@ -703,6 +704,7 @@ class ThemeSelectionController extends Controller
                 'show_appstore' => 'nullable|boolean',
                 'appstore_link' => 'nullable|string|max:255',
                 'copyright_text' => 'nullable|string|max:500',
+                'copyright_alignment' => 'nullable|string|in:left,center,right',
                 'secured_payments' => 'nullable|string',
                 'secured_payments_size' => 'nullable|string|in:small,medium,large',
                 'footer_bg_color' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$/',
@@ -770,6 +772,7 @@ class ThemeSelectionController extends Controller
 
             // Update bottom section
             $this->updateSystemSetting('homeFooterCopyrightText', $request->input('copyright_text', ''));
+            $this->updateSystemSetting('homeFooterCopyrightAlignment', $request->input('copyright_alignment', 'center'));
             $this->updateSystemSetting('homeFooterSecuredPayments', $request->input('secured_payments', ''));
             $this->updateSystemSetting('homeFooterSecuredPaymentsSize', $request->input('secured_payments_size', 'medium'));
 

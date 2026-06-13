@@ -26,6 +26,7 @@ interface FooterInfoItem {
 }
 
 type CompanyInfoAlignment = 'left' | 'center' | 'right' | 'justify';
+type CopyrightAlignment = 'left' | 'center' | 'right';
 
 const defaultFooterInfoItems: FooterInfoItem[] = [
     {
@@ -99,6 +100,7 @@ const FooterConfigurationApp: React.FC<FooterConfigurationAppProps> = ({
 
     // Bottom
     const [copyrightText, setCopyrightText] = useState('');
+    const [copyrightAlignment, setCopyrightAlignment] = useState<CopyrightAlignment>('center');
     const [securedPayments, setSecuredPayments] = useState('');
     const [securedPaymentsSize, setSecuredPaymentsSize] = useState<'small' | 'medium' | 'large'>('medium');
 
@@ -203,6 +205,7 @@ const FooterConfigurationApp: React.FC<FooterConfigurationAppProps> = ({
 
                     // Bottom
                     setCopyrightText(result.data.copyright_text || '');
+                    setCopyrightAlignment(result.data.copyright_alignment || 'center');
                     setSecuredPayments(result.data.secured_payments || '');
                     setSecuredPaymentsSize(result.data.secured_payments_size || 'medium');
 
@@ -469,6 +472,7 @@ const FooterConfigurationApp: React.FC<FooterConfigurationAppProps> = ({
                 show_appstore: showAppStore,
                 appstore_link: appStoreLink,
                 copyright_text: copyrightText,
+                copyright_alignment: copyrightAlignment,
                 secured_payments: securedPayments,
                 secured_payments_size: securedPaymentsSize,
                 footer_bg_color: footerBgColor,
@@ -1001,27 +1005,12 @@ const FooterConfigurationApp: React.FC<FooterConfigurationAppProps> = ({
                             </div>
                         </div>
 
-                        {/* Bottom Section */}
+                        {/* Secured Payments Section */}
                         <div className="bg-[#f8f9fa] rounded-lg p-4">
-                            <h3 className="text-sm font-semibold text-[#1a1a2e]">Bottom Section</h3>
+                            <h3 className="text-sm font-semibold text-[#1a1a2e]">Secured Payments</h3>
                         </div>
 
                         <div className="space-y-6 p-4">
-                            {/* Copyright Text */}
-                            <div className="flex items-start">
-                                <label className="w-56 text-xs font-medium text-[#6b7280] uppercase tracking-wide pt-2">
-                                    Copyright Text
-                                </label>
-                                <textarea
-                                    value={copyrightText}
-                                    onChange={(e) => setCopyrightText(e.target.value)}
-                                    rows={2}
-                                    className="flex-1 px-4 py-2.5 border border-gray-200 rounded-md text-sm text-gray-600 focus:outline-none focus:border-gray-300"
-                                    placeholder="© 2024 Your Company. All rights reserved."
-                                />
-                            </div>
-
-                            {/* Secured Payments */}
                             <div className="flex items-center">
                                 <label className="w-56 text-xs font-medium text-[#6b7280] uppercase tracking-wide">
                                     Secured Payments Image
@@ -1076,6 +1065,42 @@ const FooterConfigurationApp: React.FC<FooterConfigurationAppProps> = ({
                             <p className="text-xs text-gray-500 ml-56">
                                 Recommended: 400x40 pixels
                             </p>
+                        </div>
+
+                        {/* Bottom Section */}
+                        <div className="bg-[#f8f9fa] rounded-lg p-4">
+                            <h3 className="text-sm font-semibold text-[#1a1a2e]">Bottom Section</h3>
+                        </div>
+
+                        <div className="space-y-6 p-4">
+                            {/* Copyright Text */}
+                            <div className="flex items-start">
+                                <label className="w-56 text-xs font-medium text-[#6b7280] uppercase tracking-wide pt-2">
+                                    Copyright Text
+                                </label>
+                                <textarea
+                                    value={copyrightText}
+                                    onChange={(e) => setCopyrightText(e.target.value)}
+                                    rows={2}
+                                    className="flex-1 px-4 py-2.5 border border-gray-200 rounded-md text-sm text-gray-600 focus:outline-none focus:border-gray-300"
+                                    placeholder="© 2024 Your Company. All rights reserved."
+                                />
+                            </div>
+
+                            <div className="flex items-center">
+                                <label className="w-56 text-xs font-medium text-[#6b7280] uppercase tracking-wide">
+                                    Copyright Text Style
+                                </label>
+                                <select
+                                    value={copyrightAlignment}
+                                    onChange={(e) => setCopyrightAlignment(e.target.value as CopyrightAlignment)}
+                                    className="w-56 px-4 py-2.5 border border-gray-200 rounded-md text-sm text-gray-600 focus:outline-none focus:border-gray-300 bg-white"
+                                >
+                                    <option value="left">Left</option>
+                                    <option value="center">Center</option>
+                                    <option value="right">Right</option>
+                                </select>
+                            </div>
                         </div>
 
                         {/* Colors Section */}

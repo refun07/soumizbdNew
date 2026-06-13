@@ -274,6 +274,7 @@ class HomepageController extends Controller
                 'homeFooterAppStoreLink'      => getSetting('homeFooterAppStoreLink') ?? "",
 
                 'homeFooterCopyrightText'     => $copyrightText,
+                'homeFooterCopyrightAlignment' => getSetting('homeFooterCopyrightAlignment', 'center'),
                 'homeFooterSecuredPayments'   => $processImage(getSetting('homeFooterSecuredPayments')),
                 'homeFooterSecuredPaymentsSize' => getSetting('homeFooterSecuredPaymentsSize', 'medium'),
 

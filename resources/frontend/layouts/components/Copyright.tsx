@@ -4,12 +4,15 @@ const Copyright = () => {
     const { data: footerRes } = useGetFooterQuery();
     const isModernFooter = footerRes?.defaultFooter === 'footer-two';
     const fallbackText = `All Rights Reserved By ${window.config.generalSettings.appName}`;
+    const copyrightAlignment =
+        footerRes?.homeFooterCopyrightAlignment === 'left' ||
+        footerRes?.homeFooterCopyrightAlignment === 'right'
+            ? footerRes.homeFooterCopyrightAlignment
+            : 'center';
 
     return (
         <div
-            className={`text-[12px] ${
-                isModernFooter ? 'py-6 text-center' : 'py-[28px]'
-            }`}
+            className={`text-[12px] ${isModernFooter ? 'py-6' : 'py-[28px]'}`}
             style={{
                 backgroundColor:
                     footerRes?.copyright_bg_color ||
@@ -17,7 +20,7 @@ const Copyright = () => {
                 color: footerRes?.copyright_text_color || '#ffffff',
             }}
         >
-            <div className="container">
+            <div className="container" style={{ textAlign: copyrightAlignment }}>
                 {footerRes?.homeFooterCopyrightText || fallbackText}
             </div>
         </div>

@@ -165,6 +165,7 @@ export interface IGetFooter {
     showHomeFooterAppStoreLink: string;
     homeFooterAppStoreLink: string;
     homeFooterCopyrightText: string;
+    homeFooterCopyrightAlignment?: 'left' | 'center' | 'right';
     homeFooterSecuredPayments: string;
     homeFooterSecuredPaymentsSize?: 'small' | 'medium' | 'large';
     footer_bg_color: string;
