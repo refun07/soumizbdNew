@@ -66,6 +66,10 @@ const BottomBar = ({
         borderBottomColor: active ? accentColor : undefined,
     });
 
+    const scrollToPageTop = () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
     return (
         <div
             className={cn(
@@ -76,6 +80,7 @@ const BottomBar = ({
                 to={'/'}
                 className={getItemClassName()}
                 style={getItemStyle(pathname === '/')}
+                onClick={scrollToPageTop}
             >
                 <span className="text-base">
                     <FaHome />

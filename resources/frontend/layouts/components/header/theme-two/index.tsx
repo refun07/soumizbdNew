@@ -51,6 +51,9 @@ const HeaderThemeTwo = () => {
         </>
     );
     const totalProductInCart = carts.reduce((total, item) => total + item.qty, 0);
+    const scrollToPageTop = () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
     return (
         <>
@@ -94,7 +97,7 @@ const HeaderThemeTwo = () => {
                             <FaBars />
                         </button>
 
-                        <Link to="/">
+                        <Link to="/" onClick={scrollToPageTop}>
                             <DynamicLogo
                                 alt="Logo"
                                 className="max-xs:max-w-[100px] max-sm:max-w-[140px]"

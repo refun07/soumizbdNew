@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { LiaTimesSolid } from 'react-icons/lia';
 import { useGetAllCategoriesQuery } from '../../../store/features/api/apiSlice';
 import { closePopup, usePopup } from '../../../store/features/popup/popupSlice';
@@ -13,6 +14,21 @@ const CategorySidebar = () => {
 
     const isActive = popup === 'categories';
 
+    useEffect(() => {
+        if (!isActive) return;
+
+        const previousBodyOverflow = document.body.style.overflow;
+        const previousHtmlOverflow = document.documentElement.style.overflow;
+
+        document.body.style.overflow = 'hidden';
+        document.documentElement.style.overflow = 'hidden';
+
+        return () => {
+            document.body.style.overflow = previousBodyOverflow;
+            document.documentElement.style.overflow = previousHtmlOverflow;
+        };
+    }, [isActive]);
+
     return (
         <aside
             className={`flex flex-col fixed top-0 left-0 bottom-0 w-[calc(100%-50px)] max-w-[300px] bg-white z-[5] overflow-y-auto text-sm ${
@@ -21,7 +37,7 @@ const CategorySidebar = () => {
             aria-hidden={!isActive}
         >
             <div className="bg-primary text-white flex items-center justify-between h-12 px-8">
-                <h4 className="">{translate('categories')}</h4>
+                <h4 className="">{translate('Categories')}</h4>
 
                 <button
                     className="text-xl"
