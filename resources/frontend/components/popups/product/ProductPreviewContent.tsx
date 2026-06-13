@@ -18,6 +18,7 @@ import {
     useGetProductDetailsQuery,
 } from '../../../store/features/api/productApi';
 import { useAuth } from '../../../store/features/auth/authSlice';
+import { setCheckoutData } from '../../../store/features/checkout/checkoutSlice';
 import { togglePopup } from '../../../store/features/popup/popupSlice';
 import { VariationCombination } from '../../../types/product';
 import {
@@ -385,7 +386,7 @@ const ProductPreviewContent = ({
                 toast.error(
                     `Please select ${notSelectedVariations.join(', ')}`,
                 );
-                return;
+                return false;
             }
 
             // check if the selected variation is in stock or not
@@ -396,7 +397,7 @@ const ProductPreviewContent = ({
                     isCurrentPreOrder,
                 )
             ) {
-                return;
+                return false;
             }
             await addToCart({
                 productVariationId,
@@ -407,8 +408,10 @@ const ProductPreviewContent = ({
 
             setCartCount(1);
             toast.success(translate('Product added to cart'));
+            return true;
         } catch (err: any) {
             toast.error(err.data.message);
+            return false;
         }
     };
 
@@ -427,10 +430,19 @@ const ProductPreviewContent = ({
 
         setIsBuyNowLoading(true);
 
-        await handleAddToCart();
+        const addedToCart = await handleAddToCart();
 
         setIsBuyNowLoading(false);
-        navigate('/cart');
+        if (!addedToCart) return;
+
+        dispatch(
+            setCheckoutData({
+                selectedShops: {
+                    [product.shop.name]: true,
+                },
+            }),
+        );
+        navigate('/checkout');
     };
 
     const handleToggleWishList = async () => {
