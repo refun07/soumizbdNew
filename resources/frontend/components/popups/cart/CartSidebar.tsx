@@ -66,6 +66,13 @@ const CartSidebar = () => {
                 ) : (
                     Object.entries(groupedByShop).map(([shopName, carts]) => (
                         <div key={shopName}>
+                            {shopName && (
+                                <div className="px-4 pt-4 pb-2">
+                                    <p className="text-xs font-semibold uppercase tracking-wide text-black/60">
+                                        {shopName}
+                                    </p>
+                                </div>
+                            )}
                             {carts.map((item) => (
                                 <div
                                     className="px-4 border-b border-primary-14"
