@@ -1007,6 +1007,7 @@ const ProductPreviewContent = ({
                     <Button
                         size="lg"
                         onClick={handleAddToCart}
+                        className="border border-black bg-gradient-to-r from-black from-[50%] to-white to-[50%] bg-left bg-[200%_auto] text-white hover:bg-right hover:text-black"
                         isLoading={addingToCart && !isBuyNowLoading}
                         arrow={false}
                         disabled={
