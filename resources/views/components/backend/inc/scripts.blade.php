@@ -490,6 +490,162 @@
     }
     initSelect2();
 
+    function initOrderedProductPickers() {
+        $('.ordered-product-picker').each(function() {
+            const $picker = $(this);
+            const inputName = $picker.data('input-name');
+            const $select = $picker.find('select').first();
+            const $list = $picker.find('.ordered-product-picker-list').first();
+            const $emptyInput = $picker.find('.ordered-product-picker-empty-input').first();
+
+            if (!inputName || !$select.length || !$list.length) {
+                return;
+            }
+
+            const syncPicker = function() {
+                const selectedValues = $list.find('.ordered-product-picker-item').map(function() {
+                    return $(this).data('value').toString();
+                }).get();
+
+                $emptyInput.prop('disabled', selectedValues.length > 0);
+
+                $select.find('option').each(function() {
+                    const value = $(this).val();
+                    if (!value) {
+                        return;
+                    }
+
+                    $(this).prop('disabled', selectedValues.includes(value.toString()));
+                });
+
+                if ($select.hasClass('select2-hidden-accessible')) {
+                    $select.trigger('change.select2');
+                }
+            };
+
+            const buildItem = function(value, label) {
+                const $item = $('<div/>', {
+                    class: 'ordered-product-picker-item flex items-center gap-2 rounded border border-border bg-background p-2',
+                    draggable: true,
+                }).attr('data-value', value);
+
+                $('<button/>', {
+                    type: 'button',
+                    class: 'ordered-product-picker-drag-handle h-8 w-8 shrink-0 cursor-move rounded border border-border text-muted-foreground',
+                    title: '{{ translate('Drag to reorder') }}',
+                    html: '<i class="fa-solid fa-grip-vertical"></i>',
+                }).appendTo($item);
+
+                $('<input/>', {
+                    type: 'hidden',
+                    name: inputName + '[]',
+                    value: value,
+                }).appendTo($item);
+
+                $('<span/>', {
+                    class: 'min-w-0 flex-1 truncate text-sm',
+                    text: label,
+                }).appendTo($item);
+
+                $('<button/>', {
+                    type: 'button',
+                    class: 'ordered-product-picker-move-up h-8 w-8 shrink-0 rounded border border-border',
+                    title: '{{ translate('Move up') }}',
+                    html: '<i class="fa-solid fa-chevron-up"></i>',
+                }).appendTo($item);
+
+                $('<button/>', {
+                    type: 'button',
+                    class: 'ordered-product-picker-move-down h-8 w-8 shrink-0 rounded border border-border',
+                    title: '{{ translate('Move down') }}',
+                    html: '<i class="fa-solid fa-chevron-down"></i>',
+                }).appendTo($item);
+
+                $('<button/>', {
+                    type: 'button',
+                    class: 'ordered-product-picker-remove h-8 w-8 shrink-0 rounded border border-border text-red-500',
+                    title: '{{ translate('Remove') }}',
+                    html: '<i class="fa-solid fa-trash-can"></i>',
+                }).appendTo($item);
+
+                return $item;
+            };
+
+            $select.off('change.orderedProductPicker').on('change.orderedProductPicker', function() {
+                const value = $(this).val();
+                if (!value || $list.find(`.ordered-product-picker-item[data-value="${value}"]`).length) {
+                    $(this).val(null).trigger('change.select2');
+                    return;
+                }
+
+                const label = $(this).find('option:selected').text().trim();
+                $list.append(buildItem(value, label));
+                $(this).val(null).trigger('change.select2');
+                syncPicker();
+            });
+
+            $picker.off('click.orderedProductPicker')
+                .on('click.orderedProductPicker', '.ordered-product-picker-remove', function() {
+                    $(this).closest('.ordered-product-picker-item').remove();
+                    syncPicker();
+                })
+                .on('click.orderedProductPicker', '.ordered-product-picker-move-up', function() {
+                    const $item = $(this).closest('.ordered-product-picker-item');
+                    const $prev = $item.prev('.ordered-product-picker-item');
+
+                    if ($prev.length) {
+                        $item.insertBefore($prev);
+                        syncPicker();
+                    }
+                })
+                .on('click.orderedProductPicker', '.ordered-product-picker-move-down', function() {
+                    const $item = $(this).closest('.ordered-product-picker-item');
+                    const $next = $item.next('.ordered-product-picker-item');
+
+                    if ($next.length) {
+                        $item.insertAfter($next);
+                        syncPicker();
+                    }
+                });
+
+            let draggedItem = null;
+
+            $list.off('dragstart.orderedProductPicker dragover.orderedProductPicker drop.orderedProductPicker dragend.orderedProductPicker')
+                .on('dragstart.orderedProductPicker', '.ordered-product-picker-item', function(e) {
+                    draggedItem = this;
+                    this.classList.add('opacity-50');
+                    e.originalEvent.dataTransfer.effectAllowed = 'move';
+                })
+                .on('dragover.orderedProductPicker', '.ordered-product-picker-item', function(e) {
+                    e.preventDefault();
+                    if (!draggedItem || draggedItem === this) {
+                        return;
+                    }
+
+                    const rect = this.getBoundingClientRect();
+                    const afterCurrent = e.originalEvent.clientY > rect.top + rect.height / 2;
+
+                    if (afterCurrent) {
+                        this.after(draggedItem);
+                    } else {
+                        this.before(draggedItem);
+                    }
+                })
+                .on('drop.orderedProductPicker', function(e) {
+                    e.preventDefault();
+                    syncPicker();
+                })
+                .on('dragend.orderedProductPicker', '.ordered-product-picker-item', function() {
+                    this.classList.remove('opacity-50');
+                    draggedItem = null;
+                    syncPicker();
+                });
+
+            syncPicker();
+        });
+    }
+    initOrderedProductPickers();
+
     function submitAddOption() {
         const form = $('#variationValueForm');
         const formData = form.serialize();

@@ -80,13 +80,19 @@ class HomePageThemeThreeController extends Controller
      # get featured products
      public function featuredProducts(Request $request)
      {
-         $featuredProducts = collect();
+         $featuredProducts = [];
  
          if (getSetting('themeThreeFeaturedProducts') != null) {
-             $featuredProducts = json_decode(getSetting('themeThreeFeaturedProducts'), true);
+             $featuredProducts = json_decode(getSetting('themeThreeFeaturedProducts'), true) ?: [];
          }
  
-         $products = Product::fromPublishedShops()->isPublished()->hideOnEcom()->whereIn('id', $featuredProducts)->get();
+         $products = Product::fromPublishedShops()
+             ->isPublished()
+             ->hideOnEcom()
+             ->whereIn('id', $featuredProducts)
+             ->get()
+             ->sortBy(fn ($product) => array_search($product->id, $featuredProducts))
+             ->values();
          return [
              'success'   => true,
              'status'    => 200,

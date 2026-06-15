@@ -555,17 +555,64 @@
 
 
                     <input type="hidden" name="types[]" value="themeOneTopProducts">
-                    <x-backend.inputs.select :labelInline="false" label="Featured Products" name="themeOneTopProducts[]"
-                        multiple data-selection-css-class="multi-select2"
-                        data-placeholder="{{ translate('Select products') }}" :isRequired="false">
+                    @php
+                        $productsById = $products->keyBy('id');
+                    @endphp
+                    <div class="ordered-product-picker" data-input-name="themeOneTopProducts">
+                        <x-backend.inputs.select :labelInline="false" label="Featured Products"
+                            name="themeOneTopProductsPicker" data-selection-css-class="input-select2"
+                            data-placeholder="{{ translate('Select products') }}" data-no-add-new="true"
+                            :isRequired="false">
+                            <option></option>
+                            @foreach ($products as $product)
+                                <x-backend.inputs.select-option
+                                    name="{{ $product->collectTranslation('name', $langKey) }}"
+                                    value="{{ $product->id }}"
+                                    data-selected="{{ $featuredProducts->contains($product->id) ? '1' : '0' }}" />
+                            @endforeach
+                        </x-backend.inputs.select>
 
-                        @foreach ($products as $product)
-                            <x-backend.inputs.select-option
-                                name="{{ $product->collectTranslation('name', $langKey) }}"
-                                value="{{ $product->id }}"
-                                selected="{{ $featuredProducts->contains($product->id) ? $product->id : 0 }}" />
-                        @endforeach
-                    </x-backend.inputs.select>
+                        <input type="hidden" name="themeOneTopProducts" value="[]"
+                            class="ordered-product-picker-empty-input" disabled>
+
+                        <div class="ordered-product-picker-list mt-3 space-y-2">
+                            @foreach ($featuredProducts as $productId)
+                                @php
+                                    $product = $productsById->get((int) $productId);
+                                @endphp
+                                @if ($product)
+                                    <div class="ordered-product-picker-item flex items-center gap-2 rounded border border-border bg-background p-2"
+                                        draggable="true" data-value="{{ $product->id }}">
+                                        <button type="button"
+                                            class="ordered-product-picker-drag-handle h-8 w-8 shrink-0 cursor-move rounded border border-border text-muted-foreground"
+                                            title="{{ translate('Drag to reorder') }}">
+                                            <i class="fa-solid fa-grip-vertical"></i>
+                                        </button>
+                                        <input type="hidden" name="themeOneTopProducts[]"
+                                            value="{{ $product->id }}">
+                                        <span class="min-w-0 flex-1 truncate text-sm">
+                                            {{ $product->collectTranslation('name', $langKey) }}
+                                        </span>
+                                        <button type="button"
+                                            class="ordered-product-picker-move-up h-8 w-8 shrink-0 rounded border border-border"
+                                            title="{{ translate('Move up') }}">
+                                            <i class="fa-solid fa-chevron-up"></i>
+                                        </button>
+                                        <button type="button"
+                                            class="ordered-product-picker-move-down h-8 w-8 shrink-0 rounded border border-border"
+                                            title="{{ translate('Move down') }}">
+                                            <i class="fa-solid fa-chevron-down"></i>
+                                        </button>
+                                        <button type="button"
+                                            class="ordered-product-picker-remove h-8 w-8 shrink-0 rounded border border-border text-red-500"
+                                            title="{{ translate('Remove') }}">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
+                                    </div>
+                                @endif
+                            @endforeach
+                        </div>
+                    </div>
 
                     <div class="flex justify-end pt-2">
                         <x-backend.inputs.button type="submit" buttonText="{{ translate('Save Changes') }}"
