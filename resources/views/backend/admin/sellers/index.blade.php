@@ -78,6 +78,9 @@
                             {{ translate('Shop Approval') }}
                         </th>
                         <th data-breakpoints="xs sm md">
+                            {{ translate('Verified Badge') }}
+                        </th>
+                        <th data-breakpoints="xs sm md">
                             {{ translate('Shop Published') }}
                         </th>
                         <th data-breakpoints="xs sm" class="text-end">
@@ -154,6 +157,16 @@
                                         name="isActiveCheckbox" value="{{ $seller->id }}"
                                         data-status="{{ $seller->is_banned }}"
                                         isChecked="{{ (int) $seller->is_banned == 1 }}" />
+                                @endcan
+                            </td>
+
+                            <td>
+                                @can('edit_sellers')
+                                    <x-backend.inputs.checkbox toggler="true"
+                                        data-route="{{ route('admin.sellers.toggleVerified') }}" variant="primary"
+                                        name="isActiveCheckbox" value="{{ $seller->id }}"
+                                        data-status="{{ $shop->is_verified_by_admin }}"
+                                        isChecked="{{ (int) $shop->is_verified_by_admin == 1 }}" />
                                 @endcan
                             </td>
 

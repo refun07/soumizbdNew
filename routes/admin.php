@@ -236,6 +236,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin', 'unbanned',
     Route::resource('/sellers', SellerController::class, ['names' => 'admin.sellers']);
     Route::post('/sellers/toggle-ban', [SellerController::class, 'toggleBan'])->name('admin.sellers.toggleBan');
     Route::post('/sellers/toggle-approval', [SellerController::class, 'toggleApproval'])->name('admin.sellers.toggleApproval');
+    Route::post('/sellers/toggle-verified', [SellerController::class, 'toggleVerified'])->name('admin.sellers.toggleVerified');
     Route::post('/sellers/toggle-published', [SellerController::class, 'togglePublished'])->name('admin.sellers.togglePublished');
 
 

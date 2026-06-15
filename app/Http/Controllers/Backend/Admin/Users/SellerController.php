@@ -19,7 +19,7 @@ class SellerController extends Controller
     {
         $this->middleware(['permission:view_sellers'])->only(['index']);
         $this->middleware(['permission:edit_sellers'])->only([
-            'toggleBan', 'toggleApproval', 'togglePublished', 'edit', 'update'
+            'toggleBan', 'toggleApproval', 'toggleVerified', 'togglePublished', 'edit', 'update'
         ]);
         $this->middleware(['permission:pay_sellers'])->only(['makePayment']);
         $this->middleware(['permission:show_payouts'])->only(['payouts']);
@@ -111,6 +111,23 @@ class SellerController extends Controller
         $seller             = User::findOrFail($request->id);
         $shop               = $seller->shop;
         $shop->is_approved  = !$shop->is_approved;
+        $shop->save();
+        cacheClear();
+        return $data;
+    }
+
+    # toggle Verified Badge
+    public function toggleVerified(Request $request)
+    {
+        $data = [
+            'success'   => true,
+            'status'    => 200,
+            'message'   => translate('Status updated successfully'),
+            'result'    => null
+        ];
+        $seller                          = User::findOrFail($request->id);
+        $shop                            = $seller->shop;
+        $shop->is_verified_by_admin      = !$shop->is_verified_by_admin;
         $shop->save();
         cacheClear();
         return $data;
