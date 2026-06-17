@@ -153,12 +153,12 @@
             <table class="product-list-table footable w-full">
                 <thead class="uppercase text-left bg-primary/10">
                     <tr>
-                        <th class="min-w-[220px] xl:min-w-[340px]">{{ translate('Product Information') }}</th>
-                        <th data-breakpoints="xs sm" class="min-w-[130px] xl:min-w-[180px]">{{ translate('Inventory') }}</th>
-                        <th data-breakpoints="xs sm" class="min-w-[130px] xl:min-w-[180px]">{{ translate('Pricing') }}</th>
-                        <th data-breakpoints="xs sm md" class="min-w-[140px] xl:min-w-[190px]">{{ translate('Status') }}</th>
-                        <th data-breakpoints="xs sm md lg" class="min-w-[115px] xl:min-w-[140px]">{{ translate('Dates') }}</th>
-                        <th data-breakpoints="xs sm md" class="w-[110px] xl:w-[130px]">
+                        <th class="min-w-[220px] 2xl:min-w-[340px]">{{ translate('Product Information') }}</th>
+                        <th data-breakpoints="xs sm" class="min-w-[120px] 2xl:min-w-[180px]">{{ translate('Inventory') }}</th>
+                        <th data-breakpoints="xs sm" class="min-w-[120px] 2xl:min-w-[180px]">{{ translate('Pricing') }}</th>
+                        <th data-breakpoints="xs sm md" class="min-w-[130px] 2xl:min-w-[190px]">{{ translate('Status') }}</th>
+                        <th data-breakpoints="xs sm md lg" class="min-w-[105px] 2xl:min-w-[140px]">{{ translate('Dates') }}</th>
+                        <th data-breakpoints="xs sm md" class="w-[105px] 2xl:w-[130px]">
                             {{ translate('Options') }}
                         </th>
                     </tr>
