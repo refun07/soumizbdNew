@@ -661,7 +661,10 @@ class ProductService
             }
 
             # discount
-            if ($request->date_range != null) {
+            if (!$request->boolean('discount_schedule_enabled')) {
+                $product->discount_start_date = null;
+                $product->discount_end_date   = null;
+            } elseif ($request->date_range != null) {
                 if (Str::contains($request->date_range, '-')) {
                     $date_var = explode(" - ", $request->date_range);
                 } else {
@@ -1216,7 +1219,10 @@ class ProductService
             }
 
             # discount 
-            if ($request->date_range != null) {
+            if (!$request->boolean('discount_schedule_enabled')) {
+                $product->discount_start_date = null;
+                $product->discount_end_date   = null;
+            } elseif ($request->date_range != null) {
                 if (Str::contains($request->date_range, '-')) {
                     $date_var = explode(" - ", $request->date_range);
                 } else {

@@ -438,24 +438,39 @@
                             </div>
                         </div>
 
-                        <div class="mt-3 space-y-3">
+                        <div class="discount-schedule-field mt-3 space-y-3">
                             @php
-                                $start_date = date('m/d/Y');
-                                $end_date = date('m/d/Y');
+                                $hasDiscountSchedule =
+                                    $product && $product->discount_start_date && $product->discount_end_date;
+                                $start_date = '';
+                                $end_date = '';
 
-                                if ($product) {
-                                    $start_date = $product->discount_start_date
-                                        ? date('m/d/Y', $product->discount_start_date)
-                                        : date('m/d/Y');
-                                    $end_date = $product->discount_end_date
-                                        ? date('m/d/Y', $product->discount_end_date)
-                                        : date('m/d/Y');
+                                if ($hasDiscountSchedule) {
+                                    $start_date = date('m/d/Y', $product->discount_start_date);
+                                    $end_date = date('m/d/Y', $product->discount_end_date);
                                 }
                             @endphp
 
-                            <x-backend.inputs.datepicker placeholder="Start date - End date" label="Discount Schedule"
-                                name="date_range" :isRequired="false" type="range"
-                                value="{{ $start_date . ' - ' . $end_date }}" />
+                            <input type="hidden" name="discount_schedule_enabled" id="discount_schedule_enabled"
+                                value="{{ $hasDiscountSchedule ? 1 : 0 }}">
+
+                            <div class="flex items-center justify-between gap-4">
+                                <label for="discount_schedule_toggle" class="theme-input-label pt-0 mb-0">
+                                    {{ translate('Discount Schedule') }}
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <span class="text-xs text-muted">{{ translate('Off/On') }}</span>
+                                    <x-backend.inputs.checkbox toggler="true" name="discount_schedule_toggle"
+                                        id="discount_schedule_toggle" value="1"
+                                        isChecked="{{ $hasDiscountSchedule }}" />
+                                </label>
+                            </div>
+
+                            <div class="discount-schedule-range {{ $hasDiscountSchedule ? '' : 'hidden' }}">
+                                <x-backend.inputs.datepicker placeholder="Start date - End date" label=""
+                                    name="date_range" :isRequired="false" type="range"
+                                    value="{{ $hasDiscountSchedule ? $start_date . ' - ' . $end_date : '' }}" />
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1559,7 +1574,29 @@
             addField('#discount_value');
             addField('#stock_qty', 'non-variant-essential');
             addField('select[name="discount_type"]');
-            addField('#date_range', 'md:col-span-2');
+            addContainer('.discount-schedule-field', 'md:col-span-2');
+
+            const discountScheduleToggle = document.getElementById('discount_schedule_toggle');
+            const discountScheduleEnabled = document.getElementById('discount_schedule_enabled');
+            const discountScheduleRange = productLayout.querySelector('.discount-schedule-range');
+            const discountScheduleInput = document.getElementById('date_range');
+
+            const syncDiscountSchedule = () => {
+                const isEnabled = discountScheduleToggle?.checked ?? false;
+
+                if (discountScheduleEnabled) {
+                    discountScheduleEnabled.value = isEnabled ? '1' : '0';
+                }
+
+                discountScheduleRange?.classList.toggle('hidden', !isEnabled);
+
+                if (!isEnabled && discountScheduleInput) {
+                    discountScheduleInput.value = '';
+                }
+            };
+
+            discountScheduleToggle?.addEventListener('change', syncDiscountSchedule);
+            syncDiscountSchedule();
 
             const unitField = essentialsGrid.querySelector('.admin-unit-field');
             const unitLabel = unitField?.querySelector('.theme-input-label');
