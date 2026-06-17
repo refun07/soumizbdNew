@@ -195,23 +195,23 @@
                         @endphp
                         <tr>
                             <td>
-                                <div class="flex min-w-0 items-start gap-3 sm:gap-4">
+                                <div class="flex min-w-0 items-start gap-2 2xl:gap-4">
                                     <div class="max-xs:hidden shrink-0">
                                         <img src="{{ uploadedAsset($product->thumbnail_image) }}" alt=""
-                                            class="w-16 h-16 rounded-md object-cover border border-border"
+                                            class="w-12 h-12 2xl:w-16 2xl:h-16 rounded-md object-cover border border-border"
                                             onerror="this.onerror=null;this.src='{{ asset('images/image-error.png') }}';" />
                                     </div>
                                     <div class="min-w-0 flex-1 space-y-2">
                                         <div class="min-w-0">
                                             <a href="{{ route('admin.products.edit', ['product' => $product->id, 'lang_key' => config('app.default_language')]) }}&translate"
-                                                class="block max-w-full font-semibold text-foreground hover:text-secondary line-clamp-2 break-words">
+                                                class="block max-w-full font-semibold text-foreground hover:text-secondary line-clamp-2 break-words leading-snug">
                                                 {{ $product->collectTranslation('name') }}
                                             </a>
-                                            <div class="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted">
+                                            <div class="mt-1 flex min-w-0 flex-wrap gap-x-3 gap-y-1 text-xs text-muted">
                                                 <span>#{{ $product->id }}</span>
-                                                <span class="min-w-0 break-words">{{ translate('SKU') }}: {{ $firstVariation?->sku ?: translate('N/A') }}</span>
-                                                <span class="min-w-0 break-words">{{ translate('Unit') }}: {{ $product->unit?->collectTranslation('name') ?: translate('N/A') }}</span>
-                                                <span class="min-w-0 break-words">{{ translate('Brand') }}: {{ $product->brand?->collectTranslation('name') ?: translate('N/A') }}</span>
+                                                <span class="min-w-0 max-w-full truncate" title="{{ translate('SKU') }}: {{ $firstVariation?->sku ?: translate('N/A') }}">{{ translate('SKU') }}: {{ $firstVariation?->sku ?: translate('N/A') }}</span>
+                                                <span class="min-w-0 max-w-full truncate" title="{{ translate('Unit') }}: {{ $product->unit?->collectTranslation('name') ?: translate('N/A') }}">{{ translate('Unit') }}: {{ $product->unit?->collectTranslation('name') ?: translate('N/A') }}</span>
+                                                <span class="min-w-0 max-w-full truncate" title="{{ translate('Brand') }}: {{ $product->brand?->collectTranslation('name') ?: translate('N/A') }}">{{ translate('Brand') }}: {{ $product->brand?->collectTranslation('name') ?: translate('N/A') }}</span>
                                             </div>
                                         </div>
                                         <div class="flex items-center gap-1.5 flex-wrap">
@@ -302,7 +302,7 @@
                                 </div>
                             </td>
                             <td>
-                                <x-backend.inputs.action-dropdown label="{{ translate('Actions') }}" class="w-[130px]">
+                                <x-backend.inputs.action-dropdown label="{{ translate('Actions') }}" class="w-[105px] 2xl:w-[130px]">
                                     <ul>
                                         <li>
                                             <a href="{{ url('/products\/') . $product->slug }}" target="_blank"

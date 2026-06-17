@@ -1196,6 +1196,36 @@ table > tbody > tr > td > span.footable-toggle {
         white-space: normal;
         overflow-wrap: anywhere;
     }
+
+    .product-list-table.footable thead th:nth-child(1) {
+        width: 30%;
+    }
+
+    .product-list-table.footable thead th:nth-child(2),
+    .product-list-table.footable thead th:nth-child(3),
+    .product-list-table.footable thead th:nth-child(4) {
+        width: 15%;
+    }
+
+    .product-list-table.footable thead th:nth-child(5),
+    .product-list-table.footable thead th:nth-child(6) {
+        width: 12.5%;
+    }
+
+    .product-list-table.footable .ad-12b3e8cf {
+        max-width: 100%;
+    }
+
+    .product-list-table.footable .ad-12b3e8cf__toggler {
+        min-width: 0;
+        width: 100%;
+        padding-left: 10px;
+        padding-right: 28px;
+    }
+
+    .product-list-table.footable .ad-12b3e8cf__toggler::after {
+        right: 10px;
+    }
 }
 
 @media (max-width: 639px) {
