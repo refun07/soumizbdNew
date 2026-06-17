@@ -1181,6 +1181,37 @@ table > tbody > tr > td > span.footable-toggle {
     @apply text-[16px] !important;
 }
 
+@media (max-width: 1279px) {
+    .product-list-table.footable {
+        table-layout: fixed;
+    }
+
+    .product-list-table.footable td,
+    .product-list-table.footable th {
+        @apply px-3 py-3;
+        min-width: 0 !important;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+}
+
+@media (max-width: 639px) {
+    .product-list-table.footable td,
+    .product-list-table.footable th {
+        max-width: calc(100vw - 32px);
+    }
+
+    .product-list-table.footable tbody td:first-child,
+    .product-list-table.footable thead th:first-child {
+        @apply pl-3;
+    }
+
+    .product-list-table.footable tbody td:last-child,
+    .product-list-table.footable thead th:last-child {
+        @apply pr-3;
+    }
+}
+
 /* purchase-order-table */
 .price-subtotal-cell {
     display: flex;

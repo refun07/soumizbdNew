@@ -150,15 +150,15 @@
             </div>
 
 
-            <table class="product-list-table footable w-full [&_td]:">
+            <table class="product-list-table footable w-full">
                 <thead class="uppercase text-left bg-primary/10">
                     <tr>
-                        <th class="min-w-[340px]">{{ translate('Product Information') }}</th>
-                        <th data-breakpoints="xs sm" class="min-w-[180px]">{{ translate('Inventory') }}</th>
-                        <th data-breakpoints="xs sm" class="min-w-[180px]">{{ translate('Pricing') }}</th>
-                        <th data-breakpoints="xs sm md" class="min-w-[190px]">{{ translate('Status') }}</th>
-                        <th data-breakpoints="xs sm md lg" class="min-w-[140px]">{{ translate('Dates') }}</th>
-                        <th data-breakpoints="xs sm md" class="w-[130px]">
+                        <th class="min-w-[220px] xl:min-w-[340px]">{{ translate('Product Information') }}</th>
+                        <th data-breakpoints="xs sm" class="min-w-[130px] xl:min-w-[180px]">{{ translate('Inventory') }}</th>
+                        <th data-breakpoints="xs sm" class="min-w-[130px] xl:min-w-[180px]">{{ translate('Pricing') }}</th>
+                        <th data-breakpoints="xs sm md" class="min-w-[140px] xl:min-w-[190px]">{{ translate('Status') }}</th>
+                        <th data-breakpoints="xs sm md lg" class="min-w-[115px] xl:min-w-[140px]">{{ translate('Dates') }}</th>
+                        <th data-breakpoints="xs sm md" class="w-[110px] xl:w-[130px]">
                             {{ translate('Options') }}
                         </th>
                     </tr>
@@ -189,28 +189,28 @@
                         @endphp
                         <tr>
                             <td>
-                                <div class="flex items-start gap-4">
+                                <div class="flex min-w-0 items-start gap-3 sm:gap-4">
                                     <div class="max-xs:hidden shrink-0">
                                         <img src="{{ uploadedAsset($product->thumbnail_image) }}" alt=""
                                             class="w-16 h-16 rounded-md object-cover border border-border"
                                             onerror="this.onerror=null;this.src='{{ asset('images/image-error.png') }}';" />
                                     </div>
-                                    <div class="min-w-0 space-y-2">
-                                        <div>
+                                    <div class="min-w-0 flex-1 space-y-2">
+                                        <div class="min-w-0">
                                             <a href="{{ route('admin.products.edit', ['product' => $product->id, 'lang_key' => config('app.default_language')]) }}&translate"
-                                                class="font-semibold text-foreground hover:text-secondary line-clamp-2 max-w-[420px]">
+                                                class="block max-w-full font-semibold text-foreground hover:text-secondary line-clamp-2 break-words">
                                                 {{ $product->collectTranslation('name') }}
                                             </a>
                                             <div class="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted">
                                                 <span>#{{ $product->id }}</span>
-                                                <span>{{ translate('SKU') }}: {{ $firstVariation?->sku ?: translate('N/A') }}</span>
-                                                <span>{{ translate('Unit') }}: {{ $product->unit?->collectTranslation('name') ?: translate('N/A') }}</span>
-                                                <span>{{ translate('Brand') }}: {{ $product->brand?->collectTranslation('name') ?: translate('N/A') }}</span>
+                                                <span class="min-w-0 break-words">{{ translate('SKU') }}: {{ $firstVariation?->sku ?: translate('N/A') }}</span>
+                                                <span class="min-w-0 break-words">{{ translate('Unit') }}: {{ $product->unit?->collectTranslation('name') ?: translate('N/A') }}</span>
+                                                <span class="min-w-0 break-words">{{ translate('Brand') }}: {{ $product->brand?->collectTranslation('name') ?: translate('N/A') }}</span>
                                             </div>
                                         </div>
                                         <div class="flex items-center gap-1.5 flex-wrap">
                                             @forelse ($product->categories as $category)
-                                                <span class="px-2 py-1 text-[11px] bg-secondary/10 text-secondary rounded-md leading-none">
+                                                <span class="max-w-full px-2 py-1 text-[11px] bg-secondary/10 text-secondary rounded-md leading-none break-words">
                                                     {{ $category->collectTranslation('name') }}
                                                 </span>
                                             @empty
