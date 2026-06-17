@@ -143,25 +143,12 @@
 
 
                 <input type="hidden" name="types[]" value="themeThreeFeaturedCategories">
-                <x-backend.inputs.select :labelInline="false" label="Featured Categories"
-                    name="themeThreeFeaturedCategories[]" multiple data-selection-css-class="multi-select2"
-                    data-placeholder="{{ translate('Select categories') }}" :isRequired="false">
-
-                    @foreach ($categories as $cat)
-                        <x-backend.inputs.select-option name="{{ $cat->collectTranslation('name', $langKey) }}"
-                            value="{{ $cat->id }}"
-                            selected="{{ $featuredCategories->contains($cat->id) ? $cat->id : 0 }}" />
-
-                        @foreach ($cat->childrenCategories as $childCategory)
-                            @include('backend.admin.categories.subCategory', [
-                                'subCategory' => $childCategory,
-                                'langKey' => $langKey,
-                                'category' => null,
-                                'featuredCategories' => $featuredCategories,
-                            ])
-                        @endforeach
-                    @endforeach
-                </x-backend.inputs.select>
+                @include('components.backend.forms.partials.ordered-category-picker', [
+                    'categories' => $categories,
+                    'selectedCategories' => $featuredCategories,
+                    'inputName' => 'themeThreeFeaturedCategories',
+                    'langKey' => $langKey,
+                ])
 
                 <div class="flex justify-end pt-2">
                     <x-backend.inputs.button type="submit" buttonText="{{ translate('Save Changes') }}"

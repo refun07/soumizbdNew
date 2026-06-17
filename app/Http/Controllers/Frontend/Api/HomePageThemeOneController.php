@@ -183,13 +183,21 @@ class HomePageThemeOneController extends Controller
     # get featured categories
     public function featuredCategories(Request $request)
     {
-        $featuredCategories = collect();
+        $featuredCategories = [];
 
         if (getSetting('themeOneFeaturedCategories') != null) {
-            $featuredCategories = json_decode(getSetting('themeOneFeaturedCategories'), true);
+            $featuredCategories = collect(json_decode(getSetting('themeOneFeaturedCategories'), true))
+                ->map(fn ($id) => (int) $id)
+                ->filter()
+                ->values()
+                ->all();
         }
 
-        $categories = Category::whereIn('id', $featuredCategories)->get();
+        $categories = Category::whereIn('id', $featuredCategories)
+            ->get()
+            ->sortBy(fn ($category) => array_search((int) $category->id, $featuredCategories))
+            ->values();
+
         return [
             'success'   => true,
             'status'    => 200,
