@@ -146,6 +146,15 @@
             });
 
             if (res.success == true && res.status == 200) {
+                $(this).data('status', data.isActive).attr('data-status', data.isActive);
+                document.dispatchEvent(new CustomEvent('activeStatusUpdated', {
+                    detail: {
+                        input: this,
+                        id: data.id,
+                        isActive: data.isActive,
+                        route: $(this).data('route'),
+                    },
+                }));
                 notifyMe('success', res.message);
             } else {
                 notifyMe('success', `{{ translate('Something went wrong') }}`);

@@ -943,6 +943,19 @@
                             $productCategories = $product ? $product->categories()->pluck('category_id') : collect();
                         @endphp
 
+                        <div class="mb-4">
+                            <div class="theme-input-wrapper relative">
+                                <input type="search" class="theme-input pr-10 product-category-search"
+                                    data-category-search
+                                    placeholder="{{ translate('Search categories or subcategories') }}"
+                                    autocomplete="off">
+                                <span
+                                    class="absolute top-0 right-0 h-full flex items-center justify-center px-3 text-muted pointer-events-none">
+                                    <i class="fa-solid fa-magnifying-glass"></i>
+                                </span>
+                            </div>
+                        </div>
+
                         <ul class="max-h-[315px] overflow-y-auto cateogry-tree">
                             <div class="category-tree-data space-y-5">
                                 @include('components.backend.inc.products.category-list', [
@@ -953,6 +966,9 @@
                                 ])
                             </div>
                         </ul>
+                        <p class="category-search-empty mt-3 hidden text-sm text-muted" data-category-search-empty>
+                            {{ translate('No categories found') }}
+                        </p>
                         @if (user()->user_type != 'seller')
                             @can('create_categories')
                                 <a href="javascript:void(0);" class="text-secondary-light !mt-7 category-create-modal"

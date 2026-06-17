@@ -199,6 +199,9 @@
     .cateogry-tree .category.open ul {
         @apply block;
     }
+    .cateogry-tree .category-search-match > label {
+        @apply text-secondary;
+    }
 
     /* sidebar */
     .sidebar {

@@ -176,10 +176,86 @@
     }
 
     // category-selector 
-    $(".category-selector:checkbox").change(function() {
+    $(document).off('change.productCategorySelector', '.category-selector:checkbox').on('change.productCategorySelector', '.category-selector:checkbox', function() {
         let checked = this.checked;
         $(this).closest('.category').find('input[type="checkbox"]').attr('checked', checked);
     });
+
+    function initProductCategorySearch() {
+        const input = document.querySelector('[data-category-search]');
+        const tree = document.querySelector('.cateogry-tree');
+        const emptyState = document.querySelector('[data-category-search-empty]');
+
+        if (!input || !tree || input.dataset.searchInitialized === 'true') {
+            return;
+        }
+
+        input.dataset.searchInitialized = 'true';
+
+        const normalize = (value) => (value || '').toString().trim().toLowerCase();
+
+        const syncToggleIcon = (item, isOpen) => {
+            const icon = item.querySelector(':scope > .category-toggler i');
+
+            item.classList.toggle('open', isOpen);
+
+            if (icon) {
+                icon.classList.toggle('fa-chevron-down', !isOpen);
+                icon.classList.toggle('fa-chevron-up', isOpen);
+            }
+        };
+
+        const resetSearchState = () => {
+            tree.querySelectorAll('.category').forEach((item) => {
+                item.hidden = false;
+                item.classList.remove('category-search-match');
+
+                if (item.dataset.searchOpened === 'true') {
+                    syncToggleIcon(item, false);
+                    delete item.dataset.searchOpened;
+                }
+            });
+
+            emptyState?.classList.add('hidden');
+        };
+
+        const filterItem = (item, query) => {
+            const label = item.querySelector(':scope > label');
+            const childItems = Array.from(item.querySelectorAll(':scope > ul > .category'));
+            const isOwnMatch = normalize(label?.textContent).includes(query);
+            const hasMatchingChild = childItems.some((child) => filterItem(child, query));
+            const isVisible = isOwnMatch || hasMatchingChild;
+
+            item.hidden = !isVisible;
+            item.classList.toggle('category-search-match', isOwnMatch && query.length > 0);
+
+            if (query.length > 0 && hasMatchingChild) {
+                syncToggleIcon(item, true);
+                item.dataset.searchOpened = 'true';
+            } else if (item.dataset.searchOpened === 'true') {
+                syncToggleIcon(item, false);
+                delete item.dataset.searchOpened;
+            }
+
+            return isVisible;
+        };
+
+        input.addEventListener('input', function() {
+            const query = normalize(this.value);
+
+            if (!query) {
+                resetSearchState();
+                return;
+            }
+
+            const rootItems = Array.from(tree.querySelectorAll('.category-tree-data > .category'));
+            const hasResults = rootItems.some((item) => filterItem(item, query));
+
+            emptyState?.classList.toggle('hidden', hasResults);
+        });
+    }
+
+    initProductCategorySearch();
 
     // initCategoryCreateModal
     function initCategoryCreateModal() {
@@ -235,6 +311,8 @@
                 success: function(data) {
                     $('.category-tree-data').empty().html(data);
                     initCategoryTree();
+                    initProductCategorySearch();
+                    document.querySelector('[data-category-search]')?.dispatchEvent(new Event('input'));
                     MicroModal.close('category-create-modal');
                     notifyMe('success', '{{ translate('Category added successfully.') }}');
                 }

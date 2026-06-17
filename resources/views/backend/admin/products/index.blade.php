@@ -186,6 +186,12 @@
                                 ? 'bg-red-500/10 text-red-500'
                                 : ($isLowStock ? 'bg-orange-500/10 text-orange-500' : 'bg-green-500/10 text-green-500');
                             $isPreOrder = (bool) data_get($product->pre_order, 'is_active', false);
+                            $ecomStatusLabel = !$product->is_published
+                                ? translate('Not Published')
+                                : ($product->hide_on_ecom ? translate('Hidden on Ecom') : translate('Showing on Ecom'));
+                            $ecomStatusClass = !$product->is_published || $product->hide_on_ecom
+                                ? 'bg-red-500/10 text-red-500'
+                                : 'bg-green-500/10 text-green-500';
                         @endphp
                         <tr>
                             <td>
@@ -267,8 +273,13 @@
                                         @endcan
                                     </div>
                                     <div class="flex flex-wrap gap-1.5">
-                                        <span class="px-2 py-1 text-[11px] rounded-full {{ $product->hide_on_ecom ? 'bg-red-500/10 text-red-500' : 'bg-green-500/10 text-green-500' }}">
-                                            {{ $product->hide_on_ecom ? translate('Hidden on Ecom') : translate('Showing on Ecom') }}
+                                        <span class="px-2 py-1 text-[11px] rounded-full {{ $ecomStatusClass }}"
+                                            data-product-ecom-status
+                                            data-hide-on-ecom="{{ (int) $product->hide_on_ecom }}"
+                                            data-showing-label="{{ translate('Showing on Ecom') }}"
+                                            data-hidden-label="{{ translate('Hidden on Ecom') }}"
+                                            data-unpublished-label="{{ translate('Not Published') }}">
+                                            {{ $ecomStatusLabel }}
                                         </span>
                                         @if ($isPreOrder)
                                             <span class="px-2 py-1 text-[11px] rounded-full bg-blue-500/10 text-blue-500">
@@ -459,6 +470,43 @@
         }
         
         document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('activeStatusUpdated', function(event) {
+                var input = event.detail && event.detail.input;
+
+                if (!input || input.name !== 'isActiveCheckbox' || input.dataset.route !== '{{ route('admin.products.status') }}') {
+                    return;
+                }
+
+                var row = input.closest('tr');
+                var badge = row ? row.querySelector('[data-product-ecom-status]') : null;
+
+                if (!badge) {
+                    return;
+                }
+
+                var isPublished = Number(event.detail.isActive) === 1;
+                var isHiddenOnEcom = Number(badge.dataset.hideOnEcom) === 1;
+                var redClasses = ['bg-red-500/10', 'text-red-500'];
+                var greenClasses = ['bg-green-500/10', 'text-green-500'];
+
+                badge.classList.remove(...redClasses, ...greenClasses);
+
+                if (!isPublished) {
+                    badge.textContent = badge.dataset.unpublishedLabel;
+                    badge.classList.add(...redClasses);
+                    return;
+                }
+
+                if (isHiddenOnEcom) {
+                    badge.textContent = badge.dataset.hiddenLabel;
+                    badge.classList.add(...redClasses);
+                    return;
+                }
+
+                badge.textContent = badge.dataset.showingLabel;
+                badge.classList.add(...greenClasses);
+            });
+
             // Filter selects handling - use jQuery for Select2 compatibility
             $(document).on('change', '.product-search-form .filterSelect', function() {
                 var form = document.querySelector('.product-search-form form');
