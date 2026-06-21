@@ -113,18 +113,18 @@ const ProductCardThemeThree = (props: Props) => {
                         {product.unit}
                     </p>
                 ) : null}
-                <div className="flex gap-1 items-center">
+                <div className="flex flex-row gap-1.5 items-center" dir="ltr">
                     {product.basePrice !== product.discountedBasePrice ? (
                         <>
-                            <span className="text-primary text-lg font-semibold">
+                            <span className="text-primary text-xl font-semibold">
                                 {currencyFormatter(product.discountedBasePrice)}
                             </span>
-                            <span className="text-black/70 text-[17px] font-medium line-through">
+                            <span className="text-black/70 text-lg font-medium line-through">
                                 {currencyFormatter(product.basePrice)}
                             </span>
                         </>
                     ) : (
-                        <span className="text-black text-lg font-semibold">
+                        <span className="text-black text-xl font-semibold">
                             {currencyFormatter(product.basePrice)}
                         </span>
                     )}
