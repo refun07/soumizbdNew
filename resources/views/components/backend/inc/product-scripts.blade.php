@@ -408,26 +408,48 @@
 
     handleBadgeCreateFormSubmit();
 
-    function applyBulkUpdate() {
+    function setBulkVariationField(fieldName, value) {
+        const $variationContainer = $('#variation_combination');
+        const $fields = $variationContainer.find('[name]').filter(function() {
+            const name = this.getAttribute('name') || '';
+            return name.startsWith('variations[') && name.endsWith(`[${fieldName}]`);
+        });
+
+        $fields.val(value).trigger('input').trigger('change');
+        return $fields.length;
+    }
+
+    function applyBulkUpdate(showNotification = true) {
         const bulkPrice = $('#bulk_price').val();
         const bulkDiscountValue = $('#bulk_discount_value').val();
         const bulkDiscountType = $('#bulk_discount_type').val();
+        let updatedFieldCount = 0;
 
-        $('.product-variations .ac').each(function() {
-            const $ac = $(this);
+        if (!$('#variation_combination .product-variations').length) {
+            notifyMe('warning', '{{ translate('No variations found to update.') }}');
+            return;
+        }
 
-            if (bulkPrice !== '') {
-                $ac.find('input[name*="[price]"]').val(bulkPrice);
+        if (bulkPrice !== '') {
+            updatedFieldCount += setBulkVariationField('price', bulkPrice);
+        }
+
+        if (bulkDiscountValue !== '') {
+            updatedFieldCount += setBulkVariationField('discount_value', bulkDiscountValue);
+        }
+
+        if (bulkDiscountType) {
+            updatedFieldCount += setBulkVariationField('discount_type', bulkDiscountType);
+        }
+
+        if (showNotification) {
+            if (!updatedFieldCount) {
+                notifyMe('warning', '{{ translate('No variation fields found to update.') }}');
+                return;
             }
 
-            if (bulkDiscountValue !== '') {
-                $ac.find('input[name*="[discount_value]"]').val(bulkDiscountValue);
-            }
-
-            if (bulkDiscountType) {
-                $ac.find('select[name*="[discount_type]"]').val(bulkDiscountType);
-            }
-        });
+            notifyMe('success', '{{ translate('Variations updated successfully.') }}');
+        }
     }
 
     function clearBulkUpdate() {
@@ -435,6 +457,11 @@
         $('#bulk_discount_value').val('');
         $('#bulk_discount_type').val('flat');
     }
+
+    $(document).off('input.bulkVariations change.bulkVariations', '#bulk_price, #bulk_discount_value, #bulk_discount_type')
+        .on('input.bulkVariations change.bulkVariations', '#bulk_price, #bulk_discount_value, #bulk_discount_type', function() {
+            applyBulkUpdate(false);
+        });
 
     // Initialize on page load - for existing products show bulk update directly, for new products call AJAX
     $(document).ready(function() {

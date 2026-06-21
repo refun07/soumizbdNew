@@ -427,11 +427,12 @@
                                     </div>
                                 </div>
                                 <div class="flex justify-end gap-2 mt-3">
-                                    <button type="button" class="button button-secondary"
+                                    <button type="button" class="button button-secondary !bg-slate-200 !text-slate-800"
                                         onclick="clearBulkUpdate()">
                                         {{ translate('Clear') }}
                                     </button>
-                                    <button type="button" class="button button-primary" onclick="applyBulkUpdate()">
+                                    <button type="button" class="button button-primary !bg-secondary !text-white"
+                                        onclick="applyBulkUpdate()">
                                         {{ translate('Apply to All') }}
                                     </button>
                                 </div>
@@ -440,36 +441,25 @@
 
                         <div class="discount-schedule-field mt-3 space-y-3">
                             @php
-                                $hasDiscountSchedule =
-                                    $product && $product->discount_start_date && $product->discount_end_date;
-                                $start_date = '';
-                                $end_date = '';
-
-                                if ($hasDiscountSchedule) {
-                                    $start_date = date('m/d/Y', $product->discount_start_date);
-                                    $end_date = date('m/d/Y', $product->discount_end_date);
-                                }
+                                $hasDiscountEnabled =
+                                    $product &&
+                                    !is_null($product->discount_start_date) &&
+                                    !is_null($product->discount_end_date);
                             @endphp
 
                             <input type="hidden" name="discount_schedule_enabled" id="discount_schedule_enabled"
-                                value="{{ $hasDiscountSchedule ? 1 : 0 }}">
+                                value="{{ $hasDiscountEnabled ? 1 : 0 }}">
 
                             <div class="flex items-center justify-between gap-4">
                                 <label for="discount_schedule_toggle" class="theme-input-label pt-0 mb-0">
-                                    {{ translate('Discount Schedule') }}
+                                    {{ translate('Discount') }}
                                 </label>
                                 <label class="flex items-center gap-2 cursor-pointer">
                                     <span class="text-xs text-muted">{{ translate('Off/On') }}</span>
                                     <x-backend.inputs.checkbox toggler="true" name="discount_schedule_toggle"
                                         id="discount_schedule_toggle" value="1"
-                                        isChecked="{{ $hasDiscountSchedule }}" />
+                                        isChecked="{{ $hasDiscountEnabled }}" />
                                 </label>
-                            </div>
-
-                            <div class="discount-schedule-range {{ $hasDiscountSchedule ? '' : 'hidden' }}">
-                                <x-backend.inputs.datepicker placeholder="Start date - End date" label=""
-                                    name="date_range" :isRequired="false" type="range"
-                                    value="{{ $hasDiscountSchedule ? $start_date . ' - ' . $end_date : '' }}" />
                             </div>
                         </div>
                     </div>
@@ -1576,28 +1566,6 @@
             addField('select[name="discount_type"]');
             addContainer('.discount-schedule-field', 'md:col-span-2');
 
-            const discountScheduleToggle = document.getElementById('discount_schedule_toggle');
-            const discountScheduleEnabled = document.getElementById('discount_schedule_enabled');
-            const discountScheduleRange = productLayout.querySelector('.discount-schedule-range');
-            const discountScheduleInput = document.getElementById('date_range');
-
-            const syncDiscountSchedule = () => {
-                const isEnabled = discountScheduleToggle?.checked ?? false;
-
-                if (discountScheduleEnabled) {
-                    discountScheduleEnabled.value = isEnabled ? '1' : '0';
-                }
-
-                discountScheduleRange?.classList.toggle('hidden', !isEnabled);
-
-                if (!isEnabled && discountScheduleInput) {
-                    discountScheduleInput.value = '';
-                }
-            };
-
-            discountScheduleToggle?.addEventListener('change', syncDiscountSchedule);
-            syncDiscountSchedule();
-
             const unitField = essentialsGrid.querySelector('.admin-unit-field');
             const unitLabel = unitField?.querySelector('.theme-input-label');
             const addUnitAction = productLayout.querySelector('.unit-create-modal');
@@ -1862,6 +1830,20 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        const discountScheduleToggle = document.getElementById('discount_schedule_toggle');
+        const discountScheduleEnabled = document.getElementById('discount_schedule_enabled');
+
+        const syncDiscountSchedule = () => {
+            const isEnabled = discountScheduleToggle?.checked ?? false;
+
+            if (discountScheduleEnabled) {
+                discountScheduleEnabled.value = isEnabled ? '1' : '0';
+            }
+        };
+
+        discountScheduleToggle?.addEventListener('change', syncDiscountSchedule);
+        syncDiscountSchedule();
+
         const preOrderToggle = document.getElementById('pre_order_is_active');
         const preOrderSection = document.getElementById('pre_order_section');
         const sizeChartToggle = document.getElementById('isSizeChart');

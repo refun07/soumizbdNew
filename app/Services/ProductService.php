@@ -32,6 +32,9 @@ use League\Csv\Writer;
 
 class ProductService
 {
+    private const DISCOUNT_ACTIVE_START_TIMESTAMP = 1;
+    private const DISCOUNT_ACTIVE_END_TIMESTAMP = 2147483647;
+
     private static function toBoolean($value, bool $default = false): bool
     {
         if ($value === null || $value === '') {
@@ -44,6 +47,18 @@ class ProductService
     private static function productSettingEnabled(string $key): bool
     {
         return getSetting($key, '1') !== '0';
+    }
+
+    private static function syncDiscountEnabled(Product $product, bool $isEnabled): void
+    {
+        if (!$isEnabled) {
+            $product->discount_start_date = null;
+            $product->discount_end_date   = null;
+            return;
+        }
+
+        $product->discount_start_date = self::DISCOUNT_ACTIVE_START_TIMESTAMP;
+        $product->discount_end_date   = self::DISCOUNT_ACTIVE_END_TIMESTAMP;
     }
 
     private static function resolveMinPurchaseQtyValue($value = null): int
@@ -661,18 +676,7 @@ class ProductService
             }
 
             # discount
-            if (!$request->boolean('discount_schedule_enabled')) {
-                $product->discount_start_date = null;
-                $product->discount_end_date   = null;
-            } elseif ($request->date_range != null) {
-                if (Str::contains($request->date_range, '-')) {
-                    $date_var = explode(" - ", $request->date_range);
-                } else {
-                    $date_var = [date("d/m/Y"), date("d/m/Y")];
-                }
-                $product->discount_start_date = strtotime($date_var[0]);
-                $product->discount_end_date   = strtotime($date_var[1]);
-            }
+            self::syncDiscountEnabled($product, $request->boolean('discount_schedule_enabled'));
             // $product->discount_info   = $request->discount_info;
 
             # stock qty based on all variations / no variation 
@@ -1219,18 +1223,7 @@ class ProductService
             }
 
             # discount 
-            if (!$request->boolean('discount_schedule_enabled')) {
-                $product->discount_start_date = null;
-                $product->discount_end_date   = null;
-            } elseif ($request->date_range != null) {
-                if (Str::contains($request->date_range, '-')) {
-                    $date_var = explode(" - ", $request->date_range);
-                } else {
-                    $date_var = [date("d/m/Y"), date("d/m/Y")];
-                }
-                $product->discount_start_date = strtotime($date_var[0]);
-                $product->discount_end_date   = strtotime($date_var[1]);
-            }
+            self::syncDiscountEnabled($product, $request->boolean('discount_schedule_enabled'));
             // $product->discount_info   = $request->discount_info;
 
             # stock qty based on all variations / no variation 

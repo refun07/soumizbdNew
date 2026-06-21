@@ -644,7 +644,8 @@ if (!function_exists('variationDiscountedPrice')) {
         $discountValue       = $variation->discount_value;
 
         # check if discount dates are valid
-        if ($product->discount_start_date != null &&
+        if ($product->discount_start_date !== null &&
+            $product->discount_end_date !== null &&
             strtotime(date('d-m-Y H:i:s')) >= $product->discount_start_date &&
             strtotime(date('d-m-Y H:i:s')) <= $product->discount_end_date
         ) {
