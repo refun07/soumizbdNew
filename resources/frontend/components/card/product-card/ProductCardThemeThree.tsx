@@ -100,7 +100,7 @@ const ProductCardThemeThree = (props: Props) => {
                     rating={product.rating.average}
                     totalReviews={product.rating.total}
                 />
-                <h3 className="font-medium mb-4">
+                <h3 className="font-medium mb-1.5">
                     <Link
                         to={`/products/${product.slug}`}
                         className="line-clamp-2"
@@ -108,6 +108,11 @@ const ProductCardThemeThree = (props: Props) => {
                         {product.name}
                     </Link>
                 </h3>
+                {product.unit ? (
+                    <p className="mb-4 text-xs font-bold text-black/60 line-clamp-1">
+                        {product.unit}
+                    </p>
+                ) : null}
                 <div className="flex gap-1 items-center">
                     {product.basePrice !== product.discountedBasePrice ? (
                         <>

@@ -745,6 +745,11 @@ const ProductPreviewContent = ({
                     />
                 </a>
                 <h1 className="text-[26px] font-medium">{product.name}</h1>
+                {product.unit ? (
+                    <p className="mt-1 text-sm font-bold text-black/60">
+                        {product.unit}
+                    </p>
+                ) : null}
                 <hr className="mt-2.5 mb-6" />
                 {product.hasVariation === 1 &&
                     product.variationCombinations.map((variation) => {

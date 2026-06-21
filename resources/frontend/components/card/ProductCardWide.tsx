@@ -82,7 +82,7 @@ const ProductCardWide = ({
             </div>
 
             <div className="grow">
-                <h3 className="font-medium mb-3.5">
+                <h3 className="font-medium mb-1">
                     <Link
                         to={`/products/${cartProduct.product.slug}`}
                         className="line-clamp-2"
@@ -90,6 +90,11 @@ const ProductCardWide = ({
                         {cartProduct.product.name}
                     </Link>
                 </h3>
+                {cartProduct.product.unit ? (
+                    <p className="mb-3.5 text-xs font-bold text-black/60 line-clamp-1">
+                        {cartProduct.product.unit}
+                    </p>
+                ) : null}
 
                 <div className="text-primary text-sm font-bold flex gap-1 items-center">
                     {discountPrice !== basePrice ? (

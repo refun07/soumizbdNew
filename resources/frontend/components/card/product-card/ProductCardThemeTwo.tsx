@@ -157,6 +157,11 @@ const ProductCardThemeTwo = (props: Props) => {
                         {product.name}
                     </Link>
                 </h3>
+                {product.unit ? (
+                    <p className="mt-1 line-clamp-1 text-[12px] font-bold text-[#667085]">
+                        {product.unit}
+                    </p>
+                ) : null}
                 <div className="mt-3 flex items-center gap-2">
                     <span className="text-[16px] font-semibold text-[#B3052A]">
                         {currencyFormatter(product.discountedBasePrice)}

@@ -39,6 +39,11 @@ const ProductCardSmall = ({ product, containerClassName }: Props) => {
                         {product.name}
                     </Link>
                 </h3>
+                {product.unit ? (
+                    <p className="mb-1 text-xs font-bold text-black/60 line-clamp-1">
+                        {product.unit}
+                    </p>
+                ) : null}
 
                 <div className="flex gap-1 items-center">
                     {product.basePrice !== product.discountedBasePrice ? (

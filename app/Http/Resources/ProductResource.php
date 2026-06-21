@@ -94,7 +94,7 @@ class ProductResource extends JsonResource
             'thumbnailImg'  => uploadedAsset($this->thumbnail_image),
             'basePrice'     => (float) $this->__getMinBasePrice(),
             'discountedBasePrice' => (float) $this->__getMinDiscountedPrice(),
-            'unit'          => $this->unit ? $this->unit->name : '',
+            'unit'          => $this->unit ? $this->unit->collectTranslation('name') : '',
             'stockQty'      => $this->__getStock($this),
             'hasVariation'  => (int) $this->has_variation,
             'rating'        => getProductRatings($this->productReviews()),

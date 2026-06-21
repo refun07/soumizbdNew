@@ -202,6 +202,11 @@ const RaisaProductCard = ({ product }: { product: IProductShort }) => {
                         {product.name}
                     </Link>
                 </h3>
+                {product.unit ? (
+                    <p className="mt-1 line-clamp-1 text-[12px] font-bold text-[#667085]">
+                        {product.unit}
+                    </p>
+                ) : null}
                 <div className="mt-4 flex items-center gap-2">
                     <span className="text-[20px] font-semibold text-[#bc1734]">
                         {currencyFormatter(product.discountedBasePrice)}
