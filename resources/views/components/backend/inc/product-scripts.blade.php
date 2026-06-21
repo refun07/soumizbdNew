@@ -175,11 +175,8 @@
         generateVariationCombinations();
     }
 
-    // category-selector 
-    $(document).off('change.productCategorySelector', '.category-selector:checkbox').on('change.productCategorySelector', '.category-selector:checkbox', function() {
-        let checked = this.checked;
-        $(this).closest('.category').find('input[type="checkbox"]').attr('checked', checked);
-    });
+    // category-selector: each category checkbox should only toggle itself.
+    $(document).off('change.productCategorySelector', '.category-selector:checkbox');
 
     function initProductCategorySearch() {
         const input = document.querySelector('[data-category-search]');
