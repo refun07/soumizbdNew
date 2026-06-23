@@ -143,11 +143,11 @@ class ProductController extends Controller
         // sortBy
         switch ($request->sortBy) {
             case 'lowToHigh':
-                $products = $products->orderBy('min_price', 'ASC');
+                $products = $this->orderByDiscountedPrice($products, 'ASC');
                 break;
 
             case 'highToLow':
-                $products = $products->orderBy('min_price', 'DESC');
+                $products = $this->orderByDiscountedPrice($products, 'DESC');
                 break;
 
             case 'oldest':
@@ -204,6 +204,60 @@ class ProductController extends Controller
         }
 
         return $data;
+    }
+
+    private function orderByDiscountedPrice($products, string $direction)
+    {
+        $now = strtotime(date('d-m-Y H:i:s'));
+        $direction = strtoupper($direction) === 'DESC' ? 'DESC' : 'ASC';
+
+        $discountedPriceSql = "
+            COALESCE(
+                (
+                    SELECT MIN(
+                        CASE
+                            WHEN active_campaigns.product_variation_id IS NOT NULL THEN
+                                CASE
+                                    WHEN active_campaigns.discount_type = 'percentage'
+                                        THEN pv.price - ((pv.price * active_campaigns.discount_value) / 100)
+                                    ELSE pv.price - active_campaigns.discount_value
+                                END
+                            WHEN products.discount_start_date IS NOT NULL
+                                AND products.discount_end_date IS NOT NULL
+                                AND products.discount_start_date <= ?
+                                AND products.discount_end_date >= ? THEN
+                                CASE
+                                    WHEN pv.discount_type = 'percentage'
+                                        THEN pv.price - ((pv.price * pv.discount_value) / 100)
+                                    ELSE pv.price - pv.discount_value
+                                END
+                            ELSE pv.price
+                        END
+                    )
+                    FROM product_variations pv
+                    LEFT JOIN (
+                        SELECT
+                            cp.product_variation_id,
+                            cp.discount_type,
+                            cp.discount_value
+                        FROM campaign_products cp
+                        INNER JOIN campaigns c ON c.id = cp.campaign_id
+                            AND c.deleted_at IS NULL
+                            AND c.is_published = 1
+                            AND c.start_date <= ?
+                            AND c.end_date >= ?
+                        WHERE cp.deleted_at IS NULL
+                    ) active_campaigns ON active_campaigns.product_variation_id = pv.id
+                    WHERE pv.product_id = products.id
+                        AND pv.deleted_at IS NULL
+                ),
+                products.min_price
+            )
+        ";
+
+        return $products
+            ->orderByRaw($discountedPriceSql . ' ' . $direction, [$now, $now, $now, $now])
+            ->orderBy('products.id', $direction === 'ASC' ? 'ASC' : 'DESC');
     }
 
     private function themeOneOnSaleProductIds(): array
