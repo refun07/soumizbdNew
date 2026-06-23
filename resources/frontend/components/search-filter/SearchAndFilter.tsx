@@ -417,7 +417,7 @@ const SearchAndFilter = ({
                                 classNames={{
                                     singleValue: () => '!text-black/70',
                                 }}
-                                value={filters.sortBy || 'lowToHigh'}
+                                value={filters.sortBy || ''}
                                 onChange={(e) =>
                                     handleFilter({
                                         ...filters,

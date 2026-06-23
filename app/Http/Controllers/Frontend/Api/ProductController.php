@@ -142,6 +142,10 @@ class ProductController extends Controller
 
         // sortBy
         switch ($request->sortBy) {
+            case 'lowToHigh':
+                $products = $products->orderBy('min_price', 'ASC');
+                break;
+
             case 'highToLow':
                 $products = $products->orderBy('min_price', 'DESC');
                 break;
@@ -155,7 +159,7 @@ class ProductController extends Controller
                 break;
 
             default:
-                $products = $products->orderBy('min_price', 'ASC');
+                $products = $products->orderBy('updated_at', 'DESC')->orderBy('created_at', 'DESC');
                 break;
         }
 

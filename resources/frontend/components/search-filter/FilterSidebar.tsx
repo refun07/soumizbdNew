@@ -104,7 +104,7 @@ const FilterSidebar = ({
                                 classNames={{
                                     singleValue: () => '!text-black/70',
                                 }}
-                                value={filters.sortBy || 'lowToHigh'}
+                                value={filters.sortBy || ''}
                                 onChange={handleSortingChange}
                                 options={[
                                     {
