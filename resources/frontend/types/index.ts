@@ -27,6 +27,7 @@ declare global {
                 hotline?: string;
                 promo_text_icon?: string;
                 promo_text?: string;
+                promo_text_animation_enabled?: boolean;
                 bg_color?: string;
                 text_color?: string;
             };

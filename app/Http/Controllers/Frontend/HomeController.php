@@ -182,6 +182,7 @@ class HomeController extends Controller
                 'hotline' => $this->extractPhoneNumber(getSetting("header_{$selectedHeader}_topbar_hotline") ?? getSetting('topbar_hotline') ?? 'Our Hotline +88 0176 229 201'),
                 'promo_text_icon' => getSetting("header_{$selectedHeader}_topbar_promo_text_icon") ?? '',
                 'promo_text' => getSetting("header_{$selectedHeader}_topbar_promo_text") ?? getSetting('topbar_promo_text') ?? 'FREE delivery & 40% Discount for next 3 orders! Place your 1st order!',
+                'promo_text_animation_enabled' => filter_var(getSetting("header_{$selectedHeader}_topbar_promo_text_animation_enabled", true), FILTER_VALIDATE_BOOLEAN),
                 'bg_color' => getSetting("header_{$selectedHeader}_topbar_bg_color") ?? '#1a1a2e',
                 'text_color' => getSetting("header_{$selectedHeader}_topbar_text_color") ?? '#ffffff'
             ],

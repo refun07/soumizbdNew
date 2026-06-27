@@ -25,6 +25,7 @@ const HeaderConfigurationApp: React.FC<HeaderConfigurationAppProps> = ({
     const [hotline, setHotline] = useState("Our Hotline +88 01961 177726");
     const [promoText, setPromoText] = useState("FREE delivery & 40% Discount for next 3 orders! Place your 1st order!");
     const [promoTextIcon, setPromoTextIcon] = useState("");
+    const [promoTextAnimationEnabled, setPromoTextAnimationEnabled] = useState(true);
     const [backgroundColor, setBackgroundColor] = useState("#22c55e");
     const [textColor, setTextColor] = useState("#ffffff");
     const [menuFontSize, setMenuFontSize] = useState(14);
@@ -56,6 +57,7 @@ const HeaderConfigurationApp: React.FC<HeaderConfigurationAppProps> = ({
                     setHotline(result.data.topbar.hotline_number || "Our Hotline +88 01961 177726");
                     setPromoTextIcon(result.data.topbar.promo_text_icon || "");
                     setPromoText(result.data.topbar.promo_text || "FREE delivery & 40% Discount for next 3 orders! Place your 1st order!");
+                    setPromoTextAnimationEnabled(result.data.topbar.promo_text_animation_enabled ?? true);
                     setBackgroundColor(result.data.topbar.bg_color || "#22c55e");
                     setTextColor(result.data.topbar.text_color || "#ffffff");
                     setShowCustomLinks(Boolean(result.data.navbar.custom_links_enabled));
@@ -169,6 +171,7 @@ const HeaderConfigurationApp: React.FC<HeaderConfigurationAppProps> = ({
                     hotline_number: hotline,
                     promo_text_icon: promoTextIcon,
                     promo_text: promoText,
+                    promo_text_animation_enabled: Boolean(promoTextAnimationEnabled),
                     bg_color: backgroundColor,
                     text_color: textColor
                 },
@@ -353,6 +356,16 @@ const HeaderConfigurationApp: React.FC<HeaderConfigurationAppProps> = ({
                                             onChange={(e) => setHotline(e.target.value)}
                                             placeholder="Our Hotline +88 01961 177726"
                                             className="flex-1 max-w-2xl px-4 py-2.5 border border-gray-200 rounded-md text-sm text-gray-600 focus:outline-none focus:border-gray-300"
+                                        />
+                                    </div>
+
+                                    <div className="flex items-center">
+                                        <label className="w-56 text-xs font-medium text-[#6b7280] uppercase tracking-wide">
+                                            Promo Text Animation
+                                        </label>
+                                        <Toggle
+                                            enabled={promoTextAnimationEnabled}
+                                            onChange={setPromoTextAnimationEnabled}
                                         />
                                     </div>
 

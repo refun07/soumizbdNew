@@ -26,6 +26,8 @@ const HeaderThemeTwo = () => {
         topbarConfig?.hotline_number || window.config.topbarHotlineLabel;
     const topbarPromoText =
         topbarConfig?.promo_text || window.config.topbarPromoText;
+    const promoTextAnimationEnabled =
+        topbarConfig?.promo_text_animation_enabled ?? true;
     const topbarPhone =
         topbarConfig?.hotline ||
         topbarHotline?.replace(/\D/g, '') ||
@@ -57,25 +59,56 @@ const HeaderThemeTwo = () => {
 
     return (
         <>
+        <style>
+            {`
+                @keyframes headerTwoPromoTextSwing {
+                    0%, 100% {
+                        transform: translateX(-18%);
+                    }
+                    50% {
+                        transform: translateX(18%);
+                    }
+                }
+
+                .header-two-promo-text {
+                    animation: headerTwoPromoTextSwing 5.5s ease-in-out infinite;
+                    will-change: transform;
+                }
+
+                @media (prefers-reduced-motion: reduce) {
+                    .header-two-promo-text {
+                        animation: none;
+                    }
+                }
+            `}
+        </style>
         <header className="sticky top-0 z-[3] bg-white shadow-sm">
             {showTopbar && <div style={topbarStyle}>
-                <div className="container grid min-h-[46px] grid-cols-2 items-center gap-3 text-[13px] font-medium md:grid-cols-3 md:text-[15px]">
+                <div className="container grid min-h-[46px] grid-cols-2 items-center gap-3 text-[13px] font-medium md:grid-cols-[minmax(170px,0.85fr)_minmax(0,1.8fr)_minmax(110px,0.65fr)] md:text-[15px]">
                     <a href={`tel:${topbarPhone}`} className="flex min-w-0 items-center gap-2 text-inherit">
                         <FaPhoneVolume className="shrink-0 text-[#ff8200]" />
                         <span>{topbarHotline}</span>
                     </a>
-                    <p className="hidden items-center justify-center gap-2 text-center text-inherit md:flex">
-                        {topbarConfig?.promo_text_icon ? (
-                            <img
-                                src={`/${topbarConfig.promo_text_icon}`}
-                                alt=""
-                                className="h-4 w-4 shrink-0 object-contain"
-                            />
-                        ) : (
-                            <FaTag className="shrink-0 text-[#b3052a]" />
-                        )}
-                        {topbarPromoText}
-                    </p>
+                    <div className="mx-4 hidden min-w-0 overflow-hidden text-inherit lg:mx-8 md:block">
+                        <p
+                            className={`mx-auto flex w-max max-w-full items-center justify-center gap-2 whitespace-nowrap text-center ${
+                                promoTextAnimationEnabled
+                                    ? 'header-two-promo-text'
+                                    : ''
+                            }`}
+                        >
+                            {topbarConfig?.promo_text_icon ? (
+                                <img
+                                    src={`/${topbarConfig.promo_text_icon}`}
+                                    alt=""
+                                    className="h-4 w-4 shrink-0 object-contain"
+                                />
+                            ) : (
+                                <FaTag className="shrink-0 text-[#b3052a]" />
+                            )}
+                            <span className="truncate">{topbarPromoText}</span>
+                        </p>
+                    </div>
                     <Link
                         to="/track-order"
                         className="justify-self-end text-inherit transition hover:text-[#ff8200]"

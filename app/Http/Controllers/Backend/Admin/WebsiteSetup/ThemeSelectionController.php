@@ -40,6 +40,7 @@ class ThemeSelectionController extends Controller
             'hotline' => $phoneNumber,
             'promo_text_icon' => getSetting("header_{$headerId}_topbar_promo_text_icon", ''),
             'promo_text' => getSetting("header_{$headerId}_topbar_promo_text", ''),
+            'promo_text_animation_enabled' => filter_var(getSetting("header_{$headerId}_topbar_promo_text_animation_enabled", true), FILTER_VALIDATE_BOOLEAN),
             'bg_color' => getSetting("header_{$headerId}_topbar_bg_color", '#1a1a2e'),
             'text_color' => getSetting("header_{$headerId}_topbar_text_color", '#ffffff')
         ];
@@ -400,6 +401,15 @@ class ThemeSelectionController extends Controller
                 }
             }
 
+            if (isset($requestData['topbar']['promo_text_animation_enabled'])) {
+                $promoTextAnimationEnabled = $requestData['topbar']['promo_text_animation_enabled'];
+                if ($promoTextAnimationEnabled === '' || $promoTextAnimationEnabled === null) {
+                    $requestData['topbar']['promo_text_animation_enabled'] = false;
+                } elseif (is_string($promoTextAnimationEnabled)) {
+                    $requestData['topbar']['promo_text_animation_enabled'] = in_array(strtolower($promoTextAnimationEnabled), ['true', '1', 'on']);
+                }
+            }
+
             // Convert navbar.custom_links_enabled
             if (isset($requestData['navbar']['custom_links_enabled'])) {
                 $customLinksEnabled = $requestData['navbar']['custom_links_enabled'];
@@ -427,6 +437,7 @@ class ThemeSelectionController extends Controller
                 'topbar.hotline_number' => 'nullable|string|max:100',
                 'topbar.promo_text_icon' => 'nullable|string',
                 'topbar.promo_text' => 'nullable|string|max:500',
+                'topbar.promo_text_animation_enabled' => 'nullable|boolean',
                 'topbar.bg_color' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$/',
                 'topbar.text_color' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$/',
                 'navbar.custom_links_enabled' => 'required|boolean',
@@ -469,6 +480,7 @@ class ThemeSelectionController extends Controller
             $this->updateSystemSetting("header_{$headerId}_topbar_hotline", $request->input('topbar.hotline_number', ''));
             $this->updateSystemSetting("header_{$headerId}_topbar_promo_text_icon", $request->input('topbar.promo_text_icon', ''));
             $this->updateSystemSetting("header_{$headerId}_topbar_promo_text", $request->input('topbar.promo_text', ''));
+            $this->updateSystemSetting("header_{$headerId}_topbar_promo_text_animation_enabled", $request->boolean('topbar.promo_text_animation_enabled', true));
             $this->updateSystemSetting("header_{$headerId}_topbar_bg_color", $request->input('topbar.bg_color', '#4267b2'));
             $this->updateSystemSetting("header_{$headerId}_topbar_text_color", $request->input('topbar.text_color', '#ffffff'));
 
