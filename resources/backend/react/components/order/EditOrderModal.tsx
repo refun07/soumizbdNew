@@ -35,6 +35,9 @@ interface OrderDetails {
     tracking_number?: string;
 }
 
+const normalizeAddress = (address?: string) =>
+    (address || '').replace(/\s+/g, ' ').trim();
+
 const EditOrderModal: React.FC = () => {
     const { popup, closePopup } = useAppContext();
     const [loading, setLoading] = useState(false);
@@ -156,6 +159,14 @@ const EditOrderModal: React.FC = () => {
         }));
     };
 
+    const handleSharedAddressChange = (address: string) => {
+        setFormData({
+            ...formData,
+            shipping_address: address,
+            billing_address: address,
+        });
+    };
+
     const handleSubmit = async () => {
         if (!orderId || !orderDetails) return;
         setSaving(true);
@@ -199,6 +210,10 @@ const EditOrderModal: React.FC = () => {
         const tax = subtotal * 0.15; // Simplified tax calculation
         return subtotal + tax + (formData.shipping_charge || 0) - (formData.discount_amount || 0);
     };
+
+    const hasSharedCustomerAddress =
+        normalizeAddress(formData.shipping_address) ===
+        normalizeAddress(formData.billing_address);
 
     return (
         <PopupWrapper isOpen={popup.name === 'edit-order'} size="lg" closeOnBackdropClick={false}>
@@ -269,28 +284,48 @@ const EditOrderModal: React.FC = () => {
                             <section className="rounded-lg border border-border bg-background-primary-light/30 p-4">
                                 <h3 className="mb-4 font-semibold text-foreground">Address Information</h3>
                                 <div className="grid gap-4 sm:grid-cols-2">
-                                <div>
-                                    <label className="block text-sm font-medium text-foreground mb-1">
-                                        Shipping Address
-                                    </label>
-                                    <textarea
-                                        value={formData.shipping_address}
-                                        onChange={(e) => setFormData({ ...formData, shipping_address: e.target.value })}
-                                        rows={3}
-                                        className="theme-input w-full"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-foreground mb-1">
-                                        Billing Address
-                                    </label>
-                                    <textarea
-                                        value={formData.billing_address}
-                                        onChange={(e) => setFormData({ ...formData, billing_address: e.target.value })}
-                                        rows={3}
-                                        className="theme-input w-full"
-                                    />
-                                </div>
+                                    {hasSharedCustomerAddress ? (
+                                        <div className="sm:col-span-2">
+                                            <label className="block text-sm font-medium text-foreground mb-1">
+                                                Customer Address
+                                            </label>
+                                            <textarea
+                                                value={formData.shipping_address}
+                                                onChange={(e) =>
+                                                    handleSharedAddressChange(
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                rows={3}
+                                                className="theme-input w-full"
+                                            />
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <div>
+                                                <label className="block text-sm font-medium text-foreground mb-1">
+                                                    Shipping Address
+                                                </label>
+                                                <textarea
+                                                    value={formData.shipping_address}
+                                                    onChange={(e) => setFormData({ ...formData, shipping_address: e.target.value })}
+                                                    rows={3}
+                                                    className="theme-input w-full"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-foreground mb-1">
+                                                    Billing Address
+                                                </label>
+                                                <textarea
+                                                    value={formData.billing_address}
+                                                    onChange={(e) => setFormData({ ...formData, billing_address: e.target.value })}
+                                                    rows={3}
+                                                    className="theme-input w-full"
+                                                />
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             </section>
 
