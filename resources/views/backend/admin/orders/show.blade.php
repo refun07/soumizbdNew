@@ -5,6 +5,61 @@
 @endsection
 
 @section('content')
+    <style>
+        .order-show-page {
+            color: rgb(var(--foreground) / 1);
+        }
+
+        .dark .order-show-page .bg-white {
+            background-color: rgb(var(--background) / 1) !important;
+            color: rgb(var(--foreground) / 1) !important;
+        }
+
+        .dark .order-show-page .bg-gray-50,
+        .dark .order-show-page .bg-gray-100 {
+            background-color: rgb(var(--background-hover) / 1) !important;
+            color: rgb(var(--foreground) / 1) !important;
+        }
+
+        .dark .order-show-page .text-gray-900,
+        .dark .order-show-page .text-gray-800,
+        .dark .order-show-page .text-gray-700 {
+            color: rgb(var(--foreground) / 1) !important;
+        }
+
+        .dark .order-show-page .text-gray-600,
+        .dark .order-show-page .text-gray-500,
+        .dark .order-show-page .text-gray-400 {
+            color: rgb(var(--muted) / 1) !important;
+        }
+
+        .dark .order-show-page .border-gray-100,
+        .dark .order-show-page .border-gray-200,
+        .dark .order-show-page .border-gray-300,
+        .dark .order-show-page .divide-gray-200 > :not([hidden]) ~ :not([hidden]) {
+            border-color: rgb(var(--border) / 1) !important;
+        }
+
+        .dark .order-show-page input,
+        .dark .order-show-page textarea,
+        .dark .order-show-page select {
+            background-color: rgb(var(--background) / 1) !important;
+            border-color: rgb(var(--border) / 1) !important;
+            color: rgb(var(--foreground) / 1) !important;
+        }
+
+        .dark .order-show-page input::placeholder,
+        .dark .order-show-page textarea::placeholder {
+            color: rgb(var(--muted) / 1) !important;
+        }
+
+        .dark .order-show-page option {
+            background-color: rgb(var(--background) / 1);
+            color: rgb(var(--foreground) / 1);
+        }
+    </style>
+
+    <div class="order-show-page">
     <!-- start::dashboard breadcrumb -->
     <div class="dashboard-nav pt-6 flex items-center justify-between mb-9">
         <div class="flex items-center">
@@ -639,6 +694,7 @@
                 </div>
             </form>
         </div>
+    </div>
     </div>
 @endsection
 

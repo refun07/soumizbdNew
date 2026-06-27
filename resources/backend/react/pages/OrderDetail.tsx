@@ -174,7 +174,7 @@ const OrderDetailPage: React.FC = () => {
 
     if (loading) {
         return (
-            <div className="p-4">
+            <div className="p-4 text-foreground">
                 <div className="flex items-center justify-center h-64">
                     <div className="text-muted">Loading order details...</div>
                 </div>
@@ -184,7 +184,7 @@ const OrderDetailPage: React.FC = () => {
 
     if (error || !order) {
         return (
-            <div className="p-4">
+            <div className="p-4 text-foreground">
                 <div className="flex items-center justify-between mb-4">
                     <h1 className="text-xl font-bold text-foreground">Order Details</h1>
                     <Button variant="secondary" onClick={handleBack}>
@@ -192,7 +192,7 @@ const OrderDetailPage: React.FC = () => {
                         Back to Orders
                     </Button>
                 </div>
-                <div className="card rounded-lg shadow-sm p-8 text-center">
+                <div className="card rounded-lg border border-border bg-card p-8 text-center text-foreground shadow-sm">
                     <div className="text-red-500 mb-2">
                         <i className="fa-solid fa-triangle-exclamation text-3xl"></i>
                     </div>
@@ -203,7 +203,7 @@ const OrderDetailPage: React.FC = () => {
     }
 
     return (
-        <div className="p-4">
+        <div className="p-4 text-foreground">
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
@@ -250,7 +250,7 @@ const OrderDetailPage: React.FC = () => {
                 {/* Order Info Card */}
                 <div className="lg:col-span-2 space-y-4">
                     {/* Order Summary */}
-                    <div className="card rounded-lg shadow-sm border border-border p-4">
+                    <div className="card rounded-lg border border-border bg-card p-4 text-foreground shadow-sm">
                         <div className="flex items-center justify-between mb-4">
                             <h2 className="font-semibold text-lg text-foreground">Order Summary</h2>
                             <span className={`px-3 py-1 rounded text-sm font-medium text-white ${statusColorMap[order.deliveryStatus] || '!bg-gray-500'}`}>
@@ -316,7 +316,7 @@ const OrderDetailPage: React.FC = () => {
                                     )}
                                 </div>
                                 {order.courier_response && (
-                                    <div className="mt-3 bg-muted/5 rounded-lg p-3 text-sm">
+                                    <div className="mt-3 rounded-lg border border-border bg-muted/10 p-3 text-sm">
                                         <div className="text-xs text-muted uppercase mb-1">Courier Details</div>
                                         {order.courier_partner?.toLowerCase() === 'pathao' && order.courier_response.data && (
                                             <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
@@ -370,7 +370,7 @@ const OrderDetailPage: React.FC = () => {
                     </div>
 
                     {/* Order Items */}
-                    <div className="card rounded-lg shadow-sm border border-border p-4">
+                    <div className="card rounded-lg border border-border bg-card p-4 text-foreground shadow-sm">
                         <h2 className="font-semibold text-lg text-foreground mb-4">Order Items</h2>
                         <div className="overflow-x-auto">
                             <table className="w-full">
@@ -418,7 +418,7 @@ const OrderDetailPage: React.FC = () => {
                 {/* Sidebar */}
                 <div className="space-y-4">
                     {/* Customer Info */}
-                    <div className="card rounded-lg shadow-sm border border-border p-4">
+                    <div className="card rounded-lg border border-border bg-card p-4 text-foreground shadow-sm">
                         <h2 className="font-semibold text-lg text-foreground mb-4">Customer Info</h2>
                         <div className="space-y-3">
                             <div>
@@ -460,7 +460,7 @@ const OrderDetailPage: React.FC = () => {
                     </div>
 
                     {/* Shipping Address */}
-                    <div className="card rounded-lg shadow-sm border border-border p-4">
+                    <div className="card rounded-lg border border-border bg-card p-4 text-foreground shadow-sm">
                         <h2 className="font-semibold text-lg text-foreground mb-4">Shipping Address</h2>
                         <div className="space-y-2 text-sm">
                             {order.shipping_address && (
@@ -483,7 +483,7 @@ const OrderDetailPage: React.FC = () => {
                     </div>
 
                     {/* Price Summary */}
-                    <div className="card rounded-lg shadow-sm border border-border p-4">
+                    <div className="card rounded-lg border border-border bg-card p-4 text-foreground shadow-sm">
                         <h2 className="font-semibold text-lg text-foreground mb-4">Price Summary</h2>
                         <div className="space-y-2">
                             <div className="flex justify-between">
@@ -520,7 +520,7 @@ const OrderDetailPage: React.FC = () => {
                     </div>
 
                     {order.latestDeliveryUpdate && (
-                        <div className="card rounded-lg shadow-sm border border-border p-4">
+                        <div className="card rounded-lg border border-border bg-card p-4 text-foreground shadow-sm">
                             <h2 className="font-semibold text-lg text-foreground mb-4">
                                 Last Delivery Update
                             </h2>
@@ -546,7 +546,7 @@ const OrderDetailPage: React.FC = () => {
                     )}
 
                     {order.exchangeInfo && (
-                        <div className="card rounded-lg shadow-sm border border-border p-4">
+                        <div className="card rounded-lg border border-border bg-card p-4 text-foreground shadow-sm">
                             <div className="flex items-center justify-between mb-4">
                                 <h2 className="font-semibold text-lg text-foreground">
                                     Exchange Information
@@ -624,7 +624,7 @@ const OrderDetailPage: React.FC = () => {
                                         <div className="text-xs text-muted uppercase mb-2 font-medium">Exchange Items</div>
                                         <div className="space-y-2">
                                             {order.exchangeInfo.items.map((item) => (
-                                                <div key={item.id} className="text-sm bg-muted/10 rounded p-2">
+                                                <div key={item.id} className="rounded border border-border bg-muted/10 p-2 text-sm">
                                                     <div className="flex items-center gap-1 mb-1">
                                                         <span className="text-muted text-xs line-through">{item.originalProductName}{item.originalVariant ? ` (${item.originalVariant})` : ''}</span>
                                                         <i className="fa-solid fa-arrow-right text-[10px] text-muted mx-1"></i>
@@ -675,8 +675,8 @@ const OrderDetailPage: React.FC = () => {
             {/* Block IP Modal */}
             {showBlockModal && order?.ipAddress && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-                        <div className="flex items-center justify-between p-4 border-b">
+                    <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg border border-border bg-card text-foreground shadow-xl">
+                        <div className="flex items-center justify-between border-b border-border p-4">
                             <h3 className="text-lg font-semibold text-foreground">Block IP Address</h3>
                             <button
                                 onClick={() => setShowBlockModal(false)}
@@ -686,7 +686,7 @@ const OrderDetailPage: React.FC = () => {
                             </button>
                         </div>
                         <div className="p-4 space-y-4">
-                            <div className="bg-gray-50 p-3 rounded text-sm">
+                            <div className="rounded border border-border bg-muted/10 p-3 text-sm">
                                 <span className="text-muted">IP Address:</span>
                                 <span className="font-medium ml-2">{order.ipAddress}</span>
                             </div>
@@ -697,7 +697,7 @@ const OrderDetailPage: React.FC = () => {
                                 <textarea
                                     value={blockReason}
                                     onChange={(e) => setBlockReason(e.target.value)}
-                                    className="form-input w-full"
+                                    className="form-input w-full border-border bg-background text-foreground placeholder:text-muted"
                                     rows={2}
                                     placeholder="Enter reason for blocking..."
                                 />
@@ -709,7 +709,7 @@ const OrderDetailPage: React.FC = () => {
                                 <select
                                     value={blockDuration}
                                     onChange={(e) => setBlockDuration(e.target.value)}
-                                    className="form-select w-full"
+                                    className="form-select w-full border-border bg-background text-foreground"
                                 >
                                     <option value="permanent">Permanent</option>
                                     <option value="1_hour">1 Hour</option>
@@ -719,7 +719,7 @@ const OrderDetailPage: React.FC = () => {
                                 </select>
                             </div>
                         </div>
-                        <div className="flex items-center justify-end gap-2 p-4 border-t bg-gray-50">
+                        <div className="flex items-center justify-end gap-2 border-t border-border bg-muted/10 p-4">
                             <button
                                 onClick={() => setShowBlockModal(false)}
                                 className="btn btn-secondary"
