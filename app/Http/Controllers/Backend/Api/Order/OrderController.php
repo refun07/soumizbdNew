@@ -23,7 +23,7 @@ class OrderController extends Controller
         $this->orderService = $orderService;
 
         $this->middleware(['permission:view_orders|manage_assigned_orders|manage_orders'])->only(['index', 'downloadInvoice', 'export', 'getReturnDetails']);
-        $this->middleware(['permission:manage_assigned_orders|manage_orders'])->only(['show', 'updateOrderTracking', 'storeOrderUpdates', 'deleteOrderUpdate', 'updatePaymentStatus', 'updateDeliveryStatus', 'updateOrderAddress', 'updateOrderStatus', 'bulkUpdateOrderStatus', 'updateOrder']);
+        $this->middleware(['permission:manage_assigned_orders|manage_orders'])->only(['show', 'updateOrderTracking', 'storeOrderUpdates', 'deleteOrderUpdate', 'updatePaymentStatus', 'updateDeliveryStatus', 'updateOrderAddress', 'updateOrderStatus', 'bulkUpdateOrderStatus', 'updateOrder', 'destroy']);
     }
 
     private function authorizeOrderManagement(Order $order)
@@ -226,6 +226,36 @@ class OrderController extends Controller
                 'success' => false,
                 'status' => 500,
                 'message' => 'Something went wrong: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function destroy($orderId)
+    {
+        try {
+            $order = Order::shopOrders()->findOrFail($orderId);
+            $this->authorizeOrderManagement($order);
+
+            $order->delete();
+
+            return response()->json([
+                'success' => true,
+                'status'  => 200,
+                'message' => 'Order deleted successfully',
+            ]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'status'  => 404,
+                'message' => 'Order not found',
+            ], 404);
+        } catch (\Exception $e) {
+            Log::error('Error deleting order: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'status'  => 500,
+                'message' => 'Failed to delete order',
             ], 500);
         }
     }

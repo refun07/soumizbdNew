@@ -17,6 +17,42 @@ import 'react-date-range/dist/styles.css'; // main css file
 import 'react-date-range/dist/theme/default.css'; // theme css file
 import DateRangePicker from '../../js/bizana/components/DateRangePicker';
 
+type SweetAlertLike = {
+    fire?: (options: Record<string, unknown>) => Promise<{ isConfirmed?: boolean; value?: boolean }>;
+};
+
+const confirmWithSweetAlert = async (): Promise<boolean> => {
+    const sweetAlert = (window as unknown as { Swal?: SweetAlertLike; swal?: unknown }).Swal;
+    if (sweetAlert?.fire) {
+        const result = await sweetAlert.fire({
+            title: 'Delete this order?',
+            text: 'This action will remove the order from the list.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete it',
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: '#dc2626',
+        });
+
+        return Boolean(result.isConfirmed || result.value);
+    }
+
+    const legacySwal = (window as unknown as { swal?: (options: Record<string, unknown>) => Promise<boolean> }).swal;
+    if (typeof legacySwal === 'function') {
+        return Boolean(
+            await legacySwal({
+                title: 'Delete this order?',
+                text: 'This action will remove the order from the list.',
+                icon: 'warning',
+                buttons: true,
+                dangerMode: true,
+            }),
+        );
+    }
+
+    return window.confirm('Delete this order? This action will remove the order from the list.');
+};
+
 // Helper function to format date based on age
 const formatOrderDate = (dateString: string): string => {
     const orderDate = new Date(dateString);
@@ -346,6 +382,40 @@ const OrderPage: React.FC = () => {
 
     const handleViewOrder = (orderId: number) => {
         setPopup({ name: 'quick-view-order', props: { orderId } });
+    };
+
+    const handleDeleteOrder = async (orderId: number) => {
+        const confirmed = await confirmWithSweetAlert();
+        if (!confirmed) return;
+
+        try {
+            await axios.delete(`/admin/api/orders/${orderId}`);
+            setSelectedOrderIds((prev) => prev.filter((id) => id !== orderId));
+            await fetchOrders(pagination.current_page);
+
+            const sweetAlert = (window as unknown as { Swal?: SweetAlertLike }).Swal;
+            if (sweetAlert?.fire) {
+                sweetAlert.fire({
+                    title: 'Deleted',
+                    text: 'Order deleted successfully.',
+                    icon: 'success',
+                    timer: 1600,
+                    showConfirmButton: false,
+                });
+            }
+        } catch (error) {
+            console.error('Error deleting order:', error);
+            const sweetAlert = (window as unknown as { Swal?: SweetAlertLike }).Swal;
+            if (sweetAlert?.fire) {
+                sweetAlert.fire({
+                    title: 'Delete failed',
+                    text: 'Could not delete this order. Please try again.',
+                    icon: 'error',
+                });
+            } else {
+                alert('Could not delete this order. Please try again.');
+            }
+        }
     };
 
     const handleDownload = async () => {
@@ -1008,12 +1078,9 @@ const OrderPage: React.FC = () => {
                                         <button
                                             className="text-orange-500 hover:text-orange-700 text-lg p-1"
                                             title="Delete Order"
-                                            onClick={() => {
-                                                console.log(
-                                                    'Delete order:',
-                                                    order.id,
-                                                );
-                                            }}
+                                            onClick={() =>
+                                                handleDeleteOrder(order.id)
+                                            }
                                         >
                                             <i className="fa-solid fa-trash"></i>
                                         </button>
@@ -1293,6 +1360,17 @@ const OrderPage: React.FC = () => {
                                                     }
                                                 >
                                                     <i className="fa-solid fa-pen-to-square"></i>
+                                                </button>
+                                                <button
+                                                    className="p-1 text-red-500 hover:text-red-700"
+                                                    title="Delete Order"
+                                                    onClick={() =>
+                                                        handleDeleteOrder(
+                                                            order.id,
+                                                        )
+                                                    }
+                                                >
+                                                    <i className="fa-solid fa-trash"></i>
                                                 </button>
                                         </div>
                                     </td>

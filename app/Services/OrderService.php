@@ -731,6 +731,11 @@ class OrderService
 
     private static function makePdfSafeLogo(string $absolutePath): string
     {
+        return self::makePdfSafeImage($absolutePath, 'logo_pdf_safe');
+    }
+
+    public static function makePdfSafeImage(string $absolutePath, string $prefix = 'image_pdf_safe'): string
+    {
         $ext = strtolower(pathinfo($absolutePath, PATHINFO_EXTENSION));
 
         // If already jpg/jpeg, it's generally safe
@@ -744,7 +749,8 @@ class OrderService
         }
 
         $hash = md5($absolutePath.'|'.@filemtime($absolutePath));
-        $out = $cacheDir.DIRECTORY_SEPARATOR."logo_pdf_safe_{$hash}.png";
+        $safePrefix = preg_replace('/[^a-z0-9_-]/i', '_', $prefix);
+        $out = $cacheDir.DIRECTORY_SEPARATOR."{$safePrefix}_{$hash}.png";
 
         if (file_exists($out)) {
             return $out;

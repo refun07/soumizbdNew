@@ -143,6 +143,8 @@ Route::group(['prefix' => 'admin/api', 'middleware' => ['auth', 'admin', 'unbann
     Route::post('/orders/bulk-update-status',[OrderController::class, 'bulkUpdateOrderStatus'])->name('admin.bulkUpdateOrderStatus');
     // update order
     Route::put('/orders/{orderId}',[OrderController::class, 'updateOrder'])->name('admin.orders.update');
+    // delete order
+    Route::delete('/orders/{orderId}',[OrderController::class, 'destroy'])->name('admin.orders.destroy');
 
     //variation value store
     Route::post('/variation-values/store', [VariationValueController::class, 'store_from_ajax'])->name('admin.store-variation-values');
