@@ -17,42 +17,6 @@ import 'react-date-range/dist/styles.css'; // main css file
 import 'react-date-range/dist/theme/default.css'; // theme css file
 import DateRangePicker from '../../js/bizana/components/DateRangePicker';
 
-type SweetAlertLike = {
-    fire?: (options: Record<string, unknown>) => Promise<{ isConfirmed?: boolean; value?: boolean }>;
-};
-
-const confirmWithSweetAlert = async (): Promise<boolean> => {
-    const sweetAlert = (window as unknown as { Swal?: SweetAlertLike; swal?: unknown }).Swal;
-    if (sweetAlert?.fire) {
-        const result = await sweetAlert.fire({
-            title: 'Delete this order?',
-            text: 'This action will remove the order from the list.',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Yes, delete it',
-            cancelButtonText: 'Cancel',
-            confirmButtonColor: '#dc2626',
-        });
-
-        return Boolean(result.isConfirmed || result.value);
-    }
-
-    const legacySwal = (window as unknown as { swal?: (options: Record<string, unknown>) => Promise<boolean> }).swal;
-    if (typeof legacySwal === 'function') {
-        return Boolean(
-            await legacySwal({
-                title: 'Delete this order?',
-                text: 'This action will remove the order from the list.',
-                icon: 'warning',
-                buttons: true,
-                dangerMode: true,
-            }),
-        );
-    }
-
-    return window.confirm('Delete this order? This action will remove the order from the list.');
-};
-
 // Helper function to format date based on age
 const formatOrderDate = (dateString: string): string => {
     const orderDate = new Date(dateString);
@@ -173,6 +137,9 @@ const OrderPage: React.FC = () => {
     const [isBulkCourierModalOpen, setIsBulkCourierModalOpen] = useState(false);
     const [isBulkStatusModalOpen, setIsBulkStatusModalOpen] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
+    const [deleteOrderId, setDeleteOrderId] = useState<number | null>(null);
+    const [isDeletingOrder, setIsDeletingOrder] = useState(false);
+    const [deleteError, setDeleteError] = useState<string | null>(null);
 
     // Debounce ref for search to avoid too many API calls
     const debounceRef = useRef<NodeJS.Timeout>();
@@ -384,37 +351,33 @@ const OrderPage: React.FC = () => {
         setPopup({ name: 'quick-view-order', props: { orderId } });
     };
 
-    const handleDeleteOrder = async (orderId: number) => {
-        const confirmed = await confirmWithSweetAlert();
-        if (!confirmed) return;
+    const handleDeleteOrder = (orderId: number) => {
+        setDeleteError(null);
+        setDeleteOrderId(orderId);
+    };
 
+    const closeDeleteConfirm = () => {
+        if (isDeletingOrder) return;
+        setDeleteOrderId(null);
+        setDeleteError(null);
+    };
+
+    const confirmDeleteOrder = async () => {
+        if (!deleteOrderId) return;
+        setIsDeletingOrder(true);
+        setDeleteError(null);
         try {
-            await axios.delete(`/admin/api/orders/${orderId}`);
-            setSelectedOrderIds((prev) => prev.filter((id) => id !== orderId));
+            await axios.delete(`/admin/api/orders/${deleteOrderId}`);
+            setSelectedOrderIds((prev) =>
+                prev.filter((id) => id !== deleteOrderId),
+            );
             await fetchOrders(pagination.current_page);
-
-            const sweetAlert = (window as unknown as { Swal?: SweetAlertLike }).Swal;
-            if (sweetAlert?.fire) {
-                sweetAlert.fire({
-                    title: 'Deleted',
-                    text: 'Order deleted successfully.',
-                    icon: 'success',
-                    timer: 1600,
-                    showConfirmButton: false,
-                });
-            }
+            setDeleteOrderId(null);
         } catch (error) {
             console.error('Error deleting order:', error);
-            const sweetAlert = (window as unknown as { Swal?: SweetAlertLike }).Swal;
-            if (sweetAlert?.fire) {
-                sweetAlert.fire({
-                    title: 'Delete failed',
-                    text: 'Could not delete this order. Please try again.',
-                    icon: 'error',
-                });
-            } else {
-                alert('Could not delete this order. Please try again.');
-            }
+            setDeleteError('Could not delete this order. Please try again.');
+        } finally {
+            setIsDeletingOrder(false);
         }
     };
 
@@ -590,6 +553,8 @@ const OrderPage: React.FC = () => {
             </div>
         );
     };
+
+    const orderPendingDeletion = orders.find((order) => order.id === deleteOrderId);
 
     return (
         <div className="p-4">
@@ -1097,39 +1062,39 @@ const OrderPage: React.FC = () => {
                 </div>
 
                 {/* Desktop Table View */}
-                <div className="hidden lg:block overflow-x-auto">
-                    <table className="divide-y divide-border product-list-table w-full min-w-[1450px]">
+                <div className="hidden lg:block overflow-visible">
+                    <table className="divide-y divide-border product-list-table w-full table-fixed">
                         <thead>
                             <tr className="theme-table__head">
-                                <th className="px-3 py-3"></th>
-                                <th className="px-3 py-3 text-left text-xs font-medium text-muted uppercase">
+                                <th className="w-[38px] px-2 py-3"></th>
+                                <th className="w-[108px] px-2 py-3 text-left text-xs font-medium text-muted uppercase">
                                     Order
                                 </th>
-                                <th className="px-3 py-3 text-left text-xs font-medium text-muted uppercase">
+                                <th className="w-[15%] px-2 py-3 text-left text-xs font-medium text-muted uppercase">
                                     Customer & Address
                                 </th>
-                                <th className="px-3 py-3 text-left text-xs font-medium text-muted uppercase">
+                                <th className="w-[18%] px-2 py-3 text-left text-xs font-medium text-muted uppercase">
                                     Products
                                 </th>
-                                <th className="px-3 py-3 text-left text-xs font-medium text-muted uppercase">
+                                <th className="w-[126px] px-2 py-3 text-left text-xs font-medium text-muted uppercase">
                                     Amounts
                                 </th>
-                                <th className="px-3 py-3 text-left text-xs font-medium text-muted uppercase min-w-[190px]">
+                                <th className="w-[138px] px-2 py-3 text-left text-xs font-medium text-muted uppercase">
                                     Order Status
                                 </th>
-                                <th className="px-3 py-3 text-left text-xs font-medium text-muted uppercase min-w-[190px]">
+                                <th className="w-[144px] px-2 py-3 text-left text-xs font-medium text-muted uppercase">
                                     Courier
                                 </th>
-                                <th className="px-3 py-3 text-left text-xs font-medium text-muted uppercase">
+                                <th className="w-[92px] px-2 py-3 text-left text-xs font-medium text-muted uppercase">
                                     Assigned To
                                 </th>
-                                <th className="px-3 py-3 text-right text-xs font-medium text-muted uppercase"></th>
+                                <th className="w-[68px] px-2 py-3 text-right text-xs font-medium text-muted uppercase"></th>
                             </tr>
                         </thead>
                         <tbody className="theme-table__body divide-y divide-border">
                             {orders.map((order) => (
                                 <tr key={order.code} className="align-top hover:bg-muted/10">
-                                    <td className="px-3 !py-4">
+                                    <td className="px-2 !py-4">
                                         <input
                                             type="checkbox"
                                             checked={selectedOrderIds.includes(
@@ -1140,7 +1105,7 @@ const OrderPage: React.FC = () => {
                                             }
                                         />
                                     </td>
-                                    <td className="px-3 !py-4 min-w-[150px]">
+                                    <td className="px-2 !py-4">
                                         <a
                                             href={`/admin/orders/${order.code}`}
                                             className="font-semibold text-primary hover:underline"
@@ -1166,7 +1131,7 @@ const OrderPage: React.FC = () => {
                                             {formatOrderDate(order.createdDate || '')}
                                         </div>
                                     </td>
-                                    <td className="px-3 !py-4 min-w-[220px] max-w-[280px]">
+                                    <td className="px-2 !py-4">
                                         <div className="font-semibold text-foreground">
                                             {order.customerName || 'Guest customer'}
                                         </div>
@@ -1182,9 +1147,9 @@ const OrderPage: React.FC = () => {
                                             {order.shipping_address || 'No shipping address'}
                                         </div>
                                     </td>
-                                    <td className="px-3 !py-4 min-w-[260px] max-w-[330px]">
+                                    <td className="px-2 !py-4">
                                         <div className="flex items-start gap-2.5">
-                                            <div className="h-12 w-12 shrink-0 overflow-hidden rounded border border-border bg-muted/20">
+                                            <div className="h-11 w-11 shrink-0 overflow-hidden rounded border border-border bg-muted/20">
                                                 {order.firstItem?.image ? (
                                                     <img
                                                         src={order.firstItem.image}
@@ -1221,7 +1186,7 @@ const OrderPage: React.FC = () => {
                                             </button>
                                         </div>
                                     </td>
-                                    <td className="px-3 !py-4 min-w-[175px] text-xs">
+                                    <td className="px-2 !py-4 text-xs">
                                         <div className="flex justify-between gap-3 text-muted">
                                             <span>Subtotal</span>
                                             <span>{currencyFormatter(order.subtotalAmount)}</span>
@@ -1244,7 +1209,7 @@ const OrderPage: React.FC = () => {
                                             {order.paymentStatus === 'paid' ? 'Paid' : 'Cash on delivery / Unpaid'}
                                         </div>
                                     </td>
-                                    <td className="px-3 !py-4">
+                                    <td className="px-2 !py-4">
                                         <div>
                                             <SelectInput
                                                 name="delivery_status"
@@ -1302,7 +1267,7 @@ const OrderPage: React.FC = () => {
                                             {renderLatestDeliveryUpdate(order)}
                                         </div>
                                     </td>
-                                    <td className="px-3 !py-4">
+                                    <td className="px-2 !py-4">
                                         <SelectPartner order={order} />
                                         {(order.tracking_number || order.courier_devlivery_status) && (
                                             <div className="mt-1 text-[11px] leading-4 text-muted">
@@ -1311,21 +1276,21 @@ const OrderPage: React.FC = () => {
                                             </div>
                                         )}
                                     </td>
-                                    <td className="px-3 !py-4 min-w-[115px]">
-                                        <div className="text-sm font-medium">
+                                    <td className="px-2 !py-4">
+                                        <div className="break-words text-sm font-medium">
                                             {order.agentName || 'Not assigned'}
                                         </div>
                                         <div className="mt-1 text-xs text-muted">
                                             {order.agentName ? 'Order agent' : 'Needs assignment'}
                                         </div>
                                     </td>
-                                    <td className="px-3 !py-4 text-right text-sm font-medium">
-                                        <div className="flex items-start justify-end gap-1">
+                                    <td className="px-2 !py-4 text-right text-sm font-medium">
+                                        <div className="grid grid-cols-2 gap-1 justify-items-end">
                                             <a
                                                 title="Download Invoice"
                                                 href={route('admin.orders.downloadInvoice', { id: order.id })}
                                                 target="_blank"
-                                                className="p-1 text-theme-orange hover:text-orange-600"
+                                                className="flex h-7 w-7 items-center justify-center rounded text-theme-orange hover:bg-orange-50 hover:text-orange-600"
                                             >
                                                 <i className="fa-solid fa-file-arrow-down"></i>
                                             </a>
@@ -1334,13 +1299,13 @@ const OrderPage: React.FC = () => {
                                                     title="Download Challan"
                                                     href={route('admin.orders.downloadChallan', { id: order.id })}
                                                     target="_blank"
-                                                    className="p-1 text-theme-orange hover:text-orange-600"
+                                                    className="flex h-7 w-7 items-center justify-center rounded text-theme-orange hover:bg-orange-50 hover:text-orange-600"
                                                 >
                                                     <i className="fa-light fa-file-contract"></i>
                                                 </a>
                                             )}
                                                 <button
-                                                    className="p-1 text-primary hover:text-primary/80"
+                                                    className="flex h-7 w-7 items-center justify-center rounded text-primary hover:bg-primary/10 hover:text-primary/80"
                                                     title="View Order Details"
                                                     onClick={() =>
                                                         handleViewOrder(
@@ -1351,7 +1316,7 @@ const OrderPage: React.FC = () => {
                                                     <i className="fa-solid fa-eye"></i>
                                                 </button>
                                                 <button
-                                                    className="p-1 text-blue-500 hover:text-blue-700"
+                                                    className="flex h-7 w-7 items-center justify-center rounded text-blue-500 hover:bg-blue-50 hover:text-blue-700"
                                                     title="Edit Order"
                                                     onClick={() =>
                                                         handleEditOrder(
@@ -1362,7 +1327,7 @@ const OrderPage: React.FC = () => {
                                                     <i className="fa-solid fa-pen-to-square"></i>
                                                 </button>
                                                 <button
-                                                    className="p-1 text-red-500 hover:text-red-700"
+                                                    className="flex h-7 w-7 items-center justify-center rounded text-red-500 hover:bg-red-50 hover:text-red-700"
                                                     title="Delete Order"
                                                     onClick={() =>
                                                         handleDeleteOrder(
@@ -1455,6 +1420,63 @@ const OrderPage: React.FC = () => {
                     </div>
                 </div>
             </div>
+
+            {deleteOrderId !== null && (
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 px-4">
+                    <div className="w-full max-w-md rounded-lg border border-border bg-card p-5 shadow-xl">
+                        <div className="flex items-start gap-3">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600">
+                                <i className="fa-solid fa-trash"></i>
+                            </div>
+                            <div className="min-w-0">
+                                <h2 className="text-lg font-semibold text-foreground">
+                                    Delete order?
+                                </h2>
+                                <p className="mt-1 text-sm leading-5 text-muted">
+                                    This will remove{' '}
+                                    <span className="font-semibold text-foreground">
+                                        {orderPendingDeletion
+                                            ? `${orderPendingDeletion.orderPrefix ?? ''}${orderPendingDeletion.code}`
+                                            : 'this order'}
+                                    </span>
+                                    {orderPendingDeletion?.customerName
+                                        ? ` for ${orderPendingDeletion.customerName}`
+                                        : ''}
+                                    .
+                                </p>
+                            </div>
+                        </div>
+
+                        {deleteError && (
+                            <div className="mt-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                                {deleteError}
+                            </div>
+                        )}
+
+                        <div className="mt-5 flex justify-end gap-2">
+                            <button
+                                type="button"
+                                onClick={closeDeleteConfirm}
+                                disabled={isDeletingOrder}
+                                className="rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted/20 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                onClick={confirmDeleteOrder}
+                                disabled={isDeletingOrder}
+                                className="inline-flex items-center gap-2 rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-70"
+                            >
+                                {isDeletingOrder && (
+                                    <i className="fa-solid fa-spinner fa-spin"></i>
+                                )}
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Bulk Courier Order Modal */}
             <BulkCourierOrderModal
