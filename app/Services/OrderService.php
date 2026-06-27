@@ -533,8 +533,13 @@ class OrderService
             'custom_font_data' => [
                 'hindsiliguri' => [
                     'R' => 'HindSiliguri-Regular.ttf',
+                    'B' => 'HindSiliguri-Regular.ttf',
                     'useOTL' => 0xFF,
                     'useKashida' => 75,
+                ],
+                'roboto' => [
+                    'R' => 'Roboto-Regular.ttf',
+                    'B' => 'Roboto-Regular.ttf',
                 ],
             ],
             'autoScriptToLang' => true,
@@ -638,6 +643,90 @@ class OrderService
         } else {
             return PDF::loadView('backend.admin.orders.invoice', $viewData, [], $pdfConfig)->stream(getSetting('order_code_prefix').$order->order_code.'.pdf');
         }
+    }
+
+    public function downloadSinglePageInvoice(array $ids)
+    {
+        if (session()->has('locale')) {
+            $language_code = session()->get('locale', Config::get('app.locale'));
+        } else {
+            $language_code = env('DEFAULT_LANGUAGE');
+        }
+
+        if (getSetting('currencyCode')) {
+            $currency_code = getSetting('currencyCode');
+        } else {
+            $currency_code = env('DEFAULT_CURRENCY');
+        }
+
+        if (Language::where('code', $language_code)->first()->is_rtl == 1) {
+            $direction = 'rtl';
+            $default_text_align = 'right';
+            $reverse_text_align = 'left';
+        } else {
+            $direction = 'ltr';
+            $default_text_align = 'left';
+            $reverse_text_align = 'right';
+        }
+
+        $font_family = 'roboto';
+        $pdfConfig = [
+            'custom_font_dir' => public_path('fonts').DIRECTORY_SEPARATOR,
+            'custom_font_data' => [
+                'hindsiliguri' => [
+                    'R' => 'HindSiliguri-Regular.ttf',
+                    'useOTL' => 0xFF,
+                    'useKashida' => 75,
+                ],
+            ],
+            'autoScriptToLang' => true,
+            'autoLangToFont' => true,
+            'format' => 'A4',
+            'margin_left' => 10,
+            'margin_right' => 10,
+            'margin_top' => 10,
+            'margin_bottom' => 10,
+        ];
+
+        if ($currency_code == 'BDT' || $currency_code == 'bdt' || $language_code == 'bd' || $language_code == 'bn') {
+            $font_family = 'hindsiliguri';
+        }
+
+        $pdfConfig['default_font'] = $font_family;
+
+        $orders = Order::shopOrders()
+            ->with([
+                'orderGroup.transaction',
+                'orderGroup.shippingAddress',
+                'orderGroup.billingAddress',
+                'orderItems.productVariation.product',
+                'user',
+            ])
+            ->whereIn('id', array_map('intval', $ids))
+            ->orderByRaw('FIELD(id, '.implode(',', array_map('intval', $ids)).')')
+            ->get();
+
+        $logo = null;
+        $logoFileId = getSetting('websiteHeaderLogo');
+
+        if ($logoFileId) {
+            $mediaFile = MediaFile::find($logoFileId);
+            if ($mediaFile && $mediaFile->media_file) {
+                $logo = public_path($mediaFile->media_file);
+                $logo = self::makePdfSafeLogo($logo);
+            }
+        }
+
+        return PDF::loadView('backend.admin.orders.invoice-compact', [
+            'orders' => $orders,
+            'font_family' => $font_family,
+            'direction' => $direction,
+            'default_text_align' => $default_text_align,
+            'reverse_text_align' => $reverse_text_align,
+            'logo' => $logo,
+            'systemName' => getSetting('systemName'),
+            'systemAddress' => getSetting('systemAddress'),
+        ], [], $pdfConfig)->stream('single_page_invoices_'.now()->format('Y-m-d_H-i-s').'.pdf');
     }
 
     private static function makePdfSafeLogo(string $absolutePath): string

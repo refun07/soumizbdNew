@@ -199,6 +199,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin', 'unbanned',
     Route::get('/invoice-download/{id}', [OrderController::class, 'downloadInvoice'])->name('admin.orders.downloadInvoice');
     Route::get('/challan-download/{id}', [OrderController::class, 'downloadChallan'])->name('admin.orders.downloadChallan');
     Route::get('/multiple-invoice-download/{ids}', [OrderController::class, 'downloadMultipleInvoice'])->name('admin.orders.downloadMultipleInvoice');
+    Route::get('/single-page-invoice-download/{ids}', [OrderController::class, 'downloadSinglePageInvoice'])->name('admin.orders.downloadSinglePageInvoice');
     Route::post('/orders/payment', [OrderController::class, 'orderPayment'])->name('admin.orders.payment');
 
     /*

@@ -349,6 +349,11 @@ const OrderPage: React.FC = () => {
     };
 
     const handleDownload = async () => {
+        if (selectedOrderIds.length === 0) {
+            alert('Please select at least one order');
+            return;
+        }
+
         try {
             const response = await axios.get(
                 `/admin/multiple-invoice-download/${selectedOrderIds.join(
@@ -372,7 +377,42 @@ const OrderPage: React.FC = () => {
         }
     };
 
+    const handleDownloadSinglePage = async () => {
+        if (selectedOrderIds.length === 0) {
+            alert('Please select at least one order');
+            return;
+        }
+
+        try {
+            const response = await axios.get(
+                `/admin/single-page-invoice-download/${selectedOrderIds.join(
+                    ',',
+                )}`,
+                {
+                    responseType: 'blob',
+                },
+            );
+
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'single_page_invoices.pdf';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Error downloading single page invoices:', error);
+        }
+    };
+
     const handleDownloadIndividual = async () => {
+        if (selectedOrderIds.length === 0) {
+            alert('Please select at least one order');
+            return;
+        }
+
         try {
             // Download each invoice sequentially with a small delay to avoid browser blocking
             for (let i = 0; i < selectedOrderIds.length; i++) {
@@ -518,6 +558,9 @@ const OrderPage: React.FC = () => {
                                     if (value === 'download_invoice_zip') {
                                         handleDownload();
                                         e.target.value = 'bulk_actions';
+                                    } else if (value === 'download_invoice_single_page') {
+                                        handleDownloadSinglePage();
+                                        e.target.value = 'bulk_actions';
                                     } else if (value === 'download_invoice_individual') {
                                         handleDownloadIndividual();
                                         e.target.value = 'bulk_actions';
@@ -545,6 +588,12 @@ const OrderPage: React.FC = () => {
                                     className={nativeSelectOptionClass}
                                 >
                                     Bulk Actions
+                                </option>
+                                <option
+                                    value="download_invoice_single_page"
+                                    className={nativeSelectOptionClass}
+                                >
+                                    Download Invoices (Single Page)
                                 </option>
                                 <option
                                     value="download_invoice_zip"

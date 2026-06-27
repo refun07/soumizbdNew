@@ -18,7 +18,7 @@ class OrderController extends Controller
         $this->orderService = $orderService;
 
         $this->middleware(['permission:view_orders|manage_assigned_orders|manage_orders'])->only(['index', 'downloadInvoice', 'returnDetails', 'getOrderDetails']);
-        $this->middleware(['permission:manage_assigned_orders|manage_orders'])->only(['show', 'updateOrderTracking', 'storeOrderUpdates', 'deleteOrderUpdate', 'updatePaymentStatus', 'updateDeliveryStatus', 'updateOrderAddress', 'edit', 'updateOrder', 'searchProducts', 'downloadChallan', 'downloadMultipleInvoice', 'orderPayment']);
+        $this->middleware(['permission:manage_assigned_orders|manage_orders'])->only(['show', 'updateOrderTracking', 'storeOrderUpdates', 'deleteOrderUpdate', 'updatePaymentStatus', 'updateDeliveryStatus', 'updateOrderAddress', 'edit', 'updateOrder', 'searchProducts', 'downloadChallan', 'downloadMultipleInvoice', 'downloadSinglePageInvoice', 'orderPayment']);
     }
 
     private function authorizeOrderManagement(Order $order)
@@ -282,6 +282,16 @@ class OrderController extends Controller
         // Return the ZIP file for download
 
         return response()->download($zipPath, $zipFileName)->deleteFileAfterSend(true);
+    }
+
+    public function downloadSinglePageInvoice($ids)
+    {
+        $idArray = explode(',', $ids);
+        foreach ($idArray as $id) {
+            $this->authorizeOrderManagementById($id);
+        }
+
+        return $this->orderService->downloadSinglePageInvoice($idArray);
     }
 
     // store or update order tracking
