@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { IoArrowBack } from 'react-icons/io5';
 import { Link } from 'react-router-dom';
 import {
@@ -13,6 +14,19 @@ import Label from '../inputs/Label';
 const CustomerDetailsForm = () => {
     const dispatch = useAppDispatch();
     const { customerDetails } = useCheckoutData();
+
+    useEffect(() => {
+        if (customerDetails?.email) {
+            dispatch(
+                setCheckoutData({
+                    customerDetails: {
+                        ...customerDetails,
+                        email: '',
+                    },
+                }),
+            );
+        }
+    }, [customerDetails, dispatch]);
 
     const setCustomerDetails = (e: any) => {
         const { name, value } = e.target;
@@ -49,6 +63,13 @@ const CustomerDetailsForm = () => {
             </div>
 
             <div className="p-4 sm:p-5 grid sm:grid-cols-2 gap-3">
+                <input
+                    type="hidden"
+                    name="email"
+                    value=""
+                    readOnly
+                />
+
                 <InputGroup>
                     <Label className="!mb-1.5 !normal-case font-semibold text-slate-800">
                         {translate('Name')}
@@ -62,20 +83,6 @@ const CustomerDetailsForm = () => {
                         className="!rounded-[3px] !border-slate-200 !bg-slate-50 placeholder:!text-slate-400 focus:!border-primary"
                         placeholder={translate('Type Your Full Name')}
                         value={customerDetails?.name}
-                        onChange={setCustomerDetails}
-                    />
-                </InputGroup>
-
-                <InputGroup>
-                    <Label className="!mb-1.5 !normal-case font-semibold text-slate-800">
-                        {translate('Email')}
-                    </Label>
-                    <Input
-                        name="email"
-                        type="email"
-                        className="!rounded-[3px] !border-slate-200 !bg-slate-50 placeholder:!text-slate-400 focus:!border-primary"
-                        placeholder={translate('Type Your Email')}
-                        value={customerDetails?.email}
                         onChange={setCustomerDetails}
                     />
                 </InputGroup>

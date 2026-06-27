@@ -144,7 +144,10 @@ const Checkout = () => {
                     if (!hasCurrentData && session.customerDetails) {
                         dispatch(
                             setCheckoutData({
-                                customerDetails: session.customerDetails,
+                                customerDetails: {
+                                    ...session.customerDetails,
+                                    email: '',
+                                },
                             }),
                         );
                     }
@@ -335,7 +338,7 @@ const Checkout = () => {
             setCheckoutData({
                 customerDetails: {
                     name: user?.name || '',
-                    email: user?.email || '',
+                    email: '',
                     phone: user?.phone || '',
                     note: '',
                 },
@@ -524,6 +527,7 @@ const Checkout = () => {
 
             const payload: IManualOrderPayload = {
                 ...customerDetails,
+                email: '',
                 shippingAddress: shippingAddress,
                 shippingZoneId,
                 billingAddress: billingAddress,

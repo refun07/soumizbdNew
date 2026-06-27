@@ -176,11 +176,16 @@ export const useCheckoutAutoSave = ({
                 price: cart.price,
             }));
 
+            const savedCustomerDetails = {
+                ...customerDetails,
+                email: '',
+            };
+
             // Trigger debounced save
             debouncedSave({
                 userId,
                 guestUserId,
-                customerDetails,
+                customerDetails: savedCustomerDetails,
                 shippingAddress,
                 paymentMethod,
                 currentStep,
