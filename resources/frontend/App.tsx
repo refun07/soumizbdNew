@@ -16,7 +16,10 @@ import {
 import { translate } from './utils/translate';
 
 import useGTMEventsNew from 'hooks/useGTMEventNew';
-
+import {
+    buildGTM4WPData,
+    buildGTMCustomerContext,
+} from './utils/gtmCustomerData';
 
 const HomeIndex = lazy(() => import('./pages/home'));
 const Brands = lazy(() => import('./pages/Brands'));
@@ -63,11 +66,11 @@ const NotFound = lazy(() => import('./pages/NotFound'));
 
 const App = () => {
     const dispatch = useDispatch();
-    const { carts, isLoading } = useAuth();
+    const { carts, dashboardInfo, isLoading, user } = useAuth();
     const { selectedShops } = useCheckoutData();
     const location = useLocation();
 
-      const gtmEvent = useGTMEventsNew();
+    const gtmEvent = useGTMEventsNew();
 
     // Track previous search params for infinite scroll detection
     const prevSearchRef = useRef(location.search);
@@ -110,12 +113,25 @@ const App = () => {
         if (document.activeElement?.closest('.option-dropdown')) {
             (document.activeElement as HTMLElement).blur();
         }
-        gtmEvent({
-            event: 'page_view',
-            page_location: window.location.href,
-            page_referrer: document.referrer || '',
-        });
-    }, [location.pathname]);
+        const sendPageView = async () => {
+            gtmEvent({
+                event: 'page_view',
+                page_location: window.location.href,
+                page_referrer: document.referrer || '',
+                ...(await buildGTM4WPData({
+                    user,
+                    totalOrders: dashboardInfo?.totalOrders,
+                    totalOrderValue: dashboardInfo?.totalExpense,
+                })),
+                customer: buildGTMCustomerContext(
+                    user,
+                    dashboardInfo?.totalOrders,
+                ),
+            });
+        };
+
+        sendPageView();
+    }, [location.pathname, user, dashboardInfo]);
 
     // update selected shop state when cart is changed
     useEffect(() => {

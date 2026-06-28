@@ -38,6 +38,14 @@ import { getSelectedShopProducts } from '../../utils/getSelectedShopProducts';
 import { currencyFormatter } from '../../utils/numberFormatter';
 import { translate } from '../../utils/translate';
 import useGTMEventsNew from 'hooks/useGTMEventNew';
+import {
+    buildGTM4WPCartContent,
+    buildGTM4WPData,
+    buildGTM4WPOrderData,
+    buildGTMCustomerContext,
+    buildGTMUserData,
+    mapCheckoutAddressToGTMAddress,
+} from '../../utils/gtmCustomerData';
 
 export const customerDetailsSchema = object().shape({
     name: string().required('Name is required'),
@@ -57,6 +65,7 @@ const Checkout = () => {
     const navigate = useNavigate();
     const [landingPageCart, setLandingPageCart] = useState<any[]>([]);
     const pixelFired = useRef(false);
+    const beginCheckoutSignature = useRef('');
 
     const gtmEvent = useGTMEventsNew();
 
@@ -99,7 +108,7 @@ const Checkout = () => {
     const [getCartProducts] = useLazyGetCartProductsQuery();
     const [updateCartProduct] = useUpdateCartProductMutation();
     const [deleteCartProduct] = useDeleteCartProductMutation();
-    const { user, carts, isLoading, guestUserId } = useAuth();
+    const { dashboardInfo, user, carts, isLoading, guestUserId } = useAuth();
     const isSubmittingOrder = useRef(false);
     const {
         customerDetails,
@@ -550,32 +559,71 @@ const Checkout = () => {
                     return;
                 }
 
-                const purchasedItems = carts.filter((cart) =>
-                    selectedCartIds.includes(cart.id),
-                );
+                const purchasedItems = Object.values(selectedShopProducts)
+                    .flat(1)
+                    .filter((cart) => selectedCartIds.includes(cart.id));
 
                 const items = purchasedItems.map((item) => ({
                     item_id: `${item.product.id}-${item.variation.id}`,
                     item_name: `${item.product.name} (${item.variation.name})`,
-                    price: item.price ?? item.product.basePrice,
+                    price:
+                        (item as ICartProduct & { price?: number }).price ??
+                        item.variation.discountedBasePrice ??
+                        item.product.basePrice,
                     quantity: item.qty,
                 }));
 
-                const totalValue = Math.round(
-                    purchasedItems.reduce(
-                        (sum, p) =>
-                            sum + (p.price ?? p.product.basePrice) * p.qty,
-                        0,
-                    ),
+                const totalValue = Math.round(total);
+                const billingGTMAddress = mapCheckoutAddressToGTMAddress(
+                    billingAddress || shippingAddress,
+                    customerDetails,
+                );
+                const shippingGTMAddress = mapCheckoutAddressToGTMAddress(
+                    shippingAddress,
+                    customerDetails,
                 );
 
                 gtmEvent({
                     event: 'purchase',
                     event_id: eventId,
+                    ...(await buildGTM4WPData({
+                        user,
+                        totalOrders: dashboardInfo?.totalOrders,
+                        totalOrderValue: dashboardInfo?.totalExpense,
+                        billingAddress: billingGTMAddress,
+                        shippingAddress: shippingGTMAddress,
+                    })),
+                    orderData: await buildGTM4WPOrderData({
+                        orderCode: orderGroup.orderCode,
+                        paymentMethod,
+                        shippingMethod:
+                            shippingAddress.area?.name ||
+                            shippingAddress.city?.name ||
+                            '',
+                        carts: purchasedItems,
+                        coupons,
+                        subtotal: subTotal,
+                        discountTotal: discount,
+                        shippingTotal: shippingCharge,
+                        tax,
+                        total: totalValue,
+                        customerId: user?.id,
+                        billingAddress: billingGTMAddress,
+                        shippingAddress: shippingGTMAddress,
+                    }),
+                    new_customer: (dashboardInfo?.totalOrders ?? 0) === 0,
+                    customer: buildGTMCustomerContext(
+                        user,
+                        dashboardInfo?.totalOrders,
+                    ),
+                    user_data: await buildGTMUserData(billingGTMAddress),
                     ecommerce: {
                         transaction_id: orderGroup.orderCode.toString(),
                         currency: window.config.currency.code,
                         value: totalValue,
+                        tax,
+                        shipping: shippingCharge,
+                        coupon: coupons.map((coupon) => coupon.code).join(','),
                         items,
                     },
                 });
@@ -595,44 +643,92 @@ const Checkout = () => {
     useEffect(() => {
         if (!Object.keys(selectedShopProducts).length) return;
 
-        let content_ids: string[] = [];
         let contents: any[] = [];
-        let num_items = 0;
         let currency = window.config.currency.code;
+        const selectedCarts = Object.values(selectedShopProducts).flat(1);
+        const eventSignature = JSON.stringify({
+            cart: selectedCarts.map((item) => [item.id, item.qty]),
+            coupons: coupons.map((coupon) => coupon.code),
+            shippingCharge,
+        });
 
-        carts.forEach((item) => {
-            content_ids.push(item.product.id.toString());
+        if (beginCheckoutSignature.current === eventSignature) return;
+        beginCheckoutSignature.current = eventSignature;
 
+        selectedCarts.forEach((item) => {
             contents.push({
                 id: item.product.id.toString(),
                 quantity: item.qty,
-                item_price: item.price ?? item.product.basePrice,
+                item_price:
+                    (item as ICartProduct & { price?: number }).price ??
+                    item.variation.discountedBasePrice ??
+                    item.product.basePrice,
                 item_name: item.product.name ?? '',
             });
-
-            num_items += item.qty;
         });
 
-        const { total } = getSelectedShopProducts({
+        const calculatedCart = getSelectedShopProducts({
             cartProducts: selectedShopProducts,
             coupons,
             selectedShops,
         });
 
-        gtmEvent({
-            event: 'begin_checkout',
-            ecommerce: {
-                currency: currency,
-                value: total,
-                items: contents.map((item: any) => ({
-                    item_id: item.id.toString(), // MUST match catalog ID
-                    item_name: item.item_name || '',
-                    price: item.item_price || item.price,
-                    quantity: item.quantity,
+        const sendBeginCheckout = async () => {
+            const billingGTMAddress = mapCheckoutAddressToGTMAddress(
+                billingAddress || shippingAddress,
+                customerDetails,
+            );
+            const shippingGTMAddress = mapCheckoutAddressToGTMAddress(
+                shippingAddress,
+                customerDetails,
+            );
+
+            gtmEvent({
+                event: 'begin_checkout',
+                ...(await buildGTM4WPData({
+                    user,
+                    totalOrders: dashboardInfo?.totalOrders,
+                    totalOrderValue: dashboardInfo?.totalExpense,
+                    billingAddress: billingGTMAddress,
+                    shippingAddress: shippingGTMAddress,
                 })),
-            },
-        });
-    }, [selectedShopProducts]);
+                cartContent: buildGTM4WPCartContent({
+                    carts: selectedCarts,
+                    coupons,
+                    subtotal: calculatedCart.subTotal,
+                    discountTotal: calculatedCart.totalDiscount,
+                    total: calculatedCart.total + shippingCharge,
+                }),
+                customer: buildGTMCustomerContext(
+                    user,
+                    dashboardInfo?.totalOrders,
+                ),
+                user_data: await buildGTMUserData(billingGTMAddress),
+                ecommerce: {
+                    currency: currency,
+                    value: calculatedCart.total,
+                    items: contents.map((item: any) => ({
+                        item_id: item.id.toString(), // MUST match catalog ID
+                        item_name: item.item_name || '',
+                        price: item.item_price || item.price,
+                        quantity: item.quantity,
+                    })),
+                },
+            });
+        };
+
+        sendBeginCheckout();
+    }, [
+        selectedShopProducts,
+        coupons,
+        selectedShops,
+        billingAddress,
+        shippingAddress,
+        customerDetails,
+        shippingCharge,
+        user,
+        dashboardInfo,
+    ]);
 
     return (
         <>
