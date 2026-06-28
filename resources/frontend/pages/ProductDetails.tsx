@@ -1,5 +1,5 @@
 import { useFacebookPixelEvents } from 'hooks/useFacebookPixelEvents';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { FaCog, FaCoins, FaHome, FaPiggyBank, FaTruck } from 'react-icons/fa';
 import { useDispatch } from 'react-redux';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
@@ -30,6 +30,7 @@ import { translate } from '../utils/translate';
 import NotFound from './NotFound';
 
 import useGTMEventsNew from 'hooks/useGTMEventNew';
+import { createMetaEventId } from '../utils/gtmCustomerData';
 
 const ProductDetails = () => {
     const dispatch = useDispatch();
@@ -43,7 +44,14 @@ const ProductDetails = () => {
     const [searchParams] = useSearchParams();
     const [starPercentage, setStarPercentage] = useState([0, 0, 0, 0, 0]);
     const { slug } = useParams<{ slug: string }>();
-    const { data: product, isLoading } = useGetProductDetailsQuery(slug!);
+    const viewContentEventId = useMemo(
+        () => createMetaEventId('view_content'),
+        [slug],
+    );
+    const { data: product, isLoading } = useGetProductDetailsQuery({
+        slug: slug!,
+        eventId: viewContentEventId,
+    });
     const [getProductReviews, { data: reviewsRes }] =
         useLazyGetAllProductReviewsQuery();
 
@@ -72,6 +80,7 @@ const ProductDetails = () => {
             // Send GTM event for View Item
             gtmEvent({
                 event: 'view_item',
+                event_id: viewContentEventId,
                 ecommerce: {
                     currency: window.config.currency.code,
                     value: product.basePrice, // or variation price
@@ -86,7 +95,7 @@ const ProductDetails = () => {
                 },
             });
         }
-    }, [product]);
+    }, [product, viewContentEventId]);
 
     useEffect(() => {
         if (!summary) return;

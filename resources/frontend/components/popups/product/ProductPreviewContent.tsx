@@ -28,6 +28,7 @@ import {
 import { cn } from '../../../utils/cn';
 import { currencyFormatter } from '../../../utils/numberFormatter';
 import { translate } from '../../../utils/translate';
+import { createMetaEventId } from '../../../utils/gtmCustomerData';
 import CountDown from '../../CountDown';
 import Image from '../../Image';
 import Button from '../../buttons/Button';
@@ -83,14 +84,22 @@ const ProductPreviewContent = ({
     const dispatch = useDispatch();
 
     const { user, isLoading, guestUserId, carts } = useAuth();
+    const viewContentEventId = useMemo(
+        () => createMetaEventId('view_content'),
+        [slug],
+    );
 
     const { data: product, isLoading: loadingProduct } =
-        useGetProductDetailsQuery(slug!);
+        useGetProductDetailsQuery({
+            slug,
+            eventId: viewContentEventId,
+        });
     const [addToWishList] = useAddToWishListMutation();
     const [addToCart, { isLoading: addingToCart }] = useAddToCartMutation();
 
     const previewSliderRef = useRef<SwiperRef>(null);
     const thumbSliderRef = useRef<SwiperRef>(null);
+    const viewItemFiredRef = useRef(false);
 
     const [isBuyNowLoading, setIsBuyNowLoading] = useState(false);
     const [cartCount, setCartCount] = useState(1);
@@ -203,25 +212,16 @@ const ProductPreviewContent = ({
             previewSliderRef.current?.swiper.slideTo(imageIndex);
         }
 
-        //below gtm
+    }, [selectedVariationCombinations, product, images]);
 
-        let variation = null;
+    useEffect(() => {
+        if (!product || viewItemFiredRef.current) return;
 
-        if (product.hasVariation) {
-            // Find variation using user-selected combination
-            const selectedVariationCode = generateVariationCode(
-                selectedVariationCombinations,
-            );
-
-            variation = product.variations.find(
-                (v) => v.code === selectedVariationCode,
-            );
-        } else {
-            // Simple product → default to first variation
-            variation = product.variations[0];
-        }
+        const variation = product.variations[0];
 
         if (!variation) return;
+
+        viewItemFiredRef.current = true;
 
         // Build item_id based on variation logic
         const itemId = product.hasVariation
@@ -231,6 +231,7 @@ const ProductPreviewContent = ({
         // Fire GTM event ONLY (no other updates)
         gtmEvent({
             event: 'view_item',
+            event_id: viewContentEventId,
             ecommerce: {
                 currency: window.config.currency.code,
                 value: variation.basePrice,
@@ -246,7 +247,7 @@ const ProductPreviewContent = ({
                 ],
             },
         });
-    }, [selectedVariationCombinations, product]);
+    }, [product, viewContentEventId]);
 
     if (loadingProduct) {
         return (
@@ -318,6 +319,7 @@ const ProductPreviewContent = ({
 
         try {
             let productVariationId = selectedVariation?.id;
+            const eventId = createMetaEventId('add_to_cart');
 
             // if (selectedVariation) {
             //     fbEvents.addToCart({
@@ -348,6 +350,7 @@ const ProductPreviewContent = ({
             if (selectedVariation) {
                 gtmEvent({
                     event: 'add_to_cart',
+                    event_id: eventId,
                     ecommerce: {
                         currency: window.config.currency.code,
                         value:
@@ -404,6 +407,7 @@ const ProductPreviewContent = ({
                 qty: cartCount,
                 warehouseId: selectedVariation?.stocks[0]?.warehouseId || 1,
                 guestUserId,
+                eventId,
             }).unwrap();
 
             setCartCount(1);
@@ -453,14 +457,20 @@ const ProductPreviewContent = ({
 
         try {
             const wasInWishlist = product.inWishlist;
+            const eventId = wasInWishlist
+                ? undefined
+                : createMetaEventId('add_to_wishlist');
 
-            await addToWishList(product.id).unwrap();
+            await addToWishList(
+                eventId ? { productId: product.id, eventId } : product.id,
+            ).unwrap();
             toast.success(translate('Wishlist updated'));
 
             gtmEvent({
                 event: wasInWishlist
                     ? 'remove_from_wishlist'
                     : 'add_to_wishlist',
+                ...(eventId ? { event_id: eventId } : {}),
                 ecommerce: {
                     items: [
                         {

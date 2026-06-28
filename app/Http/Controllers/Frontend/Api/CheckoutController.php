@@ -879,7 +879,7 @@ class CheckoutController extends Controller
                                         'content_type' => 'product',
                                         'contents' => $contents,     // <-- FIXED (details)
                                         'num_items' => array_sum(array_column($contents, 'quantity')),
-                                    ]);
+                                    ], $request->eventId);
                                 }
                             } catch (\Exception $e) {
                                 \Log::error('Facebook Pixel tracking failed: '.$e->getMessage());

@@ -74,7 +74,7 @@ class CartController extends Controller
                         'currency' => getSetting('currencyCode') ?? 'USD',
                         'content_ids' => [$variantId],       // <-- FIXED
                         'content_type' => 'product',
-                    ]);
+                    ], $request->eventId);
                     // $this->facebook->sendEvent('AddToCart', [
                     //     'email' => $user->email,
                     //     'phone' => $user->phone

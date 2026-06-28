@@ -3,7 +3,6 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
-use App\Services\FacebookConversionService;
 use App\Facades\Gtag;
 use Route;
 
@@ -15,40 +14,11 @@ class ProductVariationResource extends JsonResource
      * @param  \Illuminate\Http\Request  $request
      * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
      */
-    protected $facebook;
-
-    public function __construct($resource)
-    {
-        parent::__construct($resource);
-        $this->facebook = app(FacebookConversionService::class);
-
-    }
-
     public function toArray($request)
     {
         $preOrderEnabled = getSetting('productSettingPreOrderEnabled', '1') !== '0';
 
-        // Send Facebook Search event
         if(!Route::currentRouteName() == 'admin.allorders'){
-            try{
-                $user = apiUser();
-                if($user && config('app.FACEBOOK_PIXEL_ACTIVATION') == '1'){
-                    $this->facebook->sendEvent('ViewContent', [
-                        'email' => $user->email,
-                        'phone' => $user->phone
-                    ], [
-                        'content_ids' => [$this->sku],
-                        'content_type' => 'product',
-                        'value' => (float) variationPrice($this->product, $this, false),
-                        'currency' => getSetting('currencyCode') ?? 'USD',
-                    ]);
-
-                }
-
-            }catch (\Exception $e) {
-                dd($e);
-            }
-            // Send Facebook Search event
             try{
                 if(config('app.GOOGLE_ANALYTICS_ACTIVATION') == '1'){
                     Gtag::sendEvent('view_item', [

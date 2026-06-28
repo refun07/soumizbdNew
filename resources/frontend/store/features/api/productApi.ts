@@ -59,12 +59,28 @@ const productApi = apiSlice
                 transformResponse: (res: any) => res.result,
             }),
 
-            getProductDetails: builder.query<IProduct, string>({
-                query: (slug) => `/products/details/${slug}`,
-                providesTags: (_result, _error, slug) => [
-                    'Product',
-                    { type: 'Product', id: slug },
-                ],
+            getProductDetails: builder.query<
+                IProduct,
+                string | { slug: string; eventId?: string }
+            >({
+                query: (arg) => {
+                    const slug = typeof arg === 'string' ? arg : arg.slug;
+                    const eventId =
+                        typeof arg === 'string' ? undefined : arg.eventId;
+
+                    return {
+                        url: `/products/details/${slug}`,
+                        params: eventId ? { eventId } : undefined,
+                    };
+                },
+                providesTags: (_result, _error, arg) => {
+                    const slug = typeof arg === 'string' ? arg : arg.slug;
+
+                    return [
+                        'Product',
+                        { type: 'Product', id: slug },
+                    ];
+                },
                 transformResponse: (res: any) => res.result,
             }),
 
@@ -88,6 +104,7 @@ const productApi = apiSlice
                     warehouseId: number;
                     qty: number;
                     guestUserId?: number | null;
+                    eventId?: string;
                 }
             >({
                 query: (body) => {
@@ -177,12 +194,22 @@ const productApi = apiSlice
                 transformResponse: (res: any) => res.result,
             }),
 
-            addToWishList: builder.mutation<IWishListResponse[], number>({
-                query: (productId) => ({
-                    url: '/wishlists/create',
-                    method: 'POST',
-                    body: objectToFormData({ productId }),
-                }),
+            addToWishList: builder.mutation<
+                IWishListResponse[],
+                number | { productId: number; eventId?: string }
+            >({
+                query: (payload) => {
+                    const data =
+                        typeof payload === 'number'
+                            ? { productId: payload }
+                            : payload;
+
+                    return {
+                        url: '/wishlists/create',
+                        method: 'POST',
+                        body: objectToFormData(data),
+                    };
+                },
                 transformResponse: (res: any) => res.result,
                 invalidatesTags: ['WishList', 'Product'],
             }),

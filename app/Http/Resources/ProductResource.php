@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use App\Models\FeatureFlag;
 use App\Models\Product;
+use App\Services\FacebookConversionService;
 use App\Traits\CategoryTrait;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Route;
@@ -11,6 +12,14 @@ use Route;
 
 class ProductResource extends JsonResource
 {
+    protected $facebook;
+
+    public function __construct($resource)
+    {
+        parent::__construct($resource);
+        $this->facebook = app(FacebookConversionService::class);
+    }
+
     private function getSizeChartTable(): ?array
     {
         $sizeChart = $this->size_guides;
@@ -46,6 +55,27 @@ class ProductResource extends JsonResource
         $user       = apiUser();
         $wishlists  = [];
         $inWishlist = false;
+
+        if (
+            Route::currentRouteName() == 'api.products.show' &&
+            config('app.FACEBOOK_PIXEL_ACTIVATION') == '1'
+        ) {
+            try {
+                $this->facebook->sendEvent('ViewContent', [
+                    'email' => $user?->email,
+                    'phone' => $user?->phone,
+                ], [
+                    'content_ids' => [(string) $this->id],
+                    'content_type' => 'product',
+                    'content_name' => $this->name,
+                    'value' => (float) $this->__getMinBasePrice(),
+                    'currency' => getSetting('currencyCode') ?? 'USD',
+                ], $request->eventId);
+            } catch (\Exception $e) {
+                \Log::error('Facebook ViewContent tracking failed: '.$e->getMessage());
+            }
+        }
+
         if ($user != null) {
             $wishlists = $user->wishlists()->pluck('product_id')->toArray();
             if (in_array($this->id, $wishlists)) {

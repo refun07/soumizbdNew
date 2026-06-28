@@ -64,7 +64,7 @@ class WishlistController extends Controller
                         'content_name' => $wishlist->product->name,
                         'value'        => (float) $wishlist->product->min_price,
                         'currency'     => getSetting('currencyCode') ?? 'USD',
-                    ]);
+                    ], $request->eventId);
                 }
             } catch (\Exception $e) {
 

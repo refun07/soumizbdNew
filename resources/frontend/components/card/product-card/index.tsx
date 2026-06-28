@@ -19,6 +19,7 @@ import ProductCardThemeThree from './ProductCardThemeThree';
 import ProductCardThemeTwo from './ProductCardThemeTwo';
 
 import useGTMEventsNew from 'hooks/useGTMEventNew';
+import { createMetaEventId } from '../../../utils/gtmCustomerData';
 
 interface Props {
     product: IProductShort;
@@ -92,11 +93,14 @@ export const useProductActions = (p: IProductShort) => {
         }
 
         try {
+            const eventId = createMetaEventId('add_to_cart');
+
             await addToCart({
                 productVariationId: productDetails.variations[0].id,
                 qty: 1,
                 warehouseId:
                     productDetails.variations[0].stocks[0]?.warehouseId,
+                eventId,
             }).unwrap();
             toast.success(translate('Added to cart'));
 
@@ -106,6 +110,7 @@ export const useProductActions = (p: IProductShort) => {
 
             gtmEvent({
                 event: 'add_to_cart',
+                event_id: eventId,
                 ecommerce: {
                     currency: window.config.currency.code,
                     value: selectedVariation.basePrice,
@@ -188,12 +193,15 @@ export const useProductActions = (p: IProductShort) => {
         }
 
         try {
-            await addToWishList(product.id).unwrap();
+            const eventId = createMetaEventId('add_to_wishlist');
+
+            await addToWishList({ productId: product.id, eventId }).unwrap();
             setProduct((prev) => ({ ...prev, inWishlist: true }));
             toast.success(translate('Added to wishlist'));
 
             gtmEvent({
                 event: 'add_to_wishlist',
+                event_id: eventId,
                 ecommerce: {
                     items: [
                         {

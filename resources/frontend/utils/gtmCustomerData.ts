@@ -73,6 +73,9 @@ export const sha256Hash = async (value: unknown): Promise<string> => {
         .join('');
 };
 
+export const createMetaEventId = (eventName: string): string =>
+    `${eventName}_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+
 export const buildGTMCustomerContext = (
     user?: Nullable<IUser>,
     totalOrders?: Nullable<number>,
