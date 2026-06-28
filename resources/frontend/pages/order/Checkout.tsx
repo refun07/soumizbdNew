@@ -26,7 +26,10 @@ import {
     useUpdateCartProductMutation,
 } from '../../store/features/api/productApi';
 import { useAuth } from '../../store/features/auth/authSlice';
-import { useLazyGetCheckoutSessionQuery } from '../../store/features/checkout/checkoutApi';
+import {
+    useLazyGetCheckoutSessionQuery,
+    useTrackInitiateCheckoutMutation,
+} from '../../store/features/checkout/checkoutApi';
 import {
     setCheckoutData,
     useCheckoutData,
@@ -44,6 +47,7 @@ import {
     buildGTM4WPOrderData,
     buildGTMCustomerContext,
     buildGTMUserData,
+    createMetaEventId,
     mapCheckoutAddressToGTMAddress,
 } from '../../utils/gtmCustomerData';
 
@@ -66,6 +70,7 @@ const Checkout = () => {
     const [landingPageCart, setLandingPageCart] = useState<any[]>([]);
     const pixelFired = useRef(false);
     const beginCheckoutSignature = useRef('');
+    const initiateCheckoutEventIdRef = useRef('');
 
     const gtmEvent = useGTMEventsNew();
 
@@ -132,6 +137,7 @@ const Checkout = () => {
 
     // Load saved checkout session on mount (for returning users)
     const [getCheckoutSession] = useLazyGetCheckoutSessionQuery();
+    const [trackInitiateCheckout] = useTrackInitiateCheckoutMutation();
 
     useEffect(() => {
         const loadSavedSession = async () => {
@@ -430,11 +436,27 @@ const Checkout = () => {
 
         let contentIds: string[] = [];
         let contents: string[] = [];
+        let serverContents: { id: string; quantity: number; item_price: number }[] =
+            [];
         let currency = window.config.currency.code;
         let num_items = 0;
         currentCarts.map((item) => {
-            contentIds = [...contentIds, item.productVariationId.toString()];
+            const itemId = item.productVariationId.toString();
+            const itemPrice =
+                (item as ICartProduct & { price?: number }).price ??
+                item.variation.discountedBasePrice ??
+                item.product.basePrice;
+
+            contentIds = [...contentIds, itemId];
             contents = [...contents, item.product.name];
+            serverContents = [
+                ...serverContents,
+                {
+                    id: itemId,
+                    quantity: item.qty,
+                    item_price: itemPrice,
+                },
+            ];
             num_items += item.qty;
         });
 
@@ -449,12 +471,27 @@ const Checkout = () => {
         }
 
         pixelFired.current = true;
+        const eventId = createMetaEventId('initiate_checkout');
+        initiateCheckoutEventIdRef.current = eventId;
+
         fbEvents.initiateCheckout({
             value: total,
             currency: currency,
             content_ids: contentIds,
             contents: contents,
             num_items: num_items,
+            eventID: eventId,
+        });
+
+        trackInitiateCheckout({
+            eventId,
+            value: total,
+            currency,
+            content_ids: contentIds,
+            contents: serverContents,
+            num_items,
+            email: customerDetails.email,
+            phone: customerDetails.phone,
         });
     }, [currentCarts]);
 
@@ -674,6 +711,9 @@ const Checkout = () => {
         });
 
         const sendBeginCheckout = async () => {
+            const eventId =
+                initiateCheckoutEventIdRef.current ||
+                createMetaEventId('initiate_checkout');
             const billingGTMAddress = mapCheckoutAddressToGTMAddress(
                 billingAddress || shippingAddress,
                 customerDetails,
@@ -685,6 +725,7 @@ const Checkout = () => {
 
             gtmEvent({
                 event: 'begin_checkout',
+                event_id: eventId,
                 ...(await buildGTM4WPData({
                     user,
                     totalOrders: dashboardInfo?.totalOrders,

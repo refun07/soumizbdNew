@@ -307,6 +307,7 @@ Route::group(['prefix' => config('app.api_version')], function () {
 
     Route::post('/checkout/get-shipping-charge', [CheckoutController::class, 'getShippingCharge']);
     Route::post('/checkout/get-delivery-areas', [CheckoutController::class, 'getDeliveryAreas']);
+    Route::post('/checkout/initiate', [CheckoutController::class, 'initiateCheckout']);
 
     // checkout session management (guest checkout support)
     Route::post('/checkout/save-session', [CheckoutController::class, 'saveSession']);

@@ -180,6 +180,52 @@ class CheckoutController extends Controller
         }
     }
 
+    public function initiateCheckout(Request $request)
+    {
+        try {
+            if (config('app.FACEBOOK_PIXEL_ACTIVATION') != '1') {
+                return [
+                    'success' => true,
+                    'status' => 200,
+                    'message' => translate('Tracking disabled'),
+                    'result' => null,
+                ];
+            }
+
+            $user = apiUser();
+            $contentIds = $request->input('content_ids', []);
+            $contents = $request->input('contents', []);
+
+            $this->facebook->sendEvent('InitiateCheckout', [
+                'email' => $request->input('email') ?: $user?->email,
+                'phone' => $request->input('phone') ?: $user?->phone,
+            ], [
+                'value' => (float) $request->input('value', 0),
+                'currency' => $request->input('currency', getSetting('currencyCode') ?? 'USD'),
+                'content_ids' => is_array($contentIds) ? $contentIds : [],
+                'content_type' => 'product',
+                'contents' => is_array($contents) ? $contents : [],
+                'num_items' => (int) $request->input('num_items', 0),
+            ], $request->eventId);
+
+            return [
+                'success' => true,
+                'status' => 200,
+                'message' => translate('Initiate checkout tracked'),
+                'result' => null,
+            ];
+        } catch (\Exception $e) {
+            \Log::error('Facebook InitiateCheckout tracking failed: '.$e->getMessage());
+
+            return [
+                'success' => false,
+                'status' => 500,
+                'message' => translate('Failed to track initiate checkout'),
+                'result' => null,
+            ];
+        }
+    }
+
     public function getDeliveryAreas(Request $request)
     {
         $cartItems = $this->getCartItemsForShipping($request);

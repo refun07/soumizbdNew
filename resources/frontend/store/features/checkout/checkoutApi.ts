@@ -67,6 +67,21 @@ interface CheckoutSessionResponse {
     lastUpdated: string;
 }
 
+interface InitiateCheckoutPayload {
+    eventId: string;
+    value: number;
+    currency: string;
+    content_ids: string[];
+    contents: Array<{
+        id: string;
+        quantity: number;
+        item_price: number;
+    }>;
+    num_items: number;
+    email?: string;
+    phone?: string;
+}
+
 const checkoutApi = apiSlice
     .enhanceEndpoints({
         addTagTypes: [
@@ -241,6 +256,20 @@ const checkoutApi = apiSlice
                 providesTags: ['CheckoutSession'],
                 transformResponse: (res: any) => res.result,
             }),
+
+            trackInitiateCheckout: builder.mutation<
+                { success: boolean },
+                InitiateCheckoutPayload
+            >({
+                query: (body) => ({
+                    url: 'checkout/initiate',
+                    method: 'POST',
+                    body,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                }),
+            }),
         }),
     });
 
@@ -262,4 +291,5 @@ export const {
     useSaveCheckoutSessionMutation,
     useGetCheckoutSessionQuery,
     useLazyGetCheckoutSessionQuery,
+    useTrackInitiateCheckoutMutation,
 } = checkoutApi;
