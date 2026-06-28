@@ -1,5 +1,4 @@
 import { useCheckoutAutoSave } from 'hooks/useCheckoutAutoSave';
-import { useFacebookPixelEvents } from 'hooks/useFacebookPixelEvents';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { FaHome, FaTrash } from 'react-icons/fa';
@@ -65,10 +64,8 @@ const stepQueryKey = 'checkoutStep';
 const Checkout = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const dispatch = useDispatch();
-    const fbEvents = useFacebookPixelEvents();
     const navigate = useNavigate();
     const [landingPageCart, setLandingPageCart] = useState<any[]>([]);
-    const pixelFired = useRef(false);
     const beginCheckoutSignature = useRef('');
     const initiateCheckoutEventIdRef = useRef('');
 
@@ -426,75 +423,6 @@ const Checkout = () => {
         }
     }, [selectedShops, isFromLanding, isLoading]);
 
-    useEffect(() => {
-        if (
-            pixelFired.current ||
-            Object.keys(selectedShopProducts).length === 0
-        ) {
-            return;
-        }
-
-        let contentIds: string[] = [];
-        let contents: string[] = [];
-        let serverContents: { id: string; quantity: number; item_price: number }[] =
-            [];
-        let currency = window.config.currency.code;
-        let num_items = 0;
-        currentCarts.map((item) => {
-            const itemId = item.productVariationId.toString();
-            const itemPrice =
-                (item as ICartProduct & { price?: number }).price ??
-                item.variation.discountedBasePrice ??
-                item.product.basePrice;
-
-            contentIds = [...contentIds, itemId];
-            contents = [...contents, item.product.name];
-            serverContents = [
-                ...serverContents,
-                {
-                    id: itemId,
-                    quantity: item.qty,
-                    item_price: itemPrice,
-                },
-            ];
-            num_items += item.qty;
-        });
-
-        const { total } = getSelectedShopProducts({
-            cartProducts: selectedShopProducts,
-            coupons,
-            selectedShops,
-        });
-
-        if (isNaN(total)) {
-            return;
-        }
-
-        pixelFired.current = true;
-        const eventId = createMetaEventId('initiate_checkout');
-        initiateCheckoutEventIdRef.current = eventId;
-
-        fbEvents.initiateCheckout({
-            value: total,
-            currency: currency,
-            content_ids: contentIds,
-            contents: contents,
-            num_items: num_items,
-            eventID: eventId,
-        });
-
-        trackInitiateCheckout({
-            eventId,
-            value: total,
-            currency,
-            content_ids: contentIds,
-            contents: serverContents,
-            num_items,
-            email: customerDetails.email,
-            phone: customerDetails.phone,
-        });
-    }, [currentCarts]);
-
     const handleNext = async () => {
         try {
             await customerDetailsSchema.validate(customerDetails, {
@@ -714,6 +642,7 @@ const Checkout = () => {
             const eventId =
                 initiateCheckoutEventIdRef.current ||
                 createMetaEventId('initiate_checkout');
+            initiateCheckoutEventIdRef.current = eventId;
             const billingGTMAddress = mapCheckoutAddressToGTMAddress(
                 billingAddress || shippingAddress,
                 customerDetails,
@@ -756,6 +685,24 @@ const Checkout = () => {
                     })),
                 },
             });
+
+            trackInitiateCheckout({
+                eventId,
+                value: calculatedCart.total,
+                currency,
+                content_ids: contents.map((item: any) => item.id.toString()),
+                contents: contents.map((item: any) => ({
+                    id: item.id.toString(),
+                    quantity: item.quantity,
+                    item_price: item.item_price || item.price,
+                })),
+                num_items: contents.reduce(
+                    (total, item: any) => total + (item.quantity || 0),
+                    0,
+                ),
+                email: customerDetails.email,
+                phone: customerDetails.phone,
+            });
         };
 
         sendBeginCheckout();
@@ -769,6 +716,7 @@ const Checkout = () => {
         shippingCharge,
         user,
         dashboardInfo,
+        trackInitiateCheckout,
     ]);
 
     return (
