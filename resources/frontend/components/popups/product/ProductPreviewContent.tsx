@@ -85,7 +85,7 @@ const ProductPreviewContent = ({
 
     const { user, isLoading, guestUserId, carts } = useAuth();
     const viewContentEventId = useMemo(
-        () => createMetaEventId('view_content'),
+        () => createMetaEventId('view_content', slug),
         [slug],
     );
 

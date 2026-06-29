@@ -58,7 +58,8 @@ class ProductResource extends JsonResource
 
         if (
             Route::currentRouteName() == 'api.products.show' &&
-            config('app.FACEBOOK_PIXEL_ACTIVATION') == '1'
+            config('app.FACEBOOK_PIXEL_ACTIVATION') == '1' &&
+            $request->filled('eventId')
         ) {
             try {
                 $this->facebook->sendEvent('ViewContent', [

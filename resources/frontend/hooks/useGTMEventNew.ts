@@ -118,9 +118,21 @@ export type GTMEventParams =
 /**
  * useGTMEvents — Unified Ecommerce Event Dispatcher for GTM
  */
+const pushedEventIds = new Set<string>();
+
 const useGTMEventsNew = () => {
     const sendEvent = useCallback((eventData: GTMEventParams) => {
         if (typeof window !== 'undefined') {
+            const eventId = eventData.event_id;
+
+            if (typeof eventId === 'string') {
+                const dedupeKey = `${eventData.event}:${eventId}`;
+
+                if (pushedEventIds.has(dedupeKey)) return;
+
+                pushedEventIds.add(dedupeKey);
+            }
+
             window.dataLayer = window.dataLayer || [];
             window.dataLayer.push(eventData);
         }

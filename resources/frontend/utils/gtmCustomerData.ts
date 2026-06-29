@@ -73,8 +73,26 @@ export const sha256Hash = async (value: unknown): Promise<string> => {
         .join('');
 };
 
-export const createMetaEventId = (eventName: string): string =>
-    `${eventName}_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+const recentEventIds = new Map<string, { eventId: string; createdAt: number }>();
+const EVENT_ID_REUSE_WINDOW_MS = 2000;
+
+export const createMetaEventId = (eventName: string, dedupeKey?: string): string => {
+    const eventId = `${eventName}_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+
+    if (!dedupeKey) return eventId;
+
+    const cacheKey = `${eventName}:${dedupeKey}`;
+    const cached = recentEventIds.get(cacheKey);
+    const now = Date.now();
+
+    if (cached && now - cached.createdAt < EVENT_ID_REUSE_WINDOW_MS) {
+        return cached.eventId;
+    }
+
+    recentEventIds.set(cacheKey, { eventId, createdAt: now });
+
+    return eventId;
+};
 
 export const buildGTMCustomerContext = (
     user?: Nullable<IUser>,

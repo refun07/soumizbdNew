@@ -1,5 +1,4 @@
-import { useFacebookPixelEvents } from 'hooks/useFacebookPixelEvents';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FaCog, FaCoins, FaHome, FaPiggyBank, FaTruck } from 'react-icons/fa';
 import { useDispatch } from 'react-redux';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
@@ -29,14 +28,8 @@ import { numberFormatter, paddedNumber } from '../utils/numberFormatter';
 import { translate } from '../utils/translate';
 import NotFound from './NotFound';
 
-import useGTMEventsNew from 'hooks/useGTMEventNew';
-import { createMetaEventId } from '../utils/gtmCustomerData';
-
 const ProductDetails = () => {
     const dispatch = useDispatch();
-    const fbEvents = useFacebookPixelEvents();
-
-    const gtmEvent = useGTMEventsNew();
 
     const [activeTab, setActiveTab] = useState<'description' | 'reviews'>(
         'description',
@@ -44,14 +37,7 @@ const ProductDetails = () => {
     const [searchParams] = useSearchParams();
     const [starPercentage, setStarPercentage] = useState([0, 0, 0, 0, 0]);
     const { slug } = useParams<{ slug: string }>();
-    const viewContentEventId = useMemo(
-        () => createMetaEventId('view_content'),
-        [slug],
-    );
-    const { data: product, isLoading } = useGetProductDetailsQuery({
-        slug: slug!,
-        eventId: viewContentEventId,
-    });
+    const { data: product, isLoading } = useGetProductDetailsQuery(slug!);
     const [getProductReviews, { data: reviewsRes }] =
         useLazyGetAllProductReviewsQuery();
 
@@ -67,35 +53,7 @@ const ProductDetails = () => {
             limit: searchParams.get('limit') || 10,
         });
 
-        // if (product) {
-        //     fbEvents.viewContent({
-        //         content_ids: [product.id.toString()],
-        //         content_name: product.name,
-        //         value: product.basePrice,
-        //         currency: window.config.currency.code,
-        //     });
-        // }
-
-        if (product) {
-            // Send GTM event for View Item
-            gtmEvent({
-                event: 'view_item',
-                event_id: viewContentEventId,
-                ecommerce: {
-                    currency: window.config.currency.code,
-                    value: product.basePrice, // or variation price
-                    items: [
-                        {
-                            item_id: product.id.toString(), // required
-                            item_name: product.name, // recommended
-                            price: product.basePrice, // recommended
-                            quantity: 1,
-                        },
-                    ],
-                },
-            });
-        }
-    }, [product, viewContentEventId]);
+    }, [product, searchParams]);
 
     useEffect(() => {
         if (!summary) return;
