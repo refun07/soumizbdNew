@@ -27,6 +27,7 @@ use App\Http\Controllers\Frontend\Api\ShopController;
 use App\Http\Controllers\Frontend\Api\StockRequestApiController;
 use App\Http\Controllers\Frontend\Api\SubscribeController;
 use App\Http\Controllers\Frontend\Api\TicketController;
+use App\Http\Controllers\Frontend\Api\TrackingController;
 use App\Http\Controllers\Frontend\Api\UserController;
 use App\Http\Controllers\Frontend\Api\WishlistController;
 use App\Http\Controllers\Installation\InstallController;
@@ -197,6 +198,9 @@ Route::group(['prefix' => config('app.api_version')], function () {
 
     // subscribe
     Route::post('subscribe', [SubscribeController::class, 'subscribe']);
+
+    // tracking
+    Route::post('tracking/page-view', [TrackingController::class, 'pageView']);
 
     // coupons
     Route::group(['prefix' => 'coupons'], function () {

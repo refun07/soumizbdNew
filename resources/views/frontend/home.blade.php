@@ -69,7 +69,6 @@
         s.parentNode.insertBefore(t,s)}(window, document,'script',
         'https://connect.facebook.net/en_US/fbevents.js');
         fbq('init', `${window.config.meta_pixel_id}`);
-        fbq('track', 'PageView');
     </script>
     {{-- Google Tag Manager (Head) --}}
     @if (config('services.gtm_id'))

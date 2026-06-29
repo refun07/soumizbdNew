@@ -107,12 +107,27 @@ class FacebookConversionService
             }
         }
 
-        $customDataObj = (new CustomData())
-            ->setCurrency(strtoupper($customData['currency'] ?? 'USD'))
-            ->setValue($customData['value'] ?? 0)
-            ->setContentIds($customData['content_ids'] ?? [])
-            ->setContents($contentsArr)
-            ->setContentType('product');
+        $customDataObj = new CustomData();
+
+        if (isset($customData['currency'])) {
+            $customDataObj->setCurrency(strtoupper($customData['currency']));
+        }
+
+        if (array_key_exists('value', $customData)) {
+            $customDataObj->setValue($customData['value']);
+        }
+
+        if (!empty($customData['content_ids'])) {
+            $customDataObj->setContentIds($customData['content_ids']);
+        }
+
+        if (!empty($contentsArr)) {
+            $customDataObj->setContents($contentsArr);
+        }
+
+        if (!empty($customData['content_type'])) {
+            $customDataObj->setContentType($customData['content_type']);
+        }
 
         // Build server event
         $event = (new Event())

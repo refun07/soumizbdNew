@@ -123,7 +123,11 @@ const pushedEventIds = new Set<string>();
 const useGTMEventsNew = () => {
     const sendEvent = useCallback((eventData: GTMEventParams) => {
         if (typeof window !== 'undefined') {
-            const eventId = eventData.event_id;
+            const eventId =
+                eventData.event_id ||
+                eventData.eventID ||
+                eventData.eventId ||
+                eventData.meta_event_id;
 
             if (typeof eventId === 'string') {
                 const dedupeKey = `${eventData.event}:${eventId}`;

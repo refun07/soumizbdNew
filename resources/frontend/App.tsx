@@ -19,7 +19,9 @@ import useGTMEventsNew from 'hooks/useGTMEventNew';
 import {
     buildGTM4WPData,
     buildGTMCustomerContext,
+    createMetaEventId,
 } from './utils/gtmCustomerData';
+import localAxios from './utils/axios';
 
 const HomeIndex = lazy(() => import('./pages/home'));
 const Brands = lazy(() => import('./pages/Brands'));
@@ -64,6 +66,38 @@ const OrderTracking = lazy(() => import('./pages/order/OrderTracking'));
 const DynamicPage = lazy(() => import('./pages/DynamicPage'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
+const installMetaPageViewEventIdPatch = () => {
+    const win = window as any;
+
+    if (win.__metaPageViewEventIdPatchInstalled || typeof win.fbq !== 'function') {
+        return;
+    }
+
+    const originalFbq = win.fbq;
+
+    const patchedFbq = (...args: any[]) => {
+        const [method, eventName] = args;
+
+        if (
+            (method === 'track' || method === 'trackCustom') &&
+            eventName === 'PageView' &&
+            win.__metaPageViewEventId
+        ) {
+            args[3] = {
+                ...(args[3] || {}),
+                eventID: win.__metaPageViewEventId,
+            };
+        }
+
+        return originalFbq(...args);
+    };
+
+    Object.assign(patchedFbq, originalFbq);
+    win.fbq = patchedFbq;
+    win._fbq = patchedFbq;
+    win.__metaPageViewEventIdPatchInstalled = true;
+};
+
 const App = () => {
     const dispatch = useDispatch();
     const { carts, dashboardInfo, isLoading, user } = useAuth();
@@ -74,6 +108,7 @@ const App = () => {
 
     // Track previous search params for infinite scroll detection
     const prevSearchRef = useRef(location.search);
+    const lastPageViewKeyRef = useRef('');
 
     // Scroll to top if path changes (but not for infinite scroll page changes)
     useEffect(() => {
@@ -114,10 +149,27 @@ const App = () => {
             (document.activeElement as HTMLElement).blur();
         }
         const sendPageView = async () => {
+            const pageViewKey = `${location.pathname}${location.search}`;
+
+            if (lastPageViewKeyRef.current === pageViewKey) return;
+
+            lastPageViewKeyRef.current = pageViewKey;
+
+            const eventId = createMetaEventId('page_view', pageViewKey);
+            const pageLocation = window.location.href;
+            const pageReferrer = document.referrer || '';
+
+            (window as any).__metaPageViewEventId = eventId;
+            installMetaPageViewEventIdPatch();
+
             gtmEvent({
                 event: 'page_view',
-                page_location: window.location.href,
-                page_referrer: document.referrer || '',
+                event_id: eventId,
+                eventID: eventId,
+                eventId,
+                meta_event_id: eventId,
+                page_location: pageLocation,
+                page_referrer: pageReferrer,
                 ...(await buildGTM4WPData({
                     user,
                     totalOrders: dashboardInfo?.totalOrders,
@@ -128,10 +180,16 @@ const App = () => {
                     dashboardInfo?.totalOrders,
                 ),
             });
+
+            localAxios.post('/tracking/page-view', {
+                eventId,
+                url: pageLocation,
+                referrer: pageReferrer,
+            }).catch(() => {});
         };
 
         sendPageView();
-    }, [location.pathname, user, dashboardInfo]);
+    }, [location.pathname, location.search, user, dashboardInfo]);
 
     // update selected shop state when cart is changed
     useEffect(() => {
