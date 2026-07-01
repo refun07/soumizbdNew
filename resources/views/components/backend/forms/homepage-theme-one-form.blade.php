@@ -711,10 +711,53 @@
     </div>
 </div>
 
-{{-- secondary on sale products --}}
+{{-- top products grid --}}
 @php
+    $topGridProducts = getSetting('themeOneTopGridProducts') != null ? collect(json_decode(getSetting('themeOneTopGridProducts'))) : collect();
     $secondaryOnSaleProducts = getSetting('themeOneSecondaryOnSaleProducts') != null ? collect(json_decode(getSetting('themeOneSecondaryOnSaleProducts'))) : collect();
 @endphp
+<div class="ac !mt-0">
+    <h2 class="ac-header">
+        <button type="button" class="ac-trigger !px-8 !rounded-none !bg-background !text-foreground">
+            <span class="">{{ translate('Top Products') }}</span>
+        </button>
+    </h2>
+    <div class="ac-panel">
+        <div class="pt-0 pb-7 px-3 md:px-6 xl:px-10">
+            <form action="" class="space-y-3 homepage-form" method="POST" enctype="multipart/form-data">
+                @csrf
+
+                <input type="hidden" name="types[]" value="showThemeOneTopGridProducts">
+                <div class="flex items-center justify-between mb-5">
+                    <p>{{ translate('Show/Hide Top Products') }}</p>
+                    <input type="hidden" name="showThemeOneTopGridProducts" value="0">
+                    <x-backend.inputs.checkbox toggler="true" name="showThemeOneTopGridProducts"
+                        value="1" isChecked="{{ getSetting('showThemeOneTopGridProducts') ?? false }}" />
+                </div>
+
+                <input type="hidden" name="types[]" value="themeOneTopGridProducts">
+                <x-backend.inputs.select :labelInline="false" label="Select Products" name="themeOneTopGridProducts[]"
+                    multiple data-selection-css-class="multi-select2"
+                    data-placeholder="{{ translate('Select products') }}" :isRequired="false">
+
+                    @foreach ($products as $product)
+                        <x-backend.inputs.select-option
+                            name="{{ $product->collectTranslation('name', $langKey) }}"
+                            value="{{ $product->id }}"
+                            selected="{{ $topGridProducts->contains($product->id) ? $product->id : 0 }}" />
+                    @endforeach
+                </x-backend.inputs.select>
+
+                <div class="flex justify-end pt-2">
+                    <x-backend.inputs.button type="submit" buttonText="{{ translate('Save Changes') }}"
+                        class="submit-btn mt-3" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{{-- secondary on sale products --}}
 <div class="ac !mt-0">
     <h2 class="ac-header">
         <button type="button" class="ac-trigger !px-8 !rounded-none !bg-background !text-foreground">

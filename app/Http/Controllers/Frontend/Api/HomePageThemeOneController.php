@@ -248,9 +248,15 @@ class HomePageThemeOneController extends Controller
         $showSecondaryOnSaleProducts = $secondaryOnSaleSetting
             ? ($secondaryOnSaleSetting->value == '1' ? '1' : '0')
             : '1';
+        $topGridSetting = SystemSetting::where('type', 'showThemeOneTopGridProducts')->first();
+        $showTopGridProducts = $topGridSetting
+            ? ($topGridSetting->value == '1' ? '1' : '0')
+            : '0';
         $onSaleProductIds = array_slice($this->themeOneOnSaleProductIds(), 0, 20);
+        $topGridProductIds = array_slice($this->themeOneTopGridProductIds(), 0, 20);
         $secondaryOnSaleProductIds = array_slice($this->themeOneSecondaryOnSaleProductIds(), 0, 20);
         $products = collect();
+        $topProducts = collect();
         $secondaryProducts = collect();
         $columns = (new ProductService)->getSpecificColumns();
 
@@ -261,6 +267,16 @@ class HomePageThemeOneController extends Controller
                 ->whereIn('id', $onSaleProductIds)
                 ->get($columns)
                 ->sortBy(fn ($product) => array_search($product->id, $onSaleProductIds))
+                ->values();
+        }
+
+        if (count($topGridProductIds) > 0) {
+            $topProducts = Product::fromPublishedShops()
+                ->isPublished()
+                ->hideOnEcom()
+                ->whereIn('id', $topGridProductIds)
+                ->get($columns)
+                ->sortBy(fn ($product) => array_search($product->id, $topGridProductIds))
                 ->values();
         }
 
@@ -280,10 +296,12 @@ class HomePageThemeOneController extends Controller
             'message'   => '',
             'result'    => [
                 'showThemeOneOnSaleProducts'          => getSetting('showThemeOneOnSaleProducts') ?? 0,
+                'showThemeOneTopGridProducts'         => $showTopGridProducts,
                 'showThemeOneSecondaryOnSaleProducts' => $showSecondaryOnSaleProducts,
                 'backgroundColor'                     => $settings['backgroundColor'] ?? '#B3052A',
                 'endsAt'                              => $settings['endsAt'] ?? null,
                 'products'                            => ProductResource::collection($products),
+                'topProducts'                         => ProductResource::collection($topProducts),
                 'secondaryProducts'                   => ProductResource::collection($secondaryProducts),
             ],
         ];
@@ -474,6 +492,12 @@ class HomePageThemeOneController extends Controller
     private function themeOneSecondaryOnSaleProductIds(): array
     {
         $products = getSetting('themeOneSecondaryOnSaleProducts');
+        return $this->settingProductIds($products);
+    }
+
+    private function themeOneTopGridProductIds(): array
+    {
+        $products = getSetting('themeOneTopGridProducts');
         return $this->settingProductIds($products);
     }
 

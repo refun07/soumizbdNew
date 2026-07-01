@@ -369,11 +369,15 @@ const HomeThemeOne = () => {
         promoCards.length > 0;
     const allOnSaleProducts = onSaleProductRes.data?.products ?? [];
     const onSaleProducts = allOnSaleProducts.slice(0, 15);
+    const topGridProducts = onSaleProductRes.data?.topProducts ?? [];
     const secondaryOnSaleProducts =
         onSaleProductRes.data?.secondaryProducts ?? [];
     const shouldShowOnSaleProducts =
         onSaleProductRes.data?.showThemeOneOnSaleProducts === '1' &&
         onSaleProducts.length > 0;
+    const shouldShowTopGridProducts =
+        onSaleProductRes.data?.showThemeOneTopGridProducts === '1' &&
+        topGridProducts.length > 0;
     const shouldShowSecondaryOnSaleProducts =
         (onSaleProductRes.data?.showThemeOneSecondaryOnSaleProducts ?? '1') ===
             '1' && secondaryOnSaleProducts.length > 0;
@@ -1269,6 +1273,43 @@ const HomeThemeOne = () => {
                     </div>
                 </section>
             )}
+
+            {shouldShowTopGridProducts ? (
+                <section id="top-products-grid">
+                    <motion.div
+                        variants={containerAnimation}
+                        initial="initial"
+                        whileInView="whileInView"
+                        viewport={{ once: true }}
+                        className="container"
+                    >
+                        <SectionTitle
+                            animated
+                            title={translate('Top Products')}
+                            subTitle={translate('Popular')}
+                            link="/products"
+                        />
+
+                        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 xl:gap-5">
+                            {topGridProducts.map((product) => (
+                                <motion.div
+                                    variants={itemAnimation}
+                                    key={product.id}
+                                    className="h-full"
+                                >
+                                    <ProductCard product={product} />
+                                </motion.div>
+                            ))}
+                        </div>
+
+                        <div className="mt-6 flex justify-end md:hidden">
+                            <Button as="link" to="/products" variant="outline">
+                                {translate('View More')}
+                            </Button>
+                        </div>
+                    </motion.div>
+                </section>
+            ) : null}
 
             {shouldShowSecondaryOnSaleProducts ? (
                 <section id="secondary-on-sale-products">

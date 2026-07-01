@@ -285,7 +285,7 @@ class SettingController extends Controller
                     ['type' => $type],
                     ['value' => $value]
                 );
-            } elseif ($type == 'showThemeOneSecondaryOnSaleProducts') {
+            } elseif (in_array($type, ['showThemeOneTopGridProducts', 'showThemeOneSecondaryOnSaleProducts'])) {
                 $value = $request->input($type) == '1' ? '1' : '0';
                 SystemSetting::updateOrCreate(
                     ['type' => $type],
