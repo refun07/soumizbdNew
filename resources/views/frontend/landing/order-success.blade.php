@@ -108,7 +108,7 @@
                                             <p class="text-sm text-gray-500">Qty: {{ $item->qty }}</p>
                                         </div>
                                     </div>
-                                    <p class="font-medium">${{ number_format($item->total_price, 2) }}</p>
+                                    <p class="font-medium">{{ formatPrice($item->total_price) }}</p>
                                 </div>
                             @endforeach
                         </div>
@@ -119,7 +119,7 @@
                 <div class="bg-gray-50 rounded-lg p-4">
                     <div class="flex justify-between items-center">
                         <span class="text-lg font-semibold text-gray-800">Total Amount Paid</span>
-                        <span class="text-2xl font-bold text-green-600">${{ number_format($orderGroup->transaction->total_amount ?? 0, 2) }}</span>
+                        <span class="text-2xl font-bold text-green-600">{{ formatPrice($orderGroup->transaction->total_amount ?? 0) }}</span>
                     </div>
                 </div>
 
