@@ -50,6 +50,140 @@
     </div>
     {{-- information-form ends --}}
 
+    {{-- Order Success Page Settings starts --}}
+    <div class="card max-w-[900px] mt-6">
+        <h4 class="card__title">{{ translate('Order Success Page') }}</h4>
+
+        <div class="card__content">
+            <form action="{{ route('admin.general-settings.update') }}" class="space-y-4" method="POST"
+                enctype="multipart/form-data">
+                @csrf
+
+                <div class="flex items-center justify-between">
+                    <label class="text-sm font-medium">{{ translate('Enable Custom Success Page') }}</label>
+                    <div class="flex items-center gap-2">
+                        <input type="hidden" name="types[]" value="orderSuccessCustomEnabled">
+                        <input type="hidden" name="orderSuccessCustomEnabled" value="0">
+                        <x-backend.inputs.checkbox toggler="true" name="orderSuccessCustomEnabled" value="1"
+                            isChecked="{{ getSetting('orderSuccessCustomEnabled', '1') !== '0' }}" />
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="space-y-3">
+                        <input type="hidden" name="types[]" value="orderSuccessHeadline">
+                        <x-backend.inputs.text label="Headline" name="orderSuccessHeadline"
+                            placeholder="আপনার অর্ডারটি সফলভাবে সম্পন্ন হয়েছে।"
+                            value="{{ getSetting('orderSuccessHeadline', 'আপনার অর্ডারটি সফলভাবে সম্পন্ন হয়েছে।') }}" />
+                    </div>
+
+                    <div class="space-y-3">
+                        <input type="hidden" name="types[]" value="orderSuccessHeadlineColor">
+                        <x-backend.inputs.color label="Headline Color" name="orderSuccessHeadlineColor"
+                            value="{{ getSetting('orderSuccessHeadlineColor', '#1f9bad') }}" />
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="space-y-3">
+                        <input type="hidden" name="types[]" value="orderSuccessSubtitle">
+                        <x-backend.inputs.textarea label="Subtitle" name="orderSuccessSubtitle" rows="3"
+                            placeholder="আমাদের কল সেন্টার থেকে এক্ষন করে আপনার অর্ডারটি কনফার্ম করা হবে"
+                            value="{{ getSetting('orderSuccessSubtitle', 'আমাদের কল সেন্টার থেকে এক্ষন করে আপনার অর্ডারটি কনফার্ম করা হবে') }}" />
+                    </div>
+
+                    <div class="space-y-3">
+                        <input type="hidden" name="types[]" value="orderSuccessSubtitleColor">
+                        <x-backend.inputs.color label="Subtitle Color" name="orderSuccessSubtitleColor"
+                            value="{{ getSetting('orderSuccessSubtitleColor', '#ef4444') }}" />
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <input type="hidden" name="types[]" value="orderSuccessCenterImage">
+                        <x-backend.inputs.file label="Center Icon/Image" name="orderSuccessCenterImage"
+                            value="{{ getSetting('orderSuccessCenterImage') }}" />
+                    </div>
+
+                    <div>
+                        <input type="hidden" name="types[]" value="orderSuccessStepsImage">
+                        <x-backend.inputs.file label="Steps Image" name="orderSuccessStepsImage"
+                            value="{{ getSetting('orderSuccessStepsImage') }}" />
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <input type="hidden" name="types[]" value="orderSuccessOrderNumberTemplate">
+                        <x-backend.inputs.text label="Order Number Template" name="orderSuccessOrderNumberTemplate"
+                            placeholder="অর্ডার নম্বর : {order_code}"
+                            value="{{ getSetting('orderSuccessOrderNumberTemplate', 'অর্ডার নম্বর : {order_code}') }}" />
+                    </div>
+
+                    <div>
+                        <input type="hidden" name="types[]" value="orderSuccessOrderTotalTemplate">
+                        <x-backend.inputs.text label="Order Total Template" name="orderSuccessOrderTotalTemplate"
+                            placeholder="অর্ডারের মোট মূল্য {order_total}"
+                            value="{{ getSetting('orderSuccessOrderTotalTemplate', 'অর্ডারের মোট মূল্য {order_total}') }}" />
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <input type="hidden" name="types[]" value="orderSuccessOrderTotalColor">
+                        <x-backend.inputs.color label="Order Total Color" name="orderSuccessOrderTotalColor"
+                            value="{{ getSetting('orderSuccessOrderTotalColor', '#ef4444') }}" />
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="flex items-center justify-between rounded border border-slate-200 px-4 py-3">
+                        <label class="text-sm font-medium">{{ translate('Show Customer Details') }}</label>
+                        <div class="flex items-center gap-2">
+                            <input type="hidden" name="types[]" value="orderSuccessShowCustomerDetails">
+                            <input type="hidden" name="orderSuccessShowCustomerDetails" value="0">
+                            <x-backend.inputs.checkbox toggler="true" name="orderSuccessShowCustomerDetails" value="1"
+                                isChecked="{{ getSetting('orderSuccessShowCustomerDetails', '1') !== '0' }}" />
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between rounded border border-slate-200 px-4 py-3">
+                        <label class="text-sm font-medium">{{ translate('Show Order Information') }}</label>
+                        <div class="flex items-center gap-2">
+                            <input type="hidden" name="types[]" value="orderSuccessShowOrderInformation">
+                            <input type="hidden" name="orderSuccessShowOrderInformation" value="0">
+                            <x-backend.inputs.checkbox toggler="true" name="orderSuccessShowOrderInformation" value="1"
+                                isChecked="{{ getSetting('orderSuccessShowOrderInformation', '1') !== '0' }}" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rounded border border-slate-200 bg-slate-50 p-4 text-center">
+                    <h2 class="text-2xl font-bold leading-tight"
+                        style="color: {{ getSetting('orderSuccessHeadlineColor', '#1f9bad') }}">
+                        {{ getSetting('orderSuccessHeadline', 'আপনার অর্ডারটি সফলভাবে সম্পন্ন হয়েছে।') }}
+                    </h2>
+                    <p class="mt-1 text-sm font-semibold"
+                        style="color: {{ getSetting('orderSuccessSubtitleColor', '#ef4444') }}">
+                        {{ getSetting('orderSuccessSubtitle', 'আমাদের কল সেন্টার থেকে এক্ষন করে আপনার অর্ডারটি কনফার্ম করা হবে') }}
+                    </p>
+                    <div class="mt-6 text-3xl">🎉</div>
+                    <p class="mt-4 text-sm font-semibold">{{ str_replace('{order_code}', 'RM3101', getSetting('orderSuccessOrderNumberTemplate', 'অর্ডার নম্বর : {order_code}')) }}</p>
+                    <p class="mt-2 text-sm font-semibold"
+                        style="color: {{ getSetting('orderSuccessOrderTotalColor', '#ef4444') }}">
+                        {{ str_replace('{order_total}', '1320 BDT', getSetting('orderSuccessOrderTotalTemplate', 'অর্ডারের মোট মূল্য {order_total}')) }}
+                    </p>
+                </div>
+
+                <div class="flex justify-end pt-2">
+                    <x-backend.inputs.button type="submit" buttonText="{{ translate('Save Changes') }}" />
+                </div>
+            </form>
+        </div>
+    </div>
+    {{-- Order Success Page Settings ends --}}
+
     {{-- POS Memo Settings starts --}}
     <div class="card max-w-[900px] mt-6">
         <h4 class="card__title">{{ translate('POS Memo Settings') }}</h4>

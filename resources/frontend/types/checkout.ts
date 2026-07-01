@@ -59,6 +59,8 @@ export interface IOrder {
 
 export interface IOrderSuccess {
     summary: {
+        orderCode: string;
+        totalAmount: number;
         customerName: string;
         shippingAddress: string;
         billingAddress?: string;
@@ -66,6 +68,20 @@ export interface IOrderSuccess {
         email: string;
         paymentMethod: string;
         paymentMethodToShow: string;
+    };
+    successPage: {
+        customEnabled: boolean;
+        headline: string;
+        headlineColor: string;
+        subtitle: string;
+        subtitleColor: string;
+        centerImage: string;
+        orderNumberTemplate: string;
+        orderTotalTemplate: string;
+        orderTotalColor: string;
+        stepsImage: string;
+        showCustomerDetails: boolean;
+        showOrderInformation: boolean;
     };
     orders: IOrder[];
 }
