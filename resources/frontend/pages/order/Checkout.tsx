@@ -123,6 +123,23 @@ const Checkout = () => {
         shippingZoneId,
         isVerified,
     } = useCheckoutData();
+    const hasCashOnDelivery = useMemo(
+        () =>
+            window.config.paymentMethods.some(
+                (method) => method.value === 'cash_on_delivery',
+            ),
+        [],
+    );
+    const appliedDefaultPaymentMethod = useRef(false);
+
+    useEffect(() => {
+        if (appliedDefaultPaymentMethod.current || !hasCashOnDelivery) {
+            return;
+        }
+
+        appliedDefaultPaymentMethod.current = true;
+        dispatch(setCheckoutData({ paymentMethod: 'cash_on_delivery' }));
+    }, [dispatch, hasCashOnDelivery]);
 
     // Real-time auto-save checkout data to database
     useCheckoutAutoSave({
@@ -173,7 +190,11 @@ const Checkout = () => {
                         );
                     }
 
-                    if (!paymentMethod && session.paymentMethod) {
+                    if (
+                        !hasCashOnDelivery &&
+                        !paymentMethod &&
+                        session.paymentMethod
+                    ) {
                         dispatch(
                             setCheckoutData({
                                 paymentMethod: session.paymentMethod,
@@ -188,7 +209,7 @@ const Checkout = () => {
         };
 
         loadSavedSession();
-    }, [isLoading, guestUserId]);
+    }, [isLoading, guestUserId, hasCashOnDelivery]);
 
     // Use landing page cart if from landing page, otherwise use user's cart
     const isFromLanding = searchParams.get('from') === 'landing';
