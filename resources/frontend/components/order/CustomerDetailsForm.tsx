@@ -29,7 +29,11 @@ const CustomerDetailsForm = () => {
     }, [customerDetails, dispatch]);
 
     const setCustomerDetails = (e: any) => {
-        const { name, value } = e.target;
+        const { name } = e.target;
+        const value =
+            name === 'phone'
+                ? e.target.value.replace(/\D/g, '').slice(0, 11)
+                : e.target.value;
 
         dispatch(
             setCheckoutData({
@@ -97,8 +101,10 @@ const CustomerDetailsForm = () => {
                     <Input
                         name="phone"
                         type="text"
+                        inputMode="numeric"
+                        maxLength={11}
                         className="!rounded-[3px] !border-slate-200 !bg-slate-50 placeholder:!text-slate-400 focus:!border-primary"
-                        placeholder={translate('Valid Phone No.')}
+                        placeholder={translate('01XXXXXXXXX')}
                         value={customerDetails?.phone}
                         onChange={setCustomerDetails}
                     />

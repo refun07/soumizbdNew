@@ -53,7 +53,12 @@ import {
 export const customerDetailsSchema = object().shape({
     name: string().required('Name is required'),
     email: string().email('Invalid email'),
-    phone: string().required('Phone is required'),
+    phone: string()
+        .required('Phone is required')
+        .matches(
+            /^01[3-9]\d{8}$/,
+            'Please enter a valid 11 digit Bangladesh phone number',
+        ),
     note: string().nullable().default(''),
 });
 
