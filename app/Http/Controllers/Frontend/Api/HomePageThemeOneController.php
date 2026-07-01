@@ -10,6 +10,7 @@ use App\Http\Services\ProductService;
 use App\Models\Campaign;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\SystemSetting;
 use Illuminate\Http\Request;
 
 class HomePageThemeOneController extends Controller
@@ -243,11 +244,17 @@ class HomePageThemeOneController extends Controller
         $settings = getSetting('themeOneOnSaleProductSettings') != null
             ? json_decode(getSetting('themeOneOnSaleProductSettings'), true)
             : [];
+        $secondaryOnSaleSetting = SystemSetting::where('type', 'showThemeOneSecondaryOnSaleProducts')->first();
+        $showSecondaryOnSaleProducts = $secondaryOnSaleSetting
+            ? ($secondaryOnSaleSetting->value == '1' ? '1' : '0')
+            : '1';
         $onSaleProductIds = array_slice($this->themeOneOnSaleProductIds(), 0, 20);
+        $secondaryOnSaleProductIds = array_slice($this->themeOneSecondaryOnSaleProductIds(), 0, 20);
         $products = collect();
+        $secondaryProducts = collect();
+        $columns = (new ProductService)->getSpecificColumns();
 
         if (count($onSaleProductIds) > 0) {
-            $columns = (new ProductService)->getSpecificColumns();
             $products = Product::fromPublishedShops()
                 ->isPublished()
                 ->hideOnEcom()
@@ -257,16 +264,27 @@ class HomePageThemeOneController extends Controller
                 ->values();
         }
 
+        if (count($secondaryOnSaleProductIds) > 0) {
+            $secondaryProducts = Product::fromPublishedShops()
+                ->isPublished()
+                ->hideOnEcom()
+                ->whereIn('id', $secondaryOnSaleProductIds)
+                ->get($columns)
+                ->sortBy(fn ($product) => array_search($product->id, $secondaryOnSaleProductIds))
+                ->values();
+        }
+
         return [
             'success'   => true,
             'status'    => 200,
             'message'   => '',
             'result'    => [
                 'showThemeOneOnSaleProducts'          => getSetting('showThemeOneOnSaleProducts') ?? 0,
-                'showThemeOneSecondaryOnSaleProducts' => getSetting('showThemeOneSecondaryOnSaleProducts') ?? '1',
+                'showThemeOneSecondaryOnSaleProducts' => $showSecondaryOnSaleProducts,
                 'backgroundColor'                     => $settings['backgroundColor'] ?? '#B3052A',
                 'endsAt'                              => $settings['endsAt'] ?? null,
                 'products'                            => ProductResource::collection($products),
+                'secondaryProducts'                   => ProductResource::collection($secondaryProducts),
             ],
         ];
     }
@@ -450,6 +468,17 @@ class HomePageThemeOneController extends Controller
     private function themeOneOnSaleProductIds(): array
     {
         $products = getSetting('themeOneOnSaleProducts');
+        return $this->settingProductIds($products);
+    }
+
+    private function themeOneSecondaryOnSaleProductIds(): array
+    {
+        $products = getSetting('themeOneSecondaryOnSaleProducts');
+        return $this->settingProductIds($products);
+    }
+
+    private function settingProductIds($products): array
+    {
         if ($products == null) {
             return [];
         }

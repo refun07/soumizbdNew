@@ -712,6 +712,9 @@
 </div>
 
 {{-- secondary on sale products --}}
+@php
+    $secondaryOnSaleProducts = getSetting('themeOneSecondaryOnSaleProducts') != null ? collect(json_decode(getSetting('themeOneSecondaryOnSaleProducts'))) : collect();
+@endphp
 <div class="ac !mt-0">
     <h2 class="ac-header">
         <button type="button" class="ac-trigger !px-8 !rounded-none !bg-background !text-foreground">
@@ -726,13 +729,27 @@
                 <input type="hidden" name="types[]" value="showThemeOneSecondaryOnSaleProducts">
                 <div class="flex items-center justify-between mb-5">
                     <p>{{ translate('Show/Hide Secondary On Sale Products') }}</p>
+                    <input type="hidden" name="showThemeOneSecondaryOnSaleProducts" value="0">
                     <x-backend.inputs.checkbox toggler="true" name="showThemeOneSecondaryOnSaleProducts"
                         value="1" isChecked="{{ getSetting('showThemeOneSecondaryOnSaleProducts') ?? '1' }}" />
                 </div>
 
+                <input type="hidden" name="types[]" value="themeOneSecondaryOnSaleProducts">
+                <x-backend.inputs.select :labelInline="false" label="Select Products" name="themeOneSecondaryOnSaleProducts[]"
+                    multiple data-selection-css-class="multi-select2"
+                    data-placeholder="{{ translate('Select products') }}" :isRequired="false">
+
+                    @foreach ($products as $product)
+                        <x-backend.inputs.select-option
+                            name="{{ $product->collectTranslation('name', $langKey) }}"
+                            value="{{ $product->id }}"
+                            selected="{{ $secondaryOnSaleProducts->contains($product->id) ? $product->id : 0 }}" />
+                    @endforeach
+                </x-backend.inputs.select>
+
                 <div class="flex justify-end pt-2">
                     <x-backend.inputs.button type="submit" buttonText="{{ translate('Save Changes') }}"
-                        class="submit-btn" />
+                        class="submit-btn mt-3" />
                 </div>
             </form>
         </div>

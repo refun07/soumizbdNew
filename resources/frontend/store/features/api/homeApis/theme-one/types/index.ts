@@ -57,6 +57,7 @@ export interface IGetOnSaleProducts {
     backgroundColor: string;
     endsAt: string | null;
     products: IProductShort[];
+    secondaryProducts: IProductShort[];
 }
 
 export interface IGetFourImageBanners {

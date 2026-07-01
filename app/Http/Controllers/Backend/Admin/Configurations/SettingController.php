@@ -285,6 +285,12 @@ class SettingController extends Controller
                     ['type' => $type],
                     ['value' => $value]
                 );
+            } elseif ($type == 'showThemeOneSecondaryOnSaleProducts') {
+                $value = $request->input($type) == '1' ? '1' : '0';
+                SystemSetting::updateOrCreate(
+                    ['type' => $type],
+                    ['value' => $value]
+                );
             } else {
                 $lang = null;
                 if (gettype($type) == 'array') {

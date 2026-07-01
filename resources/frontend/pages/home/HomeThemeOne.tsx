@@ -369,7 +369,8 @@ const HomeThemeOne = () => {
         promoCards.length > 0;
     const allOnSaleProducts = onSaleProductRes.data?.products ?? [];
     const onSaleProducts = allOnSaleProducts.slice(0, 15);
-    const secondaryOnSaleProducts = allOnSaleProducts.slice(0, 20);
+    const secondaryOnSaleProducts =
+        onSaleProductRes.data?.secondaryProducts ?? [];
     const shouldShowOnSaleProducts =
         onSaleProductRes.data?.showThemeOneOnSaleProducts === '1' &&
         onSaleProducts.length > 0;
