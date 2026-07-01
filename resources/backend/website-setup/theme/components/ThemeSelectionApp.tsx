@@ -149,6 +149,12 @@ const ThemeSelectionApp = () => {
                         name: 'Product Card 3',
                         description: 'Minimalist product card design',
                         image: '/images/backend/product_card_3.png'
+                    },
+                    {
+                        id: 'product-card-four',
+                        name: 'Product Card 4',
+                        description: 'Card 2 layout with full width add to cart button',
+                        image: '/images/backend/product_card_2.png'
                     }
                 ]);
                 setFooters([
@@ -542,7 +548,7 @@ const ThemeSelectionApp = () => {
 
             {/* Right Column - Product Card Images (5 columns) */}
             <div className="col-span-6 lg:col-span-5">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
                     {productCards.map((productCard) => (
                         <div
                             key={productCard.id}

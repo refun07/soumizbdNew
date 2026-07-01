@@ -15,6 +15,7 @@ import { IProductShort } from '../../../types/product';
 import { isProductAvailable } from '../../../utils/checkStock';
 import { translate } from '../../../utils/translate';
 import ProductCardThemeOne from './ProductCardThemeOne';
+import ProductCardThemeFour from './ProductCardThemeFour';
 import ProductCardThemeThree from './ProductCardThemeThree';
 import ProductCardThemeTwo from './ProductCardThemeTwo';
 
@@ -263,8 +264,10 @@ const ProductCard = (props: Props) => {
         return <ProductCardThemeTwo {...props} />;
     } else if (window.config.defaultProductCard === 'product-card-three') {
         return <ProductCardThemeThree {...props} />;
+    } else if (window.config.defaultProductCard === 'product-card-four') {
+        return <ProductCardThemeFour {...props} />;
     } else {
-        return null;
+        return <ProductCardThemeOne {...props} />;
     }
 };
 

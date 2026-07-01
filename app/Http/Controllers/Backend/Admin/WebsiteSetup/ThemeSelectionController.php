@@ -139,6 +139,12 @@ class ThemeSelectionController extends Controller
                 'name' => 'Product Card 3',
                 'description' => 'Minimalist product card design',
                 'image' => asset('images/backend/product_card_3.png')
+            ],
+            [
+                'id' => 'product-card-four',
+                'name' => 'Product Card 4',
+                'description' => 'Card 2 layout with full width add to cart button',
+                'image' => asset('images/backend/product_card_2.png')
             ]
         ];
 
@@ -181,7 +187,7 @@ class ThemeSelectionController extends Controller
         $request->validate([
             'theme' => 'required|string|in:theme-one,theme-two,theme-three',
             'header' => 'nullable|string|in:header-one,header-two,header-three',
-            'product_card' => 'nullable|string|in:product-card-one,product-card-two,product-card-three',
+            'product_card' => 'nullable|string|in:product-card-one,product-card-two,product-card-three,product-card-four',
             'footer' => 'nullable|string|in:footer-one,footer-two',
             'category_card' => 'nullable|string'
         ]);

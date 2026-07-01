@@ -109,6 +109,13 @@
                                     label="Product Card Three" />
                             </label>
                         </li>
+                        <li>
+                            <label class="inline-flex gap-3 items-center">
+                                <x-backend.inputs.radio-option name="defaultProductCard"
+                                    checkedValue="{{ getSetting('defaultProductCard') }}" value="product-card-four"
+                                    label="Product Card Four" />
+                            </label>
+                        </li>
                     </ul>
                 </x-backend.inputs.radio>
 
