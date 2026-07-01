@@ -113,11 +113,20 @@ const ProductCardThemeFour = (props: Props) => {
                 </div>
             </div>
 
-            <div className="flex min-h-[210px] grow flex-col px-5 pb-6 pt-5 sm:px-6">
-                <p className="line-clamp-1 text-[13px] font-normal text-[#667085]">
-                    {categoryLabel}
-                </p>
-                <h3 className="mt-2 min-h-[22px] text-[14px] font-semibold leading-[1.45] text-[#111111] transition group-hover:text-[#B3052A]">
+            <div className="flex min-h-[232px] grow flex-col px-5 pb-6 pt-5 sm:px-6">
+                <div className="flex min-h-[18px] items-center justify-between gap-2">
+                    <p className="line-clamp-1 min-w-0 text-[13px] font-normal text-[#667085]">
+                        {categoryLabel}
+                    </p>
+                    <ThemeRating
+                        rating={product.rating.average}
+                        totalReviews={product.rating.total}
+                        className="shrink-0 text-[12px]"
+                        ratingClasses="max-w-[70px]"
+                        style={{ maxWidth: 70 }}
+                    />
+                </div>
+                <h3 className="mt-2 min-h-[41px] text-[14px] font-semibold leading-[1.45] text-[#111111] transition group-hover:text-[#B3052A]">
                     <Link
                         to={`/products/${product.slug}`}
                         className="line-clamp-2"
@@ -142,7 +151,7 @@ const ProductCardThemeFour = (props: Props) => {
                 </div>
 
                 {cartProduct ? (
-                    <div className="mt-4 flex h-[42px] w-full items-center overflow-hidden rounded-none bg-[#B3052A] px-4 text-white">
+                    <div className="mt-auto flex h-[42px] w-full items-center overflow-hidden rounded-[4px] bg-[#B3052A] px-4 text-white">
                         <button
                             type="button"
                             className="flex h-full w-10 items-center justify-start text-[17px]"
@@ -169,7 +178,7 @@ const ProductCardThemeFour = (props: Props) => {
                         arrow={false}
                         size="md"
                         variant="secondary"
-                        className="mt-4 w-full rounded-none disabled:opacity-100 disabled:text-white"
+                        className="mt-auto w-full rounded-[4px] disabled:opacity-100 disabled:text-white"
                         onClick={handleAddToCart}
                         isLoading={
                             loading.gettingProduct || loading.addingToCart
@@ -183,14 +192,6 @@ const ProductCardThemeFour = (props: Props) => {
                             : translate('ADD TO CART')}
                     </Button>
                 )}
-
-                <ThemeRating
-                    rating={product.rating.average}
-                    totalReviews={product.rating.total}
-                    className="mt-3 text-[12px]"
-                    ratingClasses="max-w-[82px]"
-                    style={{ maxWidth: 82 }}
-                />
             </div>
         </div>
     );
