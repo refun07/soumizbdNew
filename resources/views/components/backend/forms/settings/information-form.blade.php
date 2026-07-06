@@ -151,13 +151,6 @@
             isChecked="{{ getSetting('productInfiniteScroll') == '1' }}" />
     </div>
 
-    <input type="hidden" name="types[]" value="invoiceQrCodeEnabled">
-    <div class="flex items-center justify-between py-2">
-        <p>{{ translate('Show QR Code On Invoice PDF') }}</p>
-        <x-backend.inputs.checkbox toggler="true" name="invoiceQrCodeEnabled" value="1"
-            isChecked="{{ getSetting('invoiceQrCodeEnabled') != '0' }}" />
-    </div>
-
     <input type="hidden" name="types[]" value="imageToWebp">
     <div class="flex items-center justify-between py-2">
         <p>{{ translate('Convert Images to WebP (Reduces file size but may affect quality)') }}</p>

@@ -50,6 +50,30 @@
     </div>
     {{-- information-form ends --}}
 
+    {{-- Invoice Settings starts --}}
+    <div class="card max-w-[900px] mt-6">
+        <h4 class="card__title">{{ translate('Invoice Settings') }}</h4>
+
+        <div class="card__content">
+            <form action="{{ route('admin.general-settings.update') }}" class="space-y-3" method="POST"
+                enctype="multipart/form-data">
+                @csrf
+
+                <input type="hidden" name="types[]" value="invoiceQrCodeEnabled">
+                <div class="flex items-center justify-between py-2">
+                    <p>{{ translate('Show QR Code On Invoice PDF') }}</p>
+                    <x-backend.inputs.checkbox toggler="true" name="invoiceQrCodeEnabled" value="1"
+                        isChecked="{{ getSetting('invoiceQrCodeEnabled') != '0' }}" />
+                </div>
+
+                <div class="flex justify-end pt-2">
+                    <x-backend.inputs.button type="submit" buttonText="{{ translate('Save Changes') }}" />
+                </div>
+            </form>
+        </div>
+    </div>
+    {{-- Invoice Settings ends --}}
+
     {{-- Order Success Page Settings starts --}}
     <div class="card max-w-[900px] mt-6">
         <h4 class="card__title">{{ translate('Order Success Page') }}</h4>
