@@ -385,23 +385,6 @@ const HomeThemeOne = () => {
     const shouldShowFeaturedProducts =
         topProductRes.data?.showThemeOneTopProducts === '1' &&
         featuredProducts.length > 0;
-    const featuredProductCategoryTabs = featuredProducts.reduce<
-        { id: number; name: string; slug: string }[]
-    >((categories, product) => {
-        product.categories?.forEach((category) => {
-            if (!categories.some((item) => item.id === category.id)) {
-                categories.push({
-                    id: category.id,
-                    name: category.name,
-                    slug: category.slug,
-                });
-            }
-        });
-
-        return categories;
-    }, []);
-    const visibleFeaturedProductCategoryTabs =
-        featuredProductCategoryTabs.slice(0, 4);
 
     return (
         <div className="space-y-10 lg:space-y-16 pb-5">
@@ -1037,30 +1020,14 @@ const HomeThemeOne = () => {
                                 <hr className="border-b border-[#EDEDED]" />
                             </div>
 
-                            {featuredProductCategoryTabs.length > 0 ? (
-                                <motion.div
-                                    variants={itemAnimation}
-                                    className="relative z-[1] flex min-h-[42px] w-full max-w-full items-center gap-6 overflow-x-auto pb-1 2xl:mt-16 2xl:w-auto 2xl:max-w-[52%] 2xl:shrink-0 2xl:justify-end"
-                                >
-                                    <Link
-                                        to="/products"
-                                        className="shrink-0 whitespace-nowrap text-xs font-medium text-[#B3052A] transition md:text-sm"
-                                    >
-                                        {translate('All Products')}
-                                    </Link>
-                                    {visibleFeaturedProductCategoryTabs.map(
-                                        (category) => (
-                                            <Link
-                                                to={`/categories/${category.slug}`}
-                                                key={category.id}
-                                                className="shrink-0 whitespace-nowrap text-xs font-medium text-foreground transition hover:text-[#B3052A] md:text-sm"
-                                            >
-                                                {category.name}
-                                            </Link>
-                                        ),
-                                    )}
-                                </motion.div>
-                            ) : null}
+                            <motion.div
+                                variants={itemAnimation}
+                                className="relative z-[1] flex w-full justify-end 2xl:mt-16 2xl:w-auto 2xl:shrink-0"
+                            >
+                                <Button as="link" to="/products" variant="outline">
+                                    {translate('View More')}
+                                </Button>
+                            </motion.div>
                         </div>
 
                         <ProductsSlider>
