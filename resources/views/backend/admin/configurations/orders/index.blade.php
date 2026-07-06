@@ -59,6 +59,38 @@
                 enctype="multipart/form-data">
                 @csrf
 
+                <input type="hidden" name="types[]" value="invoiceLogo">
+                <x-backend.inputs.file label="Invoice Logo" name="invoiceLogo" placeholder="Invoice logo"
+                    value="{{ getSetting('invoiceLogo') }}" />
+                <p class="text-xs text-gray-500 mt-1 mb-3">
+                    {{ translate('Uses Header Logo when empty') }}
+                </p>
+
+                <input type="hidden" name="types[]" value="invoiceCompanyName">
+                <x-backend.inputs.text label="Invoice Company Name" name="invoiceCompanyName"
+                    placeholder="{{ getSetting('systemName') ?: 'Business Name' }}"
+                    value="{{ getSetting('invoiceCompanyName') }}" :isRequired="false" />
+
+                <input type="hidden" name="types[]" value="invoiceCompanyAddress">
+                <x-backend.inputs.textarea label="Invoice Company Address" name="invoiceCompanyAddress"
+                    placeholder="{{ getSetting('systemAddress') ?: 'Business Address' }}"
+                    value="{{ getSetting('invoiceCompanyAddress') }}" :isRequired="false" />
+
+                <input type="hidden" name="types[]" value="invoicePreparedByTitle">
+                <x-backend.inputs.text label="Prepared By Title" name="invoicePreparedByTitle"
+                    placeholder="{{ translate('Prepared By') }}" value="{{ getSetting('invoicePreparedByTitle') }}"
+                    :isRequired="false" />
+
+                <input type="hidden" name="types[]" value="invoicePreparedByName">
+                <x-backend.inputs.text label="Prepared By Name" name="invoicePreparedByName"
+                    placeholder="{{ getSetting('invoiceCompanyName') ?: (getSetting('systemName') ?: 'Store') }}"
+                    value="{{ getSetting('invoicePreparedByName') }}" :isRequired="false" />
+
+                <input type="hidden" name="types[]" value="invoicePreparedByDepartment">
+                <x-backend.inputs.text label="Prepared By Department" name="invoicePreparedByDepartment"
+                    placeholder="{{ translate('Sales Department') }}"
+                    value="{{ getSetting('invoicePreparedByDepartment') }}" :isRequired="false" />
+
                 <input type="hidden" name="types[]" value="invoiceQrCodeEnabled">
                 <div class="flex items-center justify-between py-2">
                     <p>{{ translate('Show QR Code On Invoice PDF') }}</p>

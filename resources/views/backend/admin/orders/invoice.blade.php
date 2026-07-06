@@ -720,10 +720,10 @@
             <td style="vertical-align: top;" class="text-reverse">
                 <h3
                     style="font-weight: 700; font-size: 12px; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 1.5px; color: #78716c;">
-                    {{ translate('Prepared By') }}</h3>
+                    {{ $preparedByTitle ?? translate('Prepared By') }}</h3>
                 <p style="font-weight: 700; font-size: 15px; color: #1c1917; margin-bottom: 4px;">
-                    {{ $systemName ?? 'Store' }}</p>
-                <p style="font-size: 14px; color: #57534e;">{{ translate('Sales Department') }}</p>
+                    {{ $preparedByName ?? ($systemName ?? 'Store') }}</p>
+                <p style="font-size: 14px; color: #57534e;">{{ $preparedByDepartment ?? translate('Sales Department') }}</p>
             </td>
         </tr>
     </table>

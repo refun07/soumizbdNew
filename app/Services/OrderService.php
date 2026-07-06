@@ -586,7 +586,7 @@ class OrderService
         // }
 
         $logo = null;
-        $logoFileId = getSetting('websiteHeaderLogo');
+        $logoFileId = getSetting('invoiceLogo') ?: getSetting('websiteHeaderLogo');
 
         if ($logoFileId) {
             $mediaFile = MediaFile::find($logoFileId);
@@ -598,8 +598,11 @@ class OrderService
             }
         }
 
-        $systemName = getSetting('systemName');
-        $systemAddress = getSetting('systemAddress');
+        $systemName = getSetting('invoiceCompanyName') ?: getSetting('systemName');
+        $systemAddress = getSetting('invoiceCompanyAddress') ?: getSetting('systemAddress');
+        $preparedByTitle = getSetting('invoicePreparedByTitle') ?: translate('Prepared By');
+        $preparedByName = getSetting('invoicePreparedByName') ?: $systemName;
+        $preparedByDepartment = getSetting('invoicePreparedByDepartment') ?: translate('Sales Department');
         $invoiceQrCodeEnabled = getSetting('invoiceQrCodeEnabled') != '0';
 
         // Generate QR code for invoice verification
@@ -634,6 +637,9 @@ class OrderService
             'logo' => $logo,
             'systemName' => $systemName,
             'systemAddress' => $systemAddress,
+            'preparedByTitle' => $preparedByTitle,
+            'preparedByName' => $preparedByName,
+            'preparedByDepartment' => $preparedByDepartment,
             'qrCodeImage' => $qrCodeImage,
             'exchange' => $exchange,
         ];
@@ -707,7 +713,7 @@ class OrderService
             ->get();
 
         $logo = null;
-        $logoFileId = getSetting('websiteHeaderLogo');
+        $logoFileId = getSetting('invoiceLogo') ?: getSetting('websiteHeaderLogo');
 
         if ($logoFileId) {
             $mediaFile = MediaFile::find($logoFileId);
@@ -724,8 +730,8 @@ class OrderService
             'default_text_align' => $default_text_align,
             'reverse_text_align' => $reverse_text_align,
             'logo' => $logo,
-            'systemName' => getSetting('systemName'),
-            'systemAddress' => getSetting('systemAddress'),
+            'systemName' => getSetting('invoiceCompanyName') ?: getSetting('systemName'),
+            'systemAddress' => getSetting('invoiceCompanyAddress') ?: getSetting('systemAddress'),
         ], [], $pdfConfig)->stream('single_page_invoices_'.now()->format('Y-m-d_H-i-s').'.pdf');
     }
 
