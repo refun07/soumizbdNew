@@ -199,6 +199,7 @@ export interface URLFilterParams extends IGetsQueryParams {
     variationValueIds?: string[] | null;
     discounted?: boolean;
     onSaleProducts?: boolean;
+    featuredProducts?: boolean;
     preOrder?: string | null;
 }
 

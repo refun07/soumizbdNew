@@ -1041,7 +1041,7 @@ const HomeThemeOne = () => {
                             >
                                 <Button
                                     as="link"
-                                    to="/products"
+                                    to="/featured-products"
                                     variant="outline"
                                 >
                                     {translate('View More')}

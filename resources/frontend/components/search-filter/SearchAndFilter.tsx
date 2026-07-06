@@ -27,6 +27,7 @@ interface Props {
     shopSlug?: string;
     discounted?: boolean;
     onSaleProducts?: boolean;
+    featuredProducts?: boolean;
     title?: string;
 }
 
@@ -37,6 +38,7 @@ const SearchAndFilter = ({
     shopSlug,
     discounted = false,
     onSaleProducts = false,
+    featuredProducts = false,
     title,
 }: Props) => {
     const dispatch = useAppDispatch();
@@ -125,6 +127,7 @@ const SearchAndFilter = ({
         shopSlug,
         discounted,
         onSaleProducts,
+        featuredProducts,
         isInfiniteScrollEnabled,
     ]);
 
@@ -177,6 +180,7 @@ const SearchAndFilter = ({
             shopSlug,
             ...(discounted ? { discounted } : {}),
             ...(onSaleProducts ? { onSaleProducts } : {}),
+            ...(featuredProducts ? { featuredProducts } : {}),
         };
 
         // For infinite scroll, only fetch page 1 on initial load or filter change (not page change)
@@ -209,7 +213,7 @@ const SearchAndFilter = ({
             },
         );
         getProducts(queryStr, true);
-    }, [location.search, location.pathname, isInfiniteScrollEnabled, categorySlug, brandSlug, shopSlug, discounted, onSaleProducts]);
+    }, [location.search, location.pathname, isInfiniteScrollEnabled, categorySlug, brandSlug, shopSlug, discounted, onSaleProducts, featuredProducts]);
 
     // Load more products for infinite scroll
     const loadMoreProducts = useCallback(() => {
@@ -231,6 +235,7 @@ const SearchAndFilter = ({
             shopSlug,
             ...(discounted ? { discounted } : {}),
             ...(onSaleProducts ? { onSaleProducts } : {}),
+            ...(featuredProducts ? { featuredProducts } : {}),
             page: nextPage,
         };
         const queryStr = qs.stringify(
@@ -258,6 +263,7 @@ const SearchAndFilter = ({
         shopSlug,
         discounted,
         onSaleProducts,
+        featuredProducts,
         searchParams,
         getProducts,
     ]);

@@ -65,6 +65,19 @@ class ProductController extends Controller
             }
         }
 
+        $featuredProductIds = [];
+
+        // admin-selected featured products
+        if ($request->featuredProducts) {
+            $featuredProductIds = $this->themeOneFeaturedProductIds();
+
+            if (count($featuredProductIds) < 1) {
+                $products = $products->whereRaw('1 = 0');
+            } else {
+                $products = $products->whereIn('id', $featuredProductIds);
+            }
+        }
+
         // by search keyword
         if ($request->searchKey != null) {
             $products = $products->where('name', 'like', '%' . $request->searchKey . '%'); // [TODO:: Search with translations also]
@@ -159,7 +172,12 @@ class ProductController extends Controller
                 break;
 
             default:
-                $products = $products->orderBy('updated_at', 'DESC')->orderBy('created_at', 'DESC');
+                if ($request->featuredProducts && count($featuredProductIds) > 0) {
+                    $ids = implode(',', $featuredProductIds);
+                    $products = $products->orderByRaw("FIELD(products.id, {$ids})");
+                } else {
+                    $products = $products->orderBy('updated_at', 'DESC')->orderBy('created_at', 'DESC');
+                }
                 break;
         }
 
@@ -263,6 +281,21 @@ class ProductController extends Controller
     private function themeOneOnSaleProductIds(): array
     {
         $products = getSetting('themeOneOnSaleProducts');
+        if ($products == null) {
+            return [];
+        }
+
+        $products = json_decode($products, true);
+        if (!is_array($products)) {
+            return [];
+        }
+
+        return array_values(array_unique(array_filter(array_map('intval', $products))));
+    }
+
+    private function themeOneFeaturedProductIds(): array
+    {
+        $products = getSetting('themeOneTopProducts');
         if ($products == null) {
             return [];
         }

@@ -30,6 +30,7 @@ const Shops = lazy(() => import('./pages/shops/Shops'));
 const ProductDetails = lazy(() => import('./pages/ProductDetails'));
 const Brand = lazy(() => import('./pages/search-filter/Brand'));
 const Category = lazy(() => import('./pages/search-filter/Category'));
+const FeaturedProducts = lazy(() => import('./pages/search-filter/FeaturedProducts'));
 const OnSaleProducts = lazy(() => import('./pages/search-filter/OnSaleProducts'));
 const Search = lazy(() => import('./pages/search-filter/Search'));
 
@@ -233,6 +234,7 @@ const App = () => {
                     element={<Category />}
                 />
                 <Route path="/products" element={<Search />} />
+                <Route path="/featured-products" element={<FeaturedProducts />} />
                 <Route path="/on-sale-products" element={<OnSaleProducts />} />
                 {/* end::uses search and filter */}
 
