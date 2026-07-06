@@ -155,7 +155,7 @@ const Footer = () => {
             {/* start::featured-brands */}
             {featuredBrandsRes.data?.showFeaturedBrands === '1' ? (
                 <>
-                    <section className="featured-brands-section bg-secondary/20 py-16">
+                    <section className="featured-brands-section bg-secondary/20 py-6 md:py-8">
                         <div className="container lg:flex lg:items-center gap-10 max-lg:space-y-6">
                             <div>
                                 <SectionTitle
