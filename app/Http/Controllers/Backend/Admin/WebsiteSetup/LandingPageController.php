@@ -567,6 +567,7 @@ class LandingPageController extends Controller
                 'page_configs.theme_color' => 'nullable|string|max:20',
                 'page_configs.primary_color' => 'nullable|string|max:20',
                 'page_configs.facebook_pixel_enabled' => 'nullable|boolean',
+                'page_configs.hide_email_field' => 'nullable|boolean',
                 'page_configs.payment_methods' => 'nullable|array',
                 'page_configs.payment_methods.*' => 'string',
             ]);

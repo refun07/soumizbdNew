@@ -239,6 +239,7 @@ class LandingPageController extends Controller
         // Get page configs (colors) - already loaded earlier for payment methods
         $themeColor = $pageConfigs['theme_color'] ?? '#1a472a';
         $primaryColor = $pageConfigs['primary_color'] ?? '#E68A3D';
+        $hideEmailField = (bool) ($pageConfigs['hide_email_field'] ?? false);
 
         // Load coupon if configured
         $coupon = null;
@@ -278,7 +279,8 @@ class LandingPageController extends Controller
             'facebookPixelEnabled',
             'metaPixelId',
             'bangladeshCountryId',
-            'generalSettings'
+            'generalSettings',
+            'hideEmailField'
         ));
     }
 

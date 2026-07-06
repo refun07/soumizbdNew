@@ -16,6 +16,7 @@ export interface PageConfigs {
     theme_color?: string;
     primary_color?: string;
     facebook_pixel_enabled?: boolean;
+    hide_email_field?: boolean;
     payment_methods?: string[] | null; // null = use global settings
 }
 
@@ -755,6 +756,7 @@ export function useBuilderState() {
 
             if (!response.ok) throw new Error('Failed to save configs');
 
+            setPageConfigs(configs);
             if (window.flash) window.flash('Page settings saved successfully', 'success');
         } catch (err) {
             console.error('Error saving configs:', err);
@@ -843,6 +845,7 @@ export function useBuilderState() {
 
             if (!response.ok) throw new Error('Failed to save payment methods');
 
+            setPageConfigs(updatedConfigs);
             if (window.flash) window.flash('Payment methods saved successfully', 'success');
         } catch (err) {
             console.error('Error saving payment methods:', err);

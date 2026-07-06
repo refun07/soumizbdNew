@@ -3,7 +3,8 @@
     'landingPageId' => 0,
     'paymentMethods' => [],
     'coupon' => null,
-    'countryId' => 18
+    'countryId' => 18,
+    'hideEmailField' => false
 ])
 
 @php
@@ -13,6 +14,10 @@
     $couponDiscount = 0;
     $customerLoginMethod = getSetting('customerLoginMethod') ?? 'email';
     $isPhoneLogin = $customerLoginMethod === 'phone';
+    $defaultPaymentMethod = collect($paymentMethods)->firstWhere('value', 'cash_on_delivery')
+        ? 'cash_on_delivery'
+        : (collect($paymentMethods)->first()->value ?? null);
+    $selectedPaymentMethod = old('customer_details.payment_method', $defaultPaymentMethod);
 
     if (!empty($products)) {
         $groupedItems = $products->groupBy(function($item) {
@@ -84,19 +89,23 @@
                                                 class="w-full px-4 py-3 border border-gray-200 rounded text-sm outline-none focus:border-blue-400 transition-colors"
                                                 placeholder="880XXXXXXXXXXX or 01XXXXXXXXX">
                                         </div>
-                                        <div>
-                                            <label class="block text-xs font-medium text-gray-600 uppercase mb-1.5">Email (Optional)</label>
-                                            <input type="email" name="customer_details[email]" value="{{ old('customer_details.email') }}"
-                                                class="w-full px-4 py-3 border border-gray-200 rounded text-sm outline-none focus:border-blue-400 transition-colors"
-                                                placeholder="Type Your Email">
-                                        </div>
+                                        @unless($hideEmailField)
+                                            <div>
+                                                <label class="block text-xs font-medium text-gray-600 uppercase mb-1.5">Email (Optional)</label>
+                                                <input type="email" name="customer_details[email]" value="{{ old('customer_details.email') }}"
+                                                    class="w-full px-4 py-3 border border-gray-200 rounded text-sm outline-none focus:border-blue-400 transition-colors"
+                                                    placeholder="Type Your Email">
+                                            </div>
+                                        @endunless
                                     @else
-                                        <div>
-                                            <label class="block text-xs font-medium text-gray-600 uppercase mb-1.5">Email</label>
-                                            <input type="email" name="customer_details[email]" value="{{ old('customer_details.email') }}"
-                                                class="w-full px-4 py-3 border border-gray-200 rounded text-sm outline-none focus:border-blue-400 transition-colors"
-                                                placeholder="Type Your Email">
-                                        </div>
+                                        @unless($hideEmailField)
+                                            <div>
+                                                <label class="block text-xs font-medium text-gray-600 uppercase mb-1.5">Email</label>
+                                                <input type="email" name="customer_details[email]" value="{{ old('customer_details.email') }}"
+                                                    class="w-full px-4 py-3 border border-gray-200 rounded text-sm outline-none focus:border-blue-400 transition-colors"
+                                                    placeholder="Type Your Email">
+                                            </div>
+                                        @endunless
                                         <div>
                                             <label class="block text-xs font-medium text-gray-600 uppercase mb-1.5">Phone <span class="text-red-500">*</span></label>
                                             <input type="text" name="customer_details[phone]" value="{{ old('customer_details.phone') }}" required
@@ -150,7 +159,7 @@
                                     @else
                                         @foreach($paymentMethods as $method)
                                             @php
-                                                $isSelected = old('customer_details.payment_method') === $method->value;
+                                                $isSelected = $selectedPaymentMethod === $method->value;
                                                 $borderColor = $isSelected ? '#6EAEE8' : '#E5E5E5';
                                                 $methodImage = '';
                                                 switch($method->value) {

@@ -216,7 +216,7 @@
         @endforeach
 
         {{-- Always render product order section --}}
-        <x-landing-order-form :products="$products" :landing-page-id="$landingPage->id" :payment-methods="$paymentMethods" :coupon="$coupon" :country-id="$bangladeshCountryId" />
+        <x-landing-order-form :products="$products" :landing-page-id="$landingPage->id" :payment-methods="$paymentMethods" :coupon="$coupon" :country-id="$bangladeshCountryId" :hide-email-field="$hideEmailField" />
 
         {{-- Show message if no sections --}}
         @if($landingPage->sections->count() === 0)
