@@ -619,7 +619,7 @@ class OrderService
             if ($mediaFile && $mediaFile->media_file) {
                 $logo = public_path($mediaFile->media_file);
 
-                // Convert webp/png to pdf-safe PNG
+                // Convert webp/png to a pdf-safe image before mPDF reads it.
                 $logo = is_file($logo) ? self::makePdfSafeLogo($logo) : null;
             }
         }
@@ -647,7 +647,7 @@ class OrderService
 
                 $writer = new \Endroid\QrCode\Writer\PngWriter;
                 $result = $writer->write($qrCode);
-                $qrCodeImage = 'data:image/png;base64,'.base64_encode($result->getString());
+                $qrCodeImage = self::makePdfSafeImageDataUri($result->getString()) ?: null;
             } catch (\Exception $e) {
                 Log::error('Failed to generate QR code for invoice: '.$e->getMessage());
                 $qrCodeImage = null;
@@ -773,7 +773,7 @@ class OrderService
 
     public static function makePdfSafeImage(string $absolutePath, string $prefix = 'image_pdf_safe'): string
     {
-        if (! is_file($absolutePath)) {
+        if (! is_file($absolutePath) || filesize($absolutePath) <= 0) {
             return '';
         }
 
@@ -781,7 +781,7 @@ class OrderService
 
         // If already jpg/jpeg, it's generally safe
         if (in_array($ext, ['jpg', 'jpeg'])) {
-            return $absolutePath;
+            return @getimagesize($absolutePath) ? $absolutePath : '';
         }
 
         $cacheDir = storage_path('app/pdf-cache');
@@ -791,15 +791,14 @@ class OrderService
 
         $hash = md5($absolutePath.'|'.@filemtime($absolutePath));
         $safePrefix = preg_replace('/[^a-z0-9_-]/i', '_', $prefix);
-        $out = $cacheDir.DIRECTORY_SEPARATOR."{$safePrefix}_{$hash}.png";
+        $out = $cacheDir.DIRECTORY_SEPARATOR."{$safePrefix}_{$hash}.jpg";
 
-        if (file_exists($out)) {
+        if (is_file($out) && filesize($out) > 0 && @getimagesize($out)) {
             return $out;
         }
 
-        // Load source image (webp/png) using GD
         if (! extension_loaded('gd')) {
-            return $absolutePath;
+            return '';
         }
 
         $src = null;
@@ -813,12 +812,17 @@ class OrderService
         }
 
         if (! $src) {
-            // GD may not have WebP support enabled -> fallback: return original
-            return $absolutePath;
+            return @getimagesize($absolutePath) ? $absolutePath : '';
         }
 
         $w = imagesx($src);
         $h = imagesy($src);
+
+        if ($w <= 0 || $h <= 0) {
+            imagedestroy($src);
+
+            return '';
+        }
 
         // Create white canvas to avoid black background from transparency
         $dst = imagecreatetruecolor($w, $h);
@@ -829,12 +833,47 @@ class OrderService
         imagesavealpha($dst, false);
         imagecopy($dst, $src, 0, 0, 0, 0, $w, $h);
 
-        imagepng($dst, $out, 9);
+        $saved = imagejpeg($dst, $out, 90);
 
         imagedestroy($src);
         imagedestroy($dst);
 
-        return $out;
+        return $saved && is_file($out) && filesize($out) > 0 && @getimagesize($out) ? $out : '';
+    }
+
+    private static function makePdfSafeImageDataUri(string $imageContents): string
+    {
+        if ($imageContents === '' || ! extension_loaded('gd')) {
+            return '';
+        }
+
+        $src = @imagecreatefromstring($imageContents);
+        if (! $src) {
+            return '';
+        }
+
+        $w = imagesx($src);
+        $h = imagesy($src);
+
+        if ($w <= 0 || $h <= 0) {
+            imagedestroy($src);
+
+            return '';
+        }
+
+        $dst = imagecreatetruecolor($w, $h);
+        $white = imagecolorallocate($dst, 255, 255, 255);
+        imagefilledrectangle($dst, 0, 0, $w, $h, $white);
+        imagecopy($dst, $src, 0, 0, 0, 0, $w, $h);
+
+        ob_start();
+        $saved = imagejpeg($dst, null, 90);
+        $jpg = ob_get_clean();
+
+        imagedestroy($src);
+        imagedestroy($dst);
+
+        return $saved && $jpg ? 'data:image/jpeg;base64,'.base64_encode($jpg) : '';
     }
 
     // download Challan
