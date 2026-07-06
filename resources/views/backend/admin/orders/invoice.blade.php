@@ -104,7 +104,6 @@
         .invoice-product-thumb {
             width: 34px;
             height: 34px;
-            object-fit: cover;
             border: 1px solid #d6d3d1;
             border-radius: 4px;
         }
@@ -146,8 +145,26 @@
 
 <body>
     @php
-        $orderGroup = $order->orderGroup;
-        $user = $order->user;
+        $orderGroup = $order?->orderGroup;
+        $user = $order?->user;
+        $safeNumber = fn($value): float => is_numeric($value) ? (float) $value : 0.0;
+        $safeText = function ($value, string $fallback = '') {
+            $text = trim((string) ($value ?? ''));
+            if ($text === '') {
+                return $fallback;
+            }
+
+            if (!function_exists('mb_check_encoding') || mb_check_encoding($text, 'UTF-8')) {
+                return $text;
+            }
+
+            return function_exists('mb_convert_encoding')
+                ? mb_convert_encoding($text, 'UTF-8', 'UTF-8')
+                : preg_replace('/[^\x09\x0A\x0D\x20-\x7E]/', '', $text);
+        };
+
+        $orderItems = $order?->orderItems ?? collect();
+        $exchangeItems = $exchange?->items ?? collect();
         $customerName = $orderGroup?->name ?: $user?->name;
         $customerName = filled($customerName) ? $customerName : translate('Walk In Customer');
         $customerPhone = $orderGroup?->phone ?: $user?->phone;
@@ -166,7 +183,7 @@
         $paymentMethod = filled($paymentMethodRaw)
             ? ($paymentMethodLabels[$paymentMethodRaw] ?? ucwords(str_replace('_', ' ', $paymentMethodRaw)))
             : 'N/A';
-        $paymentStatusRaw = $transaction?->status ?: $order->payment_status;
+        $paymentStatusRaw = $transaction?->status ?: $order?->payment_status;
         $paymentStatusLabels = [
             'paid' => 'Paid',
             'unpaid' => 'Due',
@@ -179,11 +196,11 @@
             ? ($paymentStatusLabels[$paymentStatusRaw] ?? ucwords(str_replace('_', ' ', $paymentStatusRaw)))
             : 'N/A';
         $isCashOnDelivery = in_array($paymentMethodRaw, ['cod', 'cash_on_delivery'], true);
-        $cashOnDeliveryValue = $isCashOnDelivery ? $order->total_amount : 0;
-        $isExchangeInvoice = $order->is_exchange_order && isset($exchange);
+        $cashOnDeliveryValue = $isCashOnDelivery ? $safeNumber($order?->total_amount) : 0;
+        $isExchangeInvoice = (bool) ($order?->is_exchange_order) && $exchange && $exchangeItems->isNotEmpty();
         $effectiveTotal = $isExchangeInvoice
-            ? max($exchange->price_difference, 0)
-            : (float) $order->total_amount;
+            ? max($safeNumber($exchange?->price_difference), 0)
+            : $safeNumber($order?->total_amount);
         $paidAmount = match ($paymentStatusRaw) {
             'paid' => $effectiveTotal,
             'unpaid', 'pending', 'failed', 'cancelled' => 0.0,
@@ -194,11 +211,12 @@
             'unpaid', 'pending', 'failed', 'cancelled' => $effectiveTotal,
             default => null,
         };
-        $logoText = substr($systemName ?? 'EP', 0, 2);
-        $currencySymbol = getSetting('currencySymbol') ?? '$';
+        $safeLogoSource = $safeText($systemName, 'EP');
+        $logoText = function_exists('mb_substr') ? mb_substr($safeLogoSource, 0, 2) : substr($safeLogoSource, 0, 2);
+        $currencySymbol = $safeText(getSetting('currencySymbol'), '$');
         $currencySymbolAlignment = (int) (getSetting('currencySymbolAlignment') ?? 0);
-        $formatSummaryPrice = function ($amount) use ($currencySymbol, $currencySymbolAlignment) {
-            $formattedAmount = e(formatPrice($amount, false, false));
+        $formatSummaryPrice = function ($amount) use ($currencySymbol, $currencySymbolAlignment, $safeNumber) {
+            $formattedAmount = e(formatPrice($safeNumber($amount), false, false));
             $escapedSymbol = e($currencySymbol);
 
             return match ($currencySymbolAlignment) {
@@ -225,7 +243,7 @@
             };
         };
         $logoHtml = '';
-        if ($logo && file_exists($logo)) {
+        if ($logo && is_file($logo)) {
             //  $logoHtml = '<img src="'.$logo.'" alt="logo" style="width: 140px; height: 140px; object-fit: contain; filter: contrast(1.02);">';
 
             $logoHtml =
@@ -235,7 +253,7 @@
     style="width: 82px; height: auto;">';
         } else {
             $logoHtml =
-                '<div style="width: 82px; height: 82px; background: #1c1917; display: flex; align-items: center; justify-content: center; border-radius: 8px;"><span style="color: #fafaf9; font-size: 24px; font-weight: 700; letter-spacing: 2px;">' .
+                '<div style="width: 82px; height: 82px; line-height: 82px; text-align: center; background: #1c1917; border-radius: 8px;"><span style="color: #fafaf9; font-size: 24px; font-weight: 700; letter-spacing: 2px;">' .
                 $logoText .
                 '</span></div>';
         }
@@ -248,12 +266,12 @@
             $mediaFile = \App\Models\MediaFile::find($imageId);
             if ($mediaFile && $mediaFile->media_file) {
                 $absolutePath = public_path($mediaFile->media_file);
-                if (file_exists($absolutePath)) {
+                if (is_file($absolutePath)) {
                     return \App\Services\OrderService::makePdfSafeImage($absolutePath, 'product_pdf_safe');
                 }
             }
 
-            return uploadedAsset($imageId);
+            return null;
         };
     @endphp
 
@@ -271,10 +289,10 @@
                 <div style="margin-top: 8px; font-size: 14px; line-height: 1.45;">
                     <p style="margin-bottom: 4px;"><strong
                             style="color: #44403c; font-weight: 600;">{{ translate('Invoice Number') }}:</strong> <span
-                            class="font-price">{{ getSetting('order_code_prefix') }}{{ $order->order_code }}</span>
+                            class="font-price">{{ getSetting('order_code_prefix') }}{{ $order?->order_code ?? $order?->id }}</span>
                     </p>
                     <p><strong style="color: #44403c; font-weight: 600;">{{ translate('Invoice Date') }}:</strong>
-                        {{ date('d M, Y', strtotime($order->created_at)) }}</p>
+                        {{ $order?->created_at ? date('d M, Y', strtotime($order->created_at)) : date('d M, Y') }}</p>
                 </div>
             </td>
             <td style="vertical-align: top;" class="text-reverse">
@@ -344,11 +362,11 @@
             </tr>
         </thead>
         <tbody>
-            @foreach ($exchange->items as $item)
+            @foreach ($exchangeItems as $item)
                 @php
-                    $originalProduct = $item->originalVariation?->product;
-                    $originalVariationLabel = $item->originalVariation?->combinations?->map(fn($c) => $c->variationValue?->name)?->filter()?->implode(' / ') ?? '';
-                    $originalProductImage = $pdfProductImage($item->originalVariation, $originalProduct);
+                    $originalProduct = $item?->originalVariation?->product;
+                    $originalVariationLabel = $safeText($item?->originalVariation?->combinations?->map(fn($c) => $c->variationValue?->name)?->filter()?->implode(' / '));
+                    $originalProductImage = $pdfProductImage($item?->originalVariation, $originalProduct);
                 @endphp
                 <tr style="border-bottom: 1px solid #e7e5e4;">
                     <td
@@ -361,7 +379,7 @@
                                     </td>
                                 @endif
                                 <td class="invoice-product-name" style="vertical-align: top; {{ $originalProductImage ? '' : 'padding-left: 0;' }}">
-                                    {{ $originalProduct?->CollectTranslation('name') ?? translate('Product not found') }}
+                                    {{ $safeText($originalProduct?->CollectTranslation('name'), translate('Product not found')) }}
                                     @if ($originalVariationLabel)
                                         <br><span style="font-size: 12px; color: #78716c;">{{ $originalVariationLabel }}</span>
                                     @endif
@@ -371,13 +389,13 @@
                     </td>
                     <td style="text-align: right; padding: 7px 12px; font-size: 14px; border-right: 1px solid #e7e5e4; color: #1c1917;"
                         class="font-price">
-                        {{ formatPrice($item->original_unit_price) }}</td>
+                        {{ formatPrice($safeNumber($item?->original_unit_price)) }}</td>
                     <td style="text-align: center; padding: 7px 12px; font-size: 14px; border-right: 1px solid #e7e5e4; color: #1c1917;"
                         class="font-price">
-                        {{ $item->original_quantity }}</td>
+                        {{ (int) $safeNumber($item?->original_quantity) }}</td>
                     <td style="text-align: right; padding: 7px 12px; font-size: 14px; color: #15803d; font-weight: 500;"
                         class="font-price">
-                        -{{ formatPrice($item->original_unit_price * $item->original_quantity) }}</td>
+                        -{{ formatPrice($safeNumber($item?->original_unit_price) * $safeNumber($item?->original_quantity)) }}</td>
                 </tr>
             @endforeach
         </tbody>
@@ -407,11 +425,11 @@
             </tr>
         </thead>
         <tbody>
-            @foreach ($exchange->items as $item)
+            @foreach ($exchangeItems as $item)
                 @php
-                    $exchangeProduct = $item->exchangeVariation?->product;
-                    $exchangeVariationLabel = $item->exchangeVariation?->combinations?->map(fn($c) => $c->variationValue?->name)?->filter()?->implode(' / ') ?? '';
-                    $exchangeProductImage = $pdfProductImage($item->exchangeVariation, $exchangeProduct);
+                    $exchangeProduct = $item?->exchangeVariation?->product;
+                    $exchangeVariationLabel = $safeText($item?->exchangeVariation?->combinations?->map(fn($c) => $c->variationValue?->name)?->filter()?->implode(' / '));
+                    $exchangeProductImage = $pdfProductImage($item?->exchangeVariation, $exchangeProduct);
                 @endphp
                 <tr style="border-bottom: 1px solid #e7e5e4;">
                     <td
@@ -424,7 +442,7 @@
                                     </td>
                                 @endif
                                 <td class="invoice-product-name" style="vertical-align: top; {{ $exchangeProductImage ? '' : 'padding-left: 0;' }}">
-                                    {{ $exchangeProduct?->CollectTranslation('name') ?? translate('Product not found') }}
+                                    {{ $safeText($exchangeProduct?->CollectTranslation('name'), translate('Product not found')) }}
                                     @if ($exchangeVariationLabel)
                                         <br><span style="font-size: 12px; color: #78716c;">{{ $exchangeVariationLabel }}</span>
                                     @endif
@@ -434,13 +452,13 @@
                     </td>
                     <td style="text-align: right; padding: 7px 12px; font-size: 14px; border-right: 1px solid #e7e5e4; color: #1c1917;"
                         class="font-price">
-                        {{ formatPrice($item->exchange_unit_price) }}</td>
+                        {{ formatPrice($safeNumber($item?->exchange_unit_price)) }}</td>
                     <td style="text-align: center; padding: 7px 12px; font-size: 14px; border-right: 1px solid #e7e5e4; color: #1c1917;"
                         class="font-price">
-                        {{ $item->quantity }}</td>
+                        {{ (int) $safeNumber($item?->quantity) }}</td>
                     <td style="text-align: right; padding: 7px 12px; font-size: 14px; color: #1c1917; font-weight: 500;"
                         class="font-price">
-                        {{ formatPrice($item->exchange_unit_price * $item->quantity) }}</td>
+                        {{ formatPrice($safeNumber($item?->exchange_unit_price) * $safeNumber($item?->quantity)) }}</td>
                 </tr>
             @endforeach
         </tbody>
@@ -465,10 +483,10 @@
             </tr>
         </thead>
         <tbody>
-            @foreach ($order->orderItems as $key => $item)
+            @foreach ($orderItems as $key => $item)
                 @php
-                    $product = $item->productVariation->product ?? null;
-                    $productImage = $pdfProductImage($item->productVariation, $product);
+                    $product = $item?->productVariation?->product;
+                    $productImage = $pdfProductImage($item?->productVariation, $product);
                 @endphp
                 <tr style="border-bottom: 1px solid #e7e5e4;">
                     <td
@@ -481,20 +499,20 @@
                                     </td>
                                 @endif
                                 <td class="invoice-product-name" style="vertical-align: top; {{ $productImage ? '' : 'padding-left: 0;' }}">
-                                    {{ $product?->CollectTranslation('name') ?? translate('Product not found') }}
+                                    {{ $safeText($product?->CollectTranslation('name'), translate('Product not found')) }}
                                 </td>
                             </tr>
                         </table>
                     </td>
                     <td style="text-align: right; padding: 7px 12px; font-size: 14px; border-right: 1px solid #e7e5e4; color: #1c1917;"
                         class="font-price">
-                        {{ formatPrice($item->unit_price) }}</td>
+                        {{ formatPrice($safeNumber($item?->unit_price)) }}</td>
                     <td style="text-align: center; padding: 7px 12px; font-size: 14px; border-right: 1px solid #e7e5e4; color: #1c1917;"
                         class="font-price">
-                        {{ $item->qty }}</td>
+                        {{ (int) $safeNumber($item?->qty) }}</td>
                     <td style="text-align: right; padding: 7px 12px; font-size: 14px; color: #1c1917; font-weight: 500;"
                         class="font-price">
-                        {{ formatPrice($item->total_price) }}</td>
+                        {{ formatPrice($safeNumber($item?->total_price)) }}</td>
                 </tr>
             @endforeach
         </tbody>
@@ -533,24 +551,24 @@
                             {{ translate('Returned Items Total') }}</td>
                         <td style="text-align: right; padding: 7px 12px; font-size: 16px; color: #15803d; width: 50%;"
                             class="font-price">
-                            -{!! $formatSummaryPrice($exchange->total_original_price) !!}</td>
+                            -{!! $formatSummaryPrice($exchange?->total_original_price) !!}</td>
                     </tr>
                     <tr style="border-bottom: 1px solid #e7e5e4;">
                         <td style="text-align: left; padding: 7px 12px; font-size: 16px; color: #57534e; width: 50%;">
                             {{ translate('Exchange Items Total') }}</td>
                         <td style="text-align: right; padding: 7px 12px; font-size: 16px; color: #1c1917; width: 50%;"
                             class="font-price">
-                            {!! $formatSummaryPrice($exchange->total_exchange_price) !!}</td>
+                            {!! $formatSummaryPrice($exchange?->total_exchange_price) !!}</td>
                     </tr>
                     <tr style="border-bottom: 1px solid #e7e5e4;">
                         <td style="text-align: left; padding: 7px 12px; font-size: 16px; color: #57534e; width: 50%;">
                             {{ translate('Shipping Cost') }}</td>
                         <td style="text-align: right; padding: 7px 12px; font-size: 16px; color: #1c1917; width: 50%;"
                             class="font-price">
-                            @if ($exchange->shipping_charge <= 0)
+                            @if ($safeNumber($exchange?->shipping_charge) <= 0)
                                 {{ translate('Free') }}
                             @else
-                                {!! $formatSummaryPrice($exchange->shipping_charge) !!}
+                                {!! $formatSummaryPrice($exchange?->shipping_charge) !!}
                             @endif
                         </td>
                     </tr>
@@ -560,28 +578,28 @@
                             {{ translate('Price Difference') }}</td>
                         <td style="text-align: right; padding: 10px 12px; font-weight: 700; font-size: 17px; width: 50%;"
                             class="font-price">
-                            @if ($exchange->price_difference > 0)
-                                <span style="color: #c2410c;">+{!! $formatSummaryPrice($exchange->price_difference) !!}</span>
-                            @elseif ($exchange->price_difference < 0)
-                                <span style="color: #15803d;">{!! $formatSummaryPrice($exchange->price_difference) !!}</span>
+                            @if ($safeNumber($exchange?->price_difference) > 0)
+                                <span style="color: #c2410c;">+{!! $formatSummaryPrice($exchange?->price_difference) !!}</span>
+                            @elseif ($safeNumber($exchange?->price_difference) < 0)
+                                <span style="color: #15803d;">{!! $formatSummaryPrice($exchange?->price_difference) !!}</span>
                             @else
                                 {!! $formatSummaryPrice(0) !!}
                             @endif
                         </td>
                     </tr>
-                    @if ($exchange->price_difference > 0)
+                    @if ($safeNumber($exchange?->price_difference) > 0)
                     <tr style="border-top: 1px solid #e7e5e4;">
                         <td style="text-align: left; padding: 6px 12px; font-size: 13px; color: #c2410c; width: 50%; font-style: italic;">
                             {{ translate('Customer Pays') }}</td>
                         <td style="text-align: right; padding: 6px 12px; font-size: 13px; color: #c2410c; width: 50%; font-style: italic;">
                             {{ translate('Amount Due') }}</td>
                     </tr>
-                    @elseif ($exchange->price_difference < 0)
+                    @elseif ($safeNumber($exchange?->price_difference) < 0)
                     <tr style="border-top: 1px solid #e7e5e4;">
                         <td style="text-align: left; padding: 6px 12px; font-size: 13px; color: #15803d; width: 50%; font-style: italic;">
                             {{ translate('Refund to Customer') }}</td>
                         <td style="text-align: right; padding: 6px 12px; font-size: 13px; color: #15803d; width: 50%; font-style: italic;">
-                            {!! $formatSummaryPrice(abs($exchange->price_difference)) !!}</td>
+                            {!! $formatSummaryPrice(abs($safeNumber($exchange?->price_difference))) !!}</td>
                     </tr>
                     @else
                     <tr style="border-top: 1px solid #e7e5e4;">
@@ -590,13 +608,13 @@
                             {{ translate('Even Exchange - No Payment Required') }}</td>
                     </tr>
                     @endif
-                    @if ($exchange->refund_amount)
+                    @if ($safeNumber($exchange?->refund_amount) > 0)
                     <tr style="border-top: 1px solid #e7e5e4;">
                         <td style="text-align: left; padding: 7px 12px; font-size: 16px; color: #57534e; width: 50%;">
                             {{ translate('Refund Amount') }}</td>
                         <td style="text-align: right; padding: 7px 12px; font-size: 16px; color: #15803d; font-weight: 600; width: 50%;"
                             class="font-price">
-                            {!! $formatSummaryPrice($exchange->refund_amount) !!}</td>
+                            {!! $formatSummaryPrice($exchange?->refund_amount) !!}</td>
                     </tr>
                     @endif
                     <tr style="border-top: 1px solid #e7e5e4;">
@@ -632,24 +650,24 @@
                             {{ translate('Sub Total') }}</td>
                         <td style="text-align: right; padding: 7px 12px; font-size: 16px; color: #1c1917; width: 50%;"
                             class="font-price">
-                            {!! $formatSummaryPrice($order->amount) !!}</td>
+                            {!! $formatSummaryPrice($order?->amount) !!}</td>
                     </tr>
                     <tr style="border-bottom: 1px solid #e7e5e4;">
                         <td style="text-align: left; padding: 7px 12px; font-size: 16px; color: #57534e; width: 50%;">
                             {{ translate('Total Tax') }}</td>
                         <td style="text-align: right; padding: 7px 12px; font-size: 16px; color: #1c1917; width: 50%;"
                             class="font-price">
-                            {!! $formatSummaryPrice($order->tax_amount) !!}</td>
+                            {!! $formatSummaryPrice($order?->tax_amount) !!}</td>
                     </tr>
                     <tr style="border-bottom: 1px solid #e7e5e4;">
                         <td style="text-align: left; padding: 7px 12px; font-size: 16px; color: #57534e; width: 50%;">
                             {{ translate('Shipping Cost') }}</td>
                         <td style="text-align: right; padding: 7px 12px; font-size: 16px; color: #1c1917; width: 50%;"
                             class="font-price">
-                            @if ($order->shipping_charge_amount <= 0)
+                            @if ($safeNumber($order?->shipping_charge_amount) <= 0)
                                 {{ translate('Free') }}
                             @else
-                                {!! $formatSummaryPrice($order->shipping_charge_amount) !!}
+                                {!! $formatSummaryPrice($order?->shipping_charge_amount) !!}
                             @endif
                         </td>
                     </tr>
@@ -658,7 +676,7 @@
                             {{ translate('Discount') }}</td>
                         <td style="text-align: right; padding: 7px 12px; font-size: 16px; color: #1c1917; width: 50%;"
                             class="font-price">
-                            {!! $formatSummaryPrice($order->discount_amount + $order->coupon_discount_amount) !!}</td>
+                            {!! $formatSummaryPrice($safeNumber($order?->discount_amount) + $safeNumber($order?->coupon_discount_amount)) !!}</td>
                     </tr>
                     <tr style="background: #f5f5f4;">
                         <td
@@ -666,7 +684,7 @@
                             {{ translate('Grand Total') }}</td>
                         <td style="text-align: right; padding: 10px 12px; font-weight: 700; font-size: 17px; color: #1c1917; width: 50%;"
                             class="font-price">
-                            {!! $formatSummaryPrice($order->total_amount) !!}</td>
+                            {!! $formatSummaryPrice($order?->total_amount) !!}</td>
                     </tr>
                     <tr style="border-top: 1px solid #e7e5e4;">
                         <td style="text-align: left; padding: 7px 12px; font-size: 16px; color: #57534e; width: 50%;">

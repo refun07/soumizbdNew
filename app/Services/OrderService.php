@@ -517,7 +517,8 @@ class OrderService
             $currency_code = env('DEFAULT_CURRENCY');
         }
 
-        if (Language::where('code', $language_code)->first()->is_rtl == 1) {
+        $language = Language::where('code', $language_code)->first();
+        if ($language?->is_rtl == 1) {
             $direction = 'rtl';
             $default_text_align = 'right';
             $reverse_text_align = 'left';
@@ -528,6 +529,11 @@ class OrderService
         }
 
         $font_family = 'roboto';
+        $pdfTempDir = storage_path('app/mpdf-temp');
+        if (! is_dir($pdfTempDir)) {
+            @mkdir($pdfTempDir, 0755, true);
+        }
+
         $pdfConfig = [
             'custom_font_dir' => public_path('fonts').DIRECTORY_SEPARATOR,
             'custom_font_data' => [
@@ -544,18 +550,38 @@ class OrderService
             ],
             'autoScriptToLang' => true,
             'autoLangToFont' => true,
+            'tempDir' => is_dir($pdfTempDir) && is_writable($pdfTempDir) ? $pdfTempDir : sys_get_temp_dir(),
         ];
 
         if ($currency_code == 'BDT' || $currency_code == 'bdt' || $language_code == 'bd' || $language_code == 'bn') {
             $font_family = 'hindsiliguri';
         }
 
+        $fontFiles = [
+            'hindsiliguri' => 'HindSiliguri-Regular.ttf',
+            'roboto' => 'Roboto-Regular.ttf',
+        ];
+        if (! is_file(public_path('fonts/'.($fontFiles[$font_family] ?? '')))) {
+            $font_family = is_file(public_path('fonts/Roboto-Regular.ttf')) ? 'roboto' : 'sans-serif';
+        }
+
         $pdfConfig['default_font'] = $font_family;
 
         $order = Order::shopOrders()
-            ->with(['orderItems.productVariation.product'])
+            ->with([
+                'orderGroup.transaction',
+                'orderGroup.billingAddress',
+                'orderGroup.shippingAddress',
+                'orderItems.productVariation.product',
+                'orderItems.productVariation.combinations.variationValue',
+                'user',
+            ])
             ->whereId((int) $id)
             ->first();
+
+        if (! $order) {
+            abort(404, translate('Order not found'));
+        }
 
         $exchange = null;
         if ($order) {
@@ -594,7 +620,7 @@ class OrderService
                 $logo = public_path($mediaFile->media_file);
 
                 // Convert webp/png to pdf-safe PNG
-                $logo = self::makePdfSafeLogo($logo);
+                $logo = is_file($logo) ? self::makePdfSafeLogo($logo) : null;
             }
         }
 
@@ -647,7 +673,12 @@ class OrderService
         if ($multiple) {
             return PDF::loadView('backend.admin.orders.invoice', $viewData, [], $pdfConfig);
         } else {
-            return PDF::loadView('backend.admin.orders.invoice', $viewData, [], $pdfConfig)->stream(getSetting('order_code_prefix').$order->order_code.'.pdf');
+            $invoiceCode = trim((string) getSetting('order_code_prefix', '').(string) $order->order_code);
+            $filename = preg_replace('/[^A-Za-z0-9._-]+/', '-', $invoiceCode);
+            $filename = trim((string) $filename, '-_.');
+            $filename = ($filename !== '' ? $filename : 'invoice-'.$order->id).'.pdf';
+
+            return PDF::loadView('backend.admin.orders.invoice', $viewData, [], $pdfConfig)->stream($filename);
         }
     }
 
@@ -742,6 +773,10 @@ class OrderService
 
     public static function makePdfSafeImage(string $absolutePath, string $prefix = 'image_pdf_safe'): string
     {
+        if (! is_file($absolutePath)) {
+            return '';
+        }
+
         $ext = strtolower(pathinfo($absolutePath, PATHINFO_EXTENSION));
 
         // If already jpg/jpeg, it's generally safe
