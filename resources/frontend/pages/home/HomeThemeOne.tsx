@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
-import { FaArrowRight } from 'react-icons/fa';
 import { useEffect, useRef, useState } from 'react';
+import { FaArrowRight } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import { Autoplay } from 'swiper/modules';
 import { SwiperSlide } from 'swiper/react';
@@ -185,16 +185,23 @@ const LazyBackgroundVideo = ({
                             }
 
                             if (!loopTimerRef.current) {
-                                loopTimerRef.current = window.setInterval(() => {
-                                    const player = playerRef.current;
-                                    if (!player?.getCurrentTime || !player?.seekTo)
-                                        return;
+                                loopTimerRef.current = window.setInterval(
+                                    () => {
+                                        const player = playerRef.current;
+                                        if (
+                                            !player?.getCurrentTime ||
+                                            !player?.seekTo
+                                        )
+                                            return;
 
-                                    const currentTime = player.getCurrentTime();
-                                    if (currentTime >= 20) {
-                                        player.seekTo(0, true);
-                                    }
-                                }, 500);
+                                        const currentTime =
+                                            player.getCurrentTime();
+                                        if (currentTime >= 20) {
+                                            player.seekTo(0, true);
+                                        }
+                                    },
+                                    500,
+                                );
                             }
                         } else if (event.data === window.YT.PlayerState.ENDED) {
                             if (loopTimerRef.current) {
@@ -205,7 +212,9 @@ const LazyBackgroundVideo = ({
                                 event.target.seekTo(0, true);
                                 event.target.playVideo();
                             }
-                        } else if (event.data === window.YT.PlayerState.PAUSED) {
+                        } else if (
+                            event.data === window.YT.PlayerState.PAUSED
+                        ) {
                             if (loopTimerRef.current) {
                                 window.clearInterval(loopTimerRef.current);
                                 loopTimerRef.current = null;
@@ -404,268 +413,276 @@ const HomeThemeOne = () => {
                                     'lg:grid-cols-[minmax(0,60fr)_minmax(0,40fr)]',
                             )}
                         >
-                        <ThemeSlider
-                            slidesPerView={1}
-                            spaceBetween={0}
-                            autoplay={mainBannerAutoplay}
-                            loop={false}
-                            rewind={
-                                !!(banner?.banners && banner.banners.length > 1)
-                            }
-                            pagination={
-                                !!(
-                                    banner?.banners &&
-                                    banner.banners.length > 1
-                                )
-                            }
-                            containerClass="min-w-0"
-                            paginationContainerClass="absolute inset-x-0 bottom-4 z-20 mt-0"
-                        >
-                            {banner?.banners?.map((item, idx) => (
-                                <SwiperSlide key={idx}>
-                                    {({ isActive: isSlideActive }) => {
-                                        const shouldShowVideo =
-                                            item.useBackgroundVideo === '1' &&
-                                            !!item.backgroundVideoLink;
-                                        const shouldShowForegroundImage =
-                                            item.showForegroundImage === '1' &&
-                                            !!item.foregroundImage;
+                            <ThemeSlider
+                                slidesPerView={1}
+                                spaceBetween={0}
+                                autoplay={mainBannerAutoplay}
+                                loop={false}
+                                rewind={
+                                    !!(
+                                        banner?.banners &&
+                                        banner.banners.length > 1
+                                    )
+                                }
+                                pagination={
+                                    !!(
+                                        banner?.banners &&
+                                        banner.banners.length > 1
+                                    )
+                                }
+                                containerClass="min-w-0"
+                                paginationContainerClass="absolute inset-x-0 bottom-4 z-20 mt-0"
+                            >
+                                {banner?.banners?.map((item, idx) => (
+                                    <SwiperSlide key={idx}>
+                                        {({ isActive: isSlideActive }) => {
+                                            const shouldShowVideo =
+                                                item.useBackgroundVideo ===
+                                                    '1' &&
+                                                !!item.backgroundVideoLink;
+                                            const shouldShowForegroundImage =
+                                                item.showForegroundImage ===
+                                                    '1' &&
+                                                !!item.foregroundImage;
 
-                                        return (
-                                            <div
-                                                className="relative aspect-[16/9] w-full overflow-hidden rounded-[5px] bg-center md:aspect-[21/9] lg:h-[420px] lg:aspect-auto xl:h-[636px] 3xl:h-[636px]"
-                                                style={{
-                                                    backgroundImage:
-                                                        item.backgroundImage
-                                                            ? `url(${item.backgroundImage})`
-                                                            : 'none',
-                                                    backgroundSize: '100% 100%',
-                                                    backgroundRepeat:
-                                                        'no-repeat',
-                                                }}
-                                            >
-                                                {shouldShowVideo &&
-                                                    isSlideActive && (
-                                                        <>
-                                                            <LazyBackgroundVideo
-                                                                src={
-                                                                    item.backgroundVideoLink
-                                                                }
-                                                                audioEnabled={
-                                                                    item.backgroundVideoAudio ===
-                                                                    '1'
-                                                                }
-                                                            />
-                                                            <div className="absolute inset-0 bg-black/20"></div>
-                                                        </>
-                                                    )}
-
+                                            return (
                                                 <div
-                                                    className={`relative z-10 flex h-full items-center gap-y-8 px-4 sm:px-6 lg:px-8 xl:px-10 ${
-                                                        banner?.settings
-                                                            ?.contentAlignment ===
-                                                        'center'
-                                                            ? 'flex-col justify-center'
-                                                            : banner?.settings
-                                                                  ?.contentAlignment ===
-                                                              'right'
-                                                            ? 'flex-row-reverse justify-between'
-                                                            : 'max-md:flex-col justify-between'
-                                                    }`}
+                                                    className="relative aspect-[16/9] w-full overflow-hidden rounded-[5px] bg-center md:aspect-[21/9] lg:h-[420px] lg:aspect-auto xl:h-[636px] 3xl:h-[636px]"
+                                                    style={{
+                                                        backgroundImage:
+                                                            item.backgroundImage
+                                                                ? `url(${item.backgroundImage})`
+                                                                : 'none',
+                                                        backgroundSize:
+                                                            '100% 100%',
+                                                        backgroundRepeat:
+                                                            'no-repeat',
+                                                    }}
                                                 >
+                                                    {shouldShowVideo &&
+                                                        isSlideActive && (
+                                                            <>
+                                                                <LazyBackgroundVideo
+                                                                    src={
+                                                                        item.backgroundVideoLink
+                                                                    }
+                                                                    audioEnabled={
+                                                                        item.backgroundVideoAudio ===
+                                                                        '1'
+                                                                    }
+                                                                />
+                                                                <div className="absolute inset-0 bg-black/20"></div>
+                                                            </>
+                                                        )}
+
                                                     <div
-                                                        className={`max-w-[560px] ${
+                                                        className={`relative z-10 flex h-full items-center gap-y-8 px-4 sm:px-6 lg:px-8 xl:px-10 ${
                                                             banner?.settings
                                                                 ?.contentAlignment ===
                                                             'center'
-                                                                ? 'text-center relative z-10'
+                                                                ? 'flex-col justify-center'
                                                                 : banner
                                                                       ?.settings
                                                                       ?.contentAlignment ===
                                                                   'right'
-                                                                ? 'text-right'
-                                                                : 'max-md:text-center'
+                                                                ? 'flex-row-reverse justify-between'
+                                                                : 'max-md:flex-col justify-between'
                                                         }`}
                                                     >
-                                                        {item.badgeText &&
-                                                            item.badgeText !=
-                                                                '' && (
-                                                                <motion.div
-                                                                    initial={{
-                                                                        opacity: 0,
-                                                                        y: 20,
-                                                                    }}
-                                                                    whileInView={{
-                                                                        opacity: 1,
-                                                                        y: 0,
-                                                                    }}
-                                                                    viewport={{
-                                                                        once: true,
-                                                                    }}
-                                                                    transition={{
-                                                                        duration: 0.5,
-                                                                    }}
-                                                                >
-                                                                    <Badge>
-                                                                        {
-                                                                            item.badgeText
-                                                                        }
-                                                                    </Badge>
-                                                                </motion.div>
-                                                            )}
-
-                                                        <motion.h1
-                                                            initial={{
-                                                                opacity: 0,
-                                                                y: 20,
-                                                            }}
-                                                            whileInView={{
-                                                                opacity: 1,
-                                                                y: 0,
-                                                            }}
-                                                            viewport={{
-                                                                once: true,
-                                                            }}
-                                                            transition={{
-                                                                duration: 0.5,
-                                                                delay: 0.2,
-                                                            }}
-                                                            className="ek-h1 font-semibold text-primary mt-5 mb-2"
-                                                            style={
-                                                                item.titleColor
-                                                                    ? {
-                                                                          color: item.titleColor,
-                                                                      }
-                                                                    : undefined
-                                                            }
+                                                        <div
+                                                            className={`max-w-[560px] ${
+                                                                banner?.settings
+                                                                    ?.contentAlignment ===
+                                                                'center'
+                                                                    ? 'text-center relative z-10'
+                                                                    : banner
+                                                                          ?.settings
+                                                                          ?.contentAlignment ===
+                                                                      'right'
+                                                                    ? 'text-right'
+                                                                    : 'max-md:text-center'
+                                                            }`}
                                                         >
-                                                            {item.title}
-                                                        </motion.h1>
-                                                        <motion.p
-                                                            initial={{
-                                                                opacity: 0,
-                                                                y: 20,
-                                                            }}
-                                                            whileInView={{
-                                                                opacity: 1,
-                                                                y: 0,
-                                                            }}
-                                                            viewport={{
-                                                                once: true,
-                                                            }}
-                                                            transition={{
-                                                                duration: 0.5,
-                                                                delay: 0.4,
-                                                            }}
-                                                            className="mb-7 text-base text-primary/70 md:text-lg"
-                                                            style={
-                                                                item.subTitleColor
-                                                                    ? {
-                                                                          color: item.subTitleColor,
-                                                                      }
-                                                                    : undefined
-                                                            }
-                                                        >
-                                                            {item.subTitle}
-                                                        </motion.p>
-                                                        {item.link &&
-                                                            item.link != '' && (
-                                                                <motion.div
-                                                                    initial={{
-                                                                        opacity: 0,
-                                                                        y: 20,
-                                                                    }}
-                                                                    whileInView={{
-                                                                        opacity: 1,
-                                                                        y: 0,
-                                                                    }}
-                                                                    viewport={{
-                                                                        once: true,
-                                                                    }}
-                                                                    transition={{
-                                                                        duration: 0.5,
-                                                                        delay: 0.5,
-                                                                    }}
-                                                                >
-                                                                    <Button
-                                                                        as="link"
-                                                                        to={
-                                                                            item.link ||
-                                                                            '#'
-                                                                        }
-                                                                        variant="primary"
-                                                                        size="lg"
+                                                            {item.badgeText &&
+                                                                item.badgeText !=
+                                                                    '' && (
+                                                                    <motion.div
+                                                                        initial={{
+                                                                            opacity: 0,
+                                                                            y: 20,
+                                                                        }}
+                                                                        whileInView={{
+                                                                            opacity: 1,
+                                                                            y: 0,
+                                                                        }}
+                                                                        viewport={{
+                                                                            once: true,
+                                                                        }}
+                                                                        transition={{
+                                                                            duration: 0.5,
+                                                                        }}
                                                                     >
-                                                                        {translate(
-                                                                            'VISIT SHOP',
-                                                                        )}
-                                                                    </Button>
-                                                                </motion.div>
-                                                            )}
-                                                    </div>
+                                                                        <Badge>
+                                                                            {
+                                                                                item.badgeText
+                                                                            }
+                                                                        </Badge>
+                                                                    </motion.div>
+                                                                )}
 
-                                                    {banner?.settings
-                                                        ?.contentAlignment ===
-                                                        'center' &&
-                                                    shouldShowForegroundImage ? (
-                                                        <motion.div
-                                                            initial={{
-                                                                opacity: 0,
-                                                            }}
-                                                            whileInView={{
-                                                                opacity: 1,
-                                                            }}
-                                                            viewport={{
-                                                                once: true,
-                                                            }}
-                                                            transition={{
-                                                                duration: 0.5,
-                                                                delay: 0.5,
-                                                            }}
-                                                            className="absolute inset-0 z-0"
-                                                        >
-                                                            <img
-                                                                src={
-                                                                    item.foregroundImage
+                                                            <motion.h1
+                                                                initial={{
+                                                                    opacity: 0,
+                                                                    y: 20,
+                                                                }}
+                                                                whileInView={{
+                                                                    opacity: 1,
+                                                                    y: 0,
+                                                                }}
+                                                                viewport={{
+                                                                    once: true,
+                                                                }}
+                                                                transition={{
+                                                                    duration: 0.5,
+                                                                    delay: 0.2,
+                                                                }}
+                                                                className="ek-h1 font-semibold text-primary mt-5 mb-2"
+                                                                style={
+                                                                    item.titleColor
+                                                                        ? {
+                                                                              color: item.titleColor,
+                                                                          }
+                                                                        : undefined
                                                                 }
-                                                                alt=""
-                                                                className="w-full h-full object-fill object-center"
-                                                            />
-                                                        </motion.div>
-                                                    ) : shouldShowForegroundImage ? (
-                                                        <motion.div
-                                                            initial={{
-                                                                opacity: 0,
-                                                                y: 20,
-                                                            }}
-                                                            whileInView={{
-                                                                opacity: 1,
-                                                                y: 0,
-                                                            }}
-                                                            viewport={{
-                                                                once: true,
-                                                            }}
-                                                            transition={{
-                                                                duration: 0.5,
-                                                                delay: 0.5,
-                                                            }}
-                                                        >
-                                                            <img
-                                                                src={
-                                                                    item.foregroundImage
+                                                            >
+                                                                {item.title}
+                                                            </motion.h1>
+                                                            <motion.p
+                                                                initial={{
+                                                                    opacity: 0,
+                                                                    y: 20,
+                                                                }}
+                                                                whileInView={{
+                                                                    opacity: 1,
+                                                                    y: 0,
+                                                                }}
+                                                                viewport={{
+                                                                    once: true,
+                                                                }}
+                                                                transition={{
+                                                                    duration: 0.5,
+                                                                    delay: 0.4,
+                                                                }}
+                                                                className="mb-7 text-base text-primary/70 md:text-lg"
+                                                                style={
+                                                                    item.subTitleColor
+                                                                        ? {
+                                                                              color: item.subTitleColor,
+                                                                          }
+                                                                        : undefined
                                                                 }
-                                                                alt=""
-                                                                className="mx-auto max-w-[72%] xl:max-w-[320px] 3xl:max-w-[430px]"
-                                                            />
-                                                        </motion.div>
-                                                    ) : null}
+                                                            >
+                                                                {item.subTitle}
+                                                            </motion.p>
+                                                            {item.link &&
+                                                                item.link !=
+                                                                    '' && (
+                                                                    <motion.div
+                                                                        initial={{
+                                                                            opacity: 0,
+                                                                            y: 20,
+                                                                        }}
+                                                                        whileInView={{
+                                                                            opacity: 1,
+                                                                            y: 0,
+                                                                        }}
+                                                                        viewport={{
+                                                                            once: true,
+                                                                        }}
+                                                                        transition={{
+                                                                            duration: 0.5,
+                                                                            delay: 0.5,
+                                                                        }}
+                                                                    >
+                                                                        <Button
+                                                                            as="link"
+                                                                            to={
+                                                                                item.link ||
+                                                                                '#'
+                                                                            }
+                                                                            variant="primary"
+                                                                            size="lg"
+                                                                        >
+                                                                            {translate(
+                                                                                'VISIT SHOP',
+                                                                            )}
+                                                                        </Button>
+                                                                    </motion.div>
+                                                                )}
+                                                        </div>
+
+                                                        {banner?.settings
+                                                            ?.contentAlignment ===
+                                                            'center' &&
+                                                        shouldShowForegroundImage ? (
+                                                            <motion.div
+                                                                initial={{
+                                                                    opacity: 0,
+                                                                }}
+                                                                whileInView={{
+                                                                    opacity: 1,
+                                                                }}
+                                                                viewport={{
+                                                                    once: true,
+                                                                }}
+                                                                transition={{
+                                                                    duration: 0.5,
+                                                                    delay: 0.5,
+                                                                }}
+                                                                className="absolute inset-0 z-0"
+                                                            >
+                                                                <img
+                                                                    src={
+                                                                        item.foregroundImage
+                                                                    }
+                                                                    alt=""
+                                                                    className="w-full h-full object-fill object-center"
+                                                                />
+                                                            </motion.div>
+                                                        ) : shouldShowForegroundImage ? (
+                                                            <motion.div
+                                                                initial={{
+                                                                    opacity: 0,
+                                                                    y: 20,
+                                                                }}
+                                                                whileInView={{
+                                                                    opacity: 1,
+                                                                    y: 0,
+                                                                }}
+                                                                viewport={{
+                                                                    once: true,
+                                                                }}
+                                                                transition={{
+                                                                    duration: 0.5,
+                                                                    delay: 0.5,
+                                                                }}
+                                                            >
+                                                                <img
+                                                                    src={
+                                                                        item.foregroundImage
+                                                                    }
+                                                                    alt=""
+                                                                    className="mx-auto max-w-[72%] xl:max-w-[320px] 3xl:max-w-[430px]"
+                                                                />
+                                                            </motion.div>
+                                                        ) : null}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        );
-                                    }}
-                                </SwiperSlide>
-                            ))}
-                        </ThemeSlider>
+                                            );
+                                        }}
+                                    </SwiperSlide>
+                                ))}
+                            </ThemeSlider>
 
                             {mainSideBanners.length > 0 && (
                                 <ThemeSlider
@@ -684,9 +701,7 @@ const HomeThemeOne = () => {
                                                 src={item.backgroundImage}
                                                 alt=""
                                                 loading={
-                                                    idx === 0
-                                                        ? 'eager'
-                                                        : 'lazy'
+                                                    idx === 0 ? 'eager' : 'lazy'
                                                 }
                                                 className="h-full w-full object-fill"
                                             />
@@ -1024,7 +1039,11 @@ const HomeThemeOne = () => {
                                 variants={itemAnimation}
                                 className="relative z-[1] flex w-full justify-end 2xl:mt-16 2xl:w-auto 2xl:shrink-0"
                             >
-                                <Button as="link" to="/products" variant="outline">
+                                <Button
+                                    as="link"
+                                    to="/products"
+                                    variant="outline"
+                                >
                                     {translate('View More')}
                                 </Button>
                             </motion.div>
@@ -1140,77 +1159,40 @@ const HomeThemeOne = () => {
                                         backgroundPosition: 'center center',
                                     }}
                                 >
-                                {shouldShowVideo && (
-                                    <>
-                                        <LazyBackgroundVideo
-                                            src={item.backgroundVideoLink}
-                                            audioEnabled={
-                                                item.backgroundVideoAudio ===
-                                                '1'
-                                            }
-                                        />
-                                        <div className="absolute inset-0 bg-black/20"></div>
-                                    </>
-                                )}
+                                    {shouldShowVideo && (
+                                        <>
+                                            <LazyBackgroundVideo
+                                                src={item.backgroundVideoLink}
+                                                audioEnabled={
+                                                    item.backgroundVideoAudio ===
+                                                    '1'
+                                                }
+                                            />
+                                            <div className="absolute inset-0 bg-black/20"></div>
+                                        </>
+                                    )}
 
-                                <div className="max-w-[1212px] h-full mx-auto px-6 max-md:pt-8 max-md:pb-8 flex items-center justify-center relative z-10">
-                                    <div
-                                        className={cn(
-                                            'max-w-[660px] w-full',
-                                            secondaryContentAlignment ===
-                                                'center'
-                                                ? 'mx-auto text-center'
-                                                : secondaryContentAlignment ===
-                                                  'right'
-                                                ? 'ml-auto text-right'
-                                                : 'mr-auto text-left',
-                                        )}
-                                    >
-                                        {item.badgeText &&
-                                            item.badgeText != '' && (
-                                                <Badge>{item.badgeText}</Badge>
+                                    <div className="max-w-[1212px] h-full mx-auto px-6 max-md:pt-8 max-md:pb-8 flex items-center justify-center relative z-10">
+                                        <div
+                                            className={cn(
+                                                'max-w-[660px] w-full',
+                                                secondaryContentAlignment ===
+                                                    'center'
+                                                    ? 'mx-auto text-center'
+                                                    : secondaryContentAlignment ===
+                                                      'right'
+                                                    ? 'ml-auto text-right'
+                                                    : 'mr-auto text-left',
                                             )}
-
-                                        <motion.h1
-                                            initial={{ opacity: 0, y: 20 }}
-                                            whileInView={{ opacity: 1, y: 0 }}
-                                            viewport={{ once: true }}
-                                            transition={{
-                                                duration: 0.5,
-                                                delay: 0.2,
-                                            }}
-                                            className="ek-h1 font-semibold text-primary mt-5 mb-2"
-                                            style={
-                                                item.titleColor
-                                                    ? { color: item.titleColor }
-                                                    : undefined
-                                            }
                                         >
-                                            {item.title}
-                                        </motion.h1>
+                                            {item.badgeText &&
+                                                item.badgeText != '' && (
+                                                    <Badge>
+                                                        {item.badgeText}
+                                                    </Badge>
+                                                )}
 
-                                        <motion.p
-                                            initial={{ opacity: 0, y: 20 }}
-                                            whileInView={{ opacity: 1, y: 0 }}
-                                            viewport={{ once: true }}
-                                            transition={{
-                                                duration: 0.5,
-                                                delay: 0.3,
-                                            }}
-                                            className="text-primary/70 text-lg mb-7"
-                                            style={
-                                                item.subTitleColor
-                                                    ? {
-                                                          color: item.subTitleColor,
-                                                      }
-                                                    : undefined
-                                            }
-                                        >
-                                            {item.subTitle}
-                                        </motion.p>
-
-                                        {item.link && item.link != '' && (
-                                            <motion.div
+                                            <motion.h1
                                                 initial={{ opacity: 0, y: 20 }}
                                                 whileInView={{
                                                     opacity: 1,
@@ -1219,21 +1201,73 @@ const HomeThemeOne = () => {
                                                 viewport={{ once: true }}
                                                 transition={{
                                                     duration: 0.5,
-                                                    delay: 0.4,
+                                                    delay: 0.2,
                                                 }}
+                                                className="ek-h1 font-semibold text-primary mt-5 mb-2"
+                                                style={
+                                                    item.titleColor
+                                                        ? {
+                                                              color: item.titleColor,
+                                                          }
+                                                        : undefined
+                                                }
                                             >
-                                                <Button
-                                                    as="link"
-                                                    to={item.link || '#'}
-                                                    variant="primary"
-                                                    size="lg"
+                                                {item.title}
+                                            </motion.h1>
+
+                                            <motion.p
+                                                initial={{ opacity: 0, y: 20 }}
+                                                whileInView={{
+                                                    opacity: 1,
+                                                    y: 0,
+                                                }}
+                                                viewport={{ once: true }}
+                                                transition={{
+                                                    duration: 0.5,
+                                                    delay: 0.3,
+                                                }}
+                                                className="text-primary/70 text-lg mb-7"
+                                                style={
+                                                    item.subTitleColor
+                                                        ? {
+                                                              color: item.subTitleColor,
+                                                          }
+                                                        : undefined
+                                                }
+                                            >
+                                                {item.subTitle}
+                                            </motion.p>
+
+                                            {item.link && item.link != '' && (
+                                                <motion.div
+                                                    initial={{
+                                                        opacity: 0,
+                                                        y: 20,
+                                                    }}
+                                                    whileInView={{
+                                                        opacity: 1,
+                                                        y: 0,
+                                                    }}
+                                                    viewport={{ once: true }}
+                                                    transition={{
+                                                        duration: 0.5,
+                                                        delay: 0.4,
+                                                    }}
                                                 >
-                                                    {translate('VISIT SHOP')}
-                                                </Button>
-                                            </motion.div>
-                                        )}
+                                                    <Button
+                                                        as="link"
+                                                        to={item.link || '#'}
+                                                        variant="primary"
+                                                        size="lg"
+                                                    >
+                                                        {translate(
+                                                            'VISIT SHOP',
+                                                        )}
+                                                    </Button>
+                                                </motion.div>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
                                 </div>
                             );
                         })()}
@@ -1252,8 +1286,9 @@ const HomeThemeOne = () => {
                     >
                         <SectionTitle
                             animated
-                            title={translate('Top Products')}
-                            subTitle={translate('Popular')}
+                            title={translate('[Top] Products')}
+                            highlightClassName="text-[#B3052A]"
+                            subTitle={translate('For You')}
                             link="/products"
                         />
 
