@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import { FaHeart, FaPhone, FaRuler } from 'react-icons/fa6';
 import { FaFacebookMessenger, FaWhatsapp } from 'react-icons/fa';
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { LiaTimesSolid } from 'react-icons/lia';
 import { SideBySideMagnifier } from 'react-image-magnifiers';
 import { useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
@@ -102,6 +103,7 @@ const ProductPreviewContent = ({
     const viewItemFiredRef = useRef(false);
 
     const [isBuyNowLoading, setIsBuyNowLoading] = useState(false);
+    const [showVariationConfirm, setShowVariationConfirm] = useState(false);
     const [cartCount, setCartCount] = useState(1);
     const [selectedVariationCombinations, setSelectedVariationCombinations] =
         useState<ISelectedVariationCombinations>({});
@@ -268,15 +270,24 @@ const ProductPreviewContent = ({
     let selectedVariationCode = generateVariationCode(
         selectedVariationCombinations,
     );
+    const hasVariants = Number(product.hasVariation) === 1;
 
     // find the variation from selected combination
     // if `hasVariation` is 0, then select 1st variation
     // else find the variation using the generated variation code
-    const selectedVariation = !product.hasVariation
+    const selectedVariation = !hasVariants
         ? product.variations[0]
         : product.variations.find((variation) => {
               return variation.code === selectedVariationCode;
           });
+    const selectedVariationSummary = hasVariants
+        ? product.variationCombinations
+              .map((variation) => {
+                  return selectedVariationCombinations[variation.id]?.name;
+              })
+              .filter(Boolean)
+              .join(' / ')
+        : '';
 
     // Determine if current selection is pre-order (variation level, fallback to product level)
     const isCurrentPreOrder =
@@ -310,7 +321,9 @@ const ProductPreviewContent = ({
               1
             : false;
 
-    const handleAddToCart = async () => {
+    const handleAddToCart = async (confirmedVariation: unknown = false) => {
+        const variationConfirmed = confirmedVariation === true;
+
         // check user location is set or not
         // if (!userLocation?.area?.zone_id) {
         //     dispatch(togglePopup('user-location'));
@@ -347,32 +360,11 @@ const ProductPreviewContent = ({
             //     });
             // }
 
-            if (selectedVariation) {
-                gtmEvent({
-                    event: 'add_to_cart',
-                    event_id: eventId,
-                    ecommerce: {
-                        currency: window.config.currency.code,
-                        value:
-                            selectedVariation.basePrice *
-                            (productCartQuantity?.qty || 1),
-                        items: [
-                            {
-                                item_id: `${product.id}-${selectedVariation.id}`, // <-- Correct variant ID
-                                item_name: `${product.name} (${selectedVariation.name})`,
-                                price: selectedVariation.basePrice,
-                                quantity: productCartQuantity?.qty || 1,
-                            },
-                        ],
-                    },
-                });
-            }
-
             // if `hasVariation` is 0, then select 1st variation and add to cart
             // if `hasVariation` is grater then 0, then check if all variations are selected or not
             // if all variations are not selected,  then show error. Example: Please select color and size
             // else add to cart
-            if (product.hasVariation === 0) {
+            if (!hasVariants) {
                 productVariationId = product.variations[0].id;
             }
             if (!productVariationId) {
@@ -389,6 +381,11 @@ const ProductPreviewContent = ({
                 toast.error(
                     `Please select ${notSelectedVariations.join(', ')}`,
                 );
+                return false;
+            }
+
+            if (hasVariants && !variationConfirmed) {
+                setShowVariationConfirm(true);
                 return false;
             }
 
@@ -409,6 +406,25 @@ const ProductPreviewContent = ({
                 guestUserId,
                 eventId,
             }).unwrap();
+
+            if (selectedVariation) {
+                gtmEvent({
+                    event: 'add_to_cart',
+                    event_id: eventId,
+                    ecommerce: {
+                        currency: window.config.currency.code,
+                        value: selectedVariation.basePrice * cartCount,
+                        items: [
+                            {
+                                item_id: `${product.id}-${selectedVariation.id}`,
+                                item_name: `${product.name} (${selectedVariation.name})`,
+                                price: selectedVariation.basePrice,
+                                quantity: cartCount,
+                            },
+                        ],
+                    },
+                });
+            }
 
             setCartCount(1);
             toast.success(translate('Product added to cart'));
@@ -434,7 +450,7 @@ const ProductPreviewContent = ({
 
         setIsBuyNowLoading(true);
 
-        const addedToCart = await handleAddToCart();
+        const addedToCart = await handleAddToCart(true);
 
         setIsBuyNowLoading(false);
         if (!addedToCart) return;
@@ -761,7 +777,7 @@ const ProductPreviewContent = ({
                     </p>
                 ) : null}
                 <hr className="mt-2.5 mb-6" />
-                {product.hasVariation === 1 &&
+                {hasVariants &&
                     product.variationCombinations.map((variation) => {
                         const selectedValue =
                             selectedVariationCombinations[variation.id];
@@ -1115,6 +1131,160 @@ const ProductPreviewContent = ({
                 sizeChartTable={product.sizeChartTable}
                 onClose={() => setShowSizeChartModal(false)}
             />
+            {showVariationConfirm ? (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 px-4">
+                    <div className="w-full max-w-[480px] rounded-card bg-white shadow-xl">
+                        <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
+                            <h4 className="ek-h3">
+                                {translate('Confirm selected option')}
+                            </h4>
+                            <button
+                                className="text-lg"
+                                onClick={() => setShowVariationConfirm(false)}
+                            >
+                                <LiaTimesSolid />
+                            </button>
+                        </div>
+                        <div className="px-5 pb-6 pt-4">
+                            <p className="text-sm text-black/70">
+                                {translate(
+                                    'Please confirm this variation before adding it to your cart.',
+                                )}
+                            </p>
+                            <div className="mt-4 space-y-4 rounded-[4px] border border-primary/20 bg-primary/5 px-4 py-3">
+                                {product.variationCombinations.map(
+                                    (variation) => (
+                                        <div key={variation.id}>
+                                            <p className="mb-2 text-xs font-medium uppercase text-black/60">
+                                                {variation.name}
+                                            </p>
+                                            <div className="flex flex-wrap gap-2">
+                                                {variation.values.map((item) => {
+                                                    const itemSelected =
+                                                        selectedVariationCombinations[
+                                                            variation.id
+                                                        ]?.id === item.id;
+                                                    const isAvailable =
+                                                        window.config
+                                                            .generalSettings
+                                                            .allowBackorder ||
+                                                        isVariationValueInStock(
+                                                            item,
+                                                            selectedVariationCombinations,
+                                                            product.variations,
+                                                        );
+
+                                                    return (
+                                                        <button
+                                                            type="button"
+                                                            key={item.id}
+                                                            className={cn(
+                                                                'min-h-9 rounded border px-3 py-1.5 text-sm font-medium transition',
+                                                                {
+                                                                    'border-primary bg-primary text-white':
+                                                                        itemSelected,
+                                                                    'border-white bg-white text-black/75 hover:border-primary/50':
+                                                                        !itemSelected,
+                                                                    'cursor-not-allowed opacity-45 line-through':
+                                                                        !isAvailable,
+                                                                },
+                                                            )}
+                                                            onClick={() => {
+                                                                if (!isAvailable) {
+                                                                    return;
+                                                                }
+
+                                                                handleSelectVariation(
+                                                                    {
+                                                                        variationId:
+                                                                            variation.id,
+                                                                        variationValue:
+                                                                            item,
+                                                                        checked:
+                                                                            true,
+                                                                    },
+                                                                );
+                                                            }}
+                                                            disabled={!isAvailable}
+                                                        >
+                                                            <span className="inline-flex items-center gap-2">
+                                                                {variation.isColor &&
+                                                                item.colorCode ? (
+                                                                    <span
+                                                                        className="size-4 rounded-full border border-black/10"
+                                                                        style={{
+                                                                            backgroundColor:
+                                                                                item.colorCode,
+                                                                        }}
+                                                                    />
+                                                                ) : null}
+                                                                {item.name}
+                                                            </span>
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    ),
+                                )}
+                                <div className="border-t border-primary/15 pt-3">
+                                    <p className="text-xs font-medium uppercase text-black/60">
+                                        {translate('Selected')}
+                                    </p>
+                                    <p className="mt-1 font-semibold text-primary">
+                                        {selectedVariationSummary ||
+                                            selectedVariation?.name ||
+                                            translate('Selected option')}
+                                    </p>
+                                    <div className="mt-2 flex items-center gap-2 font-semibold">
+                                        {selectedVariation?.basePrice !==
+                                        selectedVariation?.discountedBasePrice ? (
+                                            <>
+                                                <span className="text-sm text-black/50 line-through">
+                                                    {currencyFormatter(
+                                                        selectedVariation?.basePrice,
+                                                    )}
+                                                </span>
+                                                <span className="text-lg text-primary">
+                                                    {currencyFormatter(
+                                                        selectedVariation?.discountedBasePrice,
+                                                    )}
+                                                </span>
+                                            </>
+                                        ) : (
+                                            <span className="text-lg text-primary">
+                                                {currencyFormatter(
+                                                    selectedVariation?.basePrice ||
+                                                        product.basePrice,
+                                                )}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="mt-6 flex gap-3">
+                                <Button
+                                    onClick={() => {
+                                        setShowVariationConfirm(false);
+                                        handleAddToCart(true);
+                                    }}
+                                    disabled={!selectedVariation}
+                                >
+                                    {translate('Confirm & Add')}
+                                </Button>
+                                <Button
+                                    variant="light"
+                                    onClick={() =>
+                                        setShowVariationConfirm(false)
+                                    }
+                                >
+                                    {translate('Cancel')}
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            ) : null}
         </div>
     );
 };
