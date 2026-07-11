@@ -9,6 +9,14 @@ export interface IProductVariation {
     productId: number;
     code: string | null;
     sku: string;
+    combinations?: {
+        id: number;
+        variationId: number;
+        variationName: string;
+        variationValueId: number;
+        variationValueName: string;
+        name: string;
+    }[];
     stocks: {
         id: number;
         warehouseId: number;

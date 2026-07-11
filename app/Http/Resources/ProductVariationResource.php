@@ -43,6 +43,7 @@ class ProductVariationResource extends JsonResource
             'name'                          => generateVariationName($this->code),
             'code'                          => $this->code,
             'sku'                           => $this->sku,
+            'combinations'                  => ProductVariationCombinationResource::collection($this->combinations()->withoutTrashed()->get()),
             'stocks'                        => ProductVariationStockResource::collection($this->productVariationStocks()->whereIn('warehouse_id', session('WarehouseIds') ?? [1])->get()),
             'image'                         => uploadedAsset($this->image),
             'basePrice'                     => (float) variationPrice($this->product, $this, false),

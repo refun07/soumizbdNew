@@ -66,6 +66,25 @@ export type TStep = 'details' | 'shipping' | 'payment';
 const steps: TStep[] = ['details'];
 const stepQueryKey = 'checkoutStep';
 
+const getVariationAttributeText = (item: ICartProduct) => {
+    const combinations = item.variation?.combinations || [];
+    const attributeText = combinations
+        .map((combination) => {
+            if (
+                combination.variationName &&
+                combination.variationValueName
+            ) {
+                return `${combination.variationName}: ${combination.variationValueName}`;
+            }
+
+            return combination.variationValueName || combination.name || '';
+        })
+        .filter(Boolean)
+        .join(', ');
+
+    return attributeText || item.variation?.name || '';
+};
+
 const Checkout = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const dispatch = useDispatch();
@@ -895,11 +914,15 @@ const Checkout = () => {
                                             </div>
                                         )}
 
-                                        {carts.map((item) => (
-                                            <div
-                                                className="grid grid-cols-[minmax(0,2fr)_minmax(64px,.75fr)_minmax(92px,1fr)_minmax(76px,.85fr)_36px] items-center gap-2 border-b border-slate-200 px-3 py-3 text-xs sm:px-4 sm:text-sm"
-                                                key={item.id}
-                                            >
+                                        {carts.map((item) => {
+                                            const variationAttributeText =
+                                                getVariationAttributeText(item);
+
+                                            return (
+                                                <div
+                                                    className="grid grid-cols-[minmax(0,2fr)_minmax(64px,.75fr)_minmax(92px,1fr)_minmax(76px,.85fr)_36px] items-center gap-2 border-b border-slate-200 px-3 py-3 text-xs sm:px-4 sm:text-sm"
+                                                    key={item.id}
+                                                >
                                                 <Link
                                                     to={`/products/${item.product.slug}`}
                                                     className="flex min-w-0 items-center gap-2 font-medium text-slate-800 hover:text-primary"
@@ -914,8 +937,19 @@ const Checkout = () => {
                                                         alt={item.product.name}
                                                         className="h-10 w-10 shrink-0 rounded-[3px] border border-slate-200 object-cover sm:h-12 sm:w-12"
                                                     />
-                                                    <span className="line-clamp-2">
-                                                        {item.product.name}
+                                                    <span className="min-w-0">
+                                                        <span className="line-clamp-2">
+                                                            {item.product.name}
+                                                        </span>
+                                                        {Number(
+                                                            item.product
+                                                                .hasVariation,
+                                                        ) === 1 &&
+                                                            variationAttributeText && (
+                                                                <span className="mt-0.5 block text-[11px] font-normal leading-snug text-slate-500 sm:text-xs">
+                                                                    {variationAttributeText}
+                                                                </span>
+                                                            )}
                                                     </span>
                                                 </Link>
 
@@ -992,8 +1026,9 @@ const Checkout = () => {
                                                 >
                                                     <FaTrash size={13} />
                                                 </button>
-                                            </div>
-                                        ))}
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 ),
                             )}
