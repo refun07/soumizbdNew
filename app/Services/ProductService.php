@@ -322,7 +322,8 @@ class ProductService
                 'unit',
                 'variations' => fn($query) => $query->withSum('productVariationStocks as stock_total', 'stock_qty'),
             ])
-            ->latest();
+            ->orderBy('created_at', 'DESC')
+            ->orderBy('id', 'DESC');
 
         if ($request->isPublished != null) {
             $products = $products->where('is_published', $request->isPublished);
