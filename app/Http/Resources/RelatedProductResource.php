@@ -30,7 +30,7 @@ class RelatedProductResource extends JsonResource
 
         $data = [
             'id'            => (int) $this->id,
-            'name'          => $this->name,
+            'name'          => $this->collectTranslation('name'),
             'slug'          => $this->slug,
             'thumbnailImg'  => uploadedAsset($this->thumbnail_image),
             'basePrice'     => (float) productBasePrice($this, false),

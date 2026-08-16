@@ -55,6 +55,7 @@ class ProductResource extends JsonResource
         $user       = apiUser();
         $wishlists  = [];
         $inWishlist = false;
+        $translatedName = $this->collectTranslation('name');
 
         if (
             Route::currentRouteName() == 'api.products.show' &&
@@ -68,7 +69,7 @@ class ProductResource extends JsonResource
                 ], [
                     'content_ids' => [(string) $this->id],
                     'content_type' => 'product',
-                    'content_name' => $this->name,
+                    'content_name' => $translatedName,
                     'value' => (float) $this->__getMinBasePrice(),
                     'currency' => getSetting('currencyCode') ?? 'USD',
                 ], $request->eventId);
@@ -120,7 +121,7 @@ class ProductResource extends JsonResource
 
         $data = [
             'id'            => (int) $this->id,
-            'name'          => $this->name,
+            'name'          => $translatedName,
             'slug'          => $this->slug,
             'thumbnailImg'  => uploadedAsset($this->thumbnail_image),
             'basePrice'     => (float) $this->__getMinBasePrice(),
