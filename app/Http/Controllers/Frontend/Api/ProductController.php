@@ -176,7 +176,7 @@ class ProductController extends Controller
                     $ids = implode(',', $featuredProductIds);
                     $products = $products->orderByRaw("FIELD(products.id, {$ids})");
                 } else {
-                    $products = $products->orderBy('updated_at', 'DESC')->orderBy('created_at', 'DESC');
+                    $products = $products->orderBy('created_at', 'DESC');
                 }
                 break;
         }
