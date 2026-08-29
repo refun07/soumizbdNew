@@ -236,7 +236,7 @@ class OrderController extends Controller
         return view('frontend.invoice-public', [
             'order' => $order,
             'products' => $products,
-            'invoiceCode' => getSetting('order_code_prefix').$order->order_code,
+            'invoiceCode' => getSetting('order_code_prefix').($order->orderGroup?->code ?? $order->order_code),
         ]);
     }
 

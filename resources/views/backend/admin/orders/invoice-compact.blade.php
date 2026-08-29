@@ -287,7 +287,7 @@
                             </td>
                             <td style="width: 34%; padding-left: 8px;">
                                 <div class="meta">
-                                    <strong>Invoice #{{ getSetting('order_code_prefix') }}{{ $order->order_code }}</strong><br>
+                                    <strong>Invoice #{{ getSetting('order_code_prefix') }}{{ $order->orderGroup?->code ?? $order->order_code }}</strong><br>
                                     <strong>Order Date :</strong> {{ date('Y-m-d', strtotime($order->created_at)) }}<br>
                                     <strong>Payment Method :</strong> {{ $paymentMethod }}<br>
                                     <strong>Cash On Delivery :</strong> <strong class="amount-value" style="font-weight: bold;">{{ formatPrice($codAmount) }}</strong><br>
@@ -300,9 +300,10 @@
                     <table class="items">
                         <thead>
                             <tr>
-                                <th style="width: 64%;">Product</th>
+                                <th style="width: 52%;">Product</th>
+                                <th style="width: 18%; text-align: left;">Size</th>
                                 <th style="width: 12%; text-align: center;">Quantity</th>
-                                <th style="width: 24%; text-align: right;">Price</th>
+                                <th style="width: 18%; text-align: right;">Price</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -311,6 +312,7 @@
                                     $product = $item->productVariation?->product;
                                     $imageId = $item->productVariation?->image ?: $product?->thumbnail_image;
                                     $imageUrl = $uploadedImagePath($imageId);
+                                    $variationLabel = $item->productVariation?->combinations?->map(fn($combination) => $combination->variationValue?->name)->filter()->implode(' / ');
                                 @endphp
                                 <tr>
                                     <td>
@@ -330,6 +332,7 @@
                                             </tr>
                                         </table>
                                     </td>
+                                    <td class="item-name">{{ $variationLabel ?: '-' }}</td>
                                     <td class="qty" style="font-weight: bold;">{{ $item->qty }}</td>
                                     <td class="price amount-value" style="font-weight: bold;"><strong>{{ formatPrice($item->total_price) }}</strong></td>
                                 </tr>
@@ -342,6 +345,12 @@
                             <td class="label">Delivery :</td>
                             <td class="value amount-value" style="font-weight: bold;"><strong>{{ formatPrice($order->shipping_charge_amount) }}</strong></td>
                         </tr>
+                        @if ((float) $order->discount_amount + (float) $order->coupon_discount_amount > 0)
+                            <tr>
+                                <td class="label">Discount :</td>
+                                <td class="value amount-value" style="font-weight: bold; color: #b91c1c;"><strong>-{{ formatPrice($order->discount_amount + $order->coupon_discount_amount) }}</strong></td>
+                            </tr>
+                        @endif
                         <tr>
                             <td class="label">Total Due :</td>
                             <td class="value amount-value" style="font-weight: bold;"><strong>{{ formatPrice($order->total_amount) }}</strong></td>

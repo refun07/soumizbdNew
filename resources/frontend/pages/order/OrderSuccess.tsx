@@ -127,7 +127,9 @@ const OrderSuccess = () => {
                                     <p className="text-black/70 mb-1">
                                         {translate('Order Number')}
                                     </p>
-                                    <p className="text-black">{order.code}</p>
+                                    <p className="text-black">
+                                        {orderSuccessData.summary.orderCode}
+                                    </p>
                                 </div>
                                 <div>
                                     <p className="text-black/70 mb-1">

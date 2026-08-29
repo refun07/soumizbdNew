@@ -16,6 +16,8 @@
 
         <x-backend.inputs.file label="Thumbnail Image" name="thumbnail_image" value="{{ $brand?->thumbnail_image }}" />
 
+        <x-backend.inputs.file label="Banner Image" name="banner_image" value="{{ $brand?->banner_image }}" />
+
         <x-backend.inputs.text label="Meta Title" name="meta_title" placeholder="Type meta title"
             value="{{ $brand?->collectTranslation('meta_title', $langKey) }}" :isRequired="false" aiGenerate="true" />
 

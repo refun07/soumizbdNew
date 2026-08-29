@@ -93,7 +93,7 @@
                     <!-- Column 1: Invoice & Customer Info -->
                     <div class="p-4 lg:p-6">
                         <p class="text-xs text-gray-500 uppercase mb-2">{{ translate('INVOICE') }}</p>
-                        <p class="text-2xl font-bold mb-4">{{ getSetting('orderCodePrefix') }}{{ $order->order_code }}</p>
+                        <p class="text-2xl font-bold mb-4">{{ getSetting('orderCodePrefix') }}{{ $order->orderGroup?->code ?? $order->order_code }}</p>
                         
                         <button onclick="window.open('{{ route('admin.orders.downloadInvoice', $order->id) }}', '_blank')" 
                             class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded text-sm font-medium uppercase mb-6">

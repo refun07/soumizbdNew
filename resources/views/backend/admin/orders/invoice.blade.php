@@ -7,6 +7,12 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta charset="UTF-8">
     <style type="text/css">
+        @page {
+            sheet-size: 105mm 148.5mm;
+            size: 105mm 148.5mm;
+            margin: 5mm;
+        }
+
         * {
             box-sizing: border-box;
         }
@@ -17,7 +23,7 @@
             background: #ffffff;
             line-height: 1.35;
             margin: 0;
-            padding: 14px 14px 56px;
+            padding: 0 0 28px;
             direction: {{ $direction ?? 'ltr' }};
             text-align: {{ $default_text_align ?? 'left' }};
         }
@@ -102,8 +108,8 @@
         }
 
         .invoice-product-thumb {
-            width: 34px;
-            height: 34px;
+            width: 26px;
+            height: 26px;
             border: 1px solid #d6d3d1;
             border-radius: 4px;
         }
@@ -118,12 +124,25 @@
             border-collapse: collapse;
             border: 1.5px solid #a8a29e;
             margin-bottom: 10px;
+            table-layout: fixed;
         }
 
         .invoice-items-table th,
         .invoice-items-table td {
             border: 1px solid #a8a29e !important;
+            overflow-wrap: anywhere;
         }
+
+        .invoice-items-table > thead > tr > th:nth-child(1),
+        .invoice-items-table > tbody > tr > td:nth-child(1) { width: 40% !important; }
+        .invoice-items-table > thead > tr > th:nth-child(2),
+        .invoice-items-table > tbody > tr > td:nth-child(2) { width: 18% !important; }
+        .invoice-items-table > thead > tr > th:nth-child(3),
+        .invoice-items-table > tbody > tr > td:nth-child(3) { width: 16% !important; }
+        .invoice-items-table > thead > tr > th:nth-child(4),
+        .invoice-items-table > tbody > tr > td:nth-child(4) { width: 10% !important; }
+        .invoice-items-table > thead > tr > th:nth-child(5),
+        .invoice-items-table > tbody > tr > td:nth-child(5) { width: 16% !important; }
 
         .invoice-items-inner,
         .invoice-items-inner td {
@@ -131,10 +150,8 @@
         }
 
         .invoice-page-footer {
-            position: fixed;
-            left: 14px;
-            right: 14px;
-            bottom: 12px;
+            position: static;
+            margin-top: 12px;
             padding-top: 7px;
             border-top: 1px solid #e7e5e4;
             text-align: center;
@@ -289,7 +306,7 @@
                 <div style="margin-top: 8px; font-size: 14px; line-height: 1.45;">
                     <p style="margin-bottom: 4px;"><strong
                             style="color: #44403c; font-weight: 600;">{{ translate('Invoice Number') }}:</strong> <span
-                            class="font-price">{{ getSetting('order_code_prefix') }}{{ $order?->order_code ?? $order?->id }}</span>
+                            class="font-price">{{ getSetting('order_code_prefix') }}{{ $orderGroup?->code ?? $order?->order_code ?? $order?->id }}</span>
                     </p>
                     <p><strong style="color: #44403c; font-weight: 600;">{{ translate('Invoice Date') }}:</strong>
                         {{ $order?->created_at ? date('d M, Y', strtotime($order->created_at)) : date('d M, Y') }}</p>
@@ -342,7 +359,7 @@
         style="margin-bottom: 8px; margin-top: 16px; border-radius: 4px; overflow: hidden;">
         <thead>
             <tr style="background: #fef3c7; border-bottom: 2px solid #d6d3d1;">
-                <th colspan="4"
+                <th colspan="5"
                     style="font-weight: 700; font-size: 13px; padding: 7px 12px; text-align: left; text-transform: uppercase; letter-spacing: 0.5px; color: #92400e;">
                     {{ translate('Returned Items') }} ({{ translate('Credit') }})</th>
             </tr>
@@ -350,6 +367,9 @@
                 <th
                     style="font-weight: 700; font-size: 13px; padding: 8px 12px; text-align: left; border-right: 1px solid #e7e5e4; width: auto; text-transform: uppercase; letter-spacing: 0.5px; color: #44403c;">
                     {{ translate('Item & Description') }}</th>
+                <th
+                    style="font-weight: 700; font-size: 13px; padding: 8px 12px; text-align: left; border-right: 1px solid #e7e5e4; width: 82px; text-transform: uppercase; letter-spacing: 0.5px; color: #44403c;">
+                    {{ translate('Size') }}</th>
                 <th
                     style="font-weight: 700; font-size: 13px; padding: 8px 12px; text-align: right; border-right: 1px solid #e7e5e4; width: 100px; text-transform: uppercase; letter-spacing: 0.5px; color: #44403c;">
                     {{ translate('Unit Price') }}</th>
@@ -387,6 +407,9 @@
                             </tr>
                         </table>
                     </td>
+                    <td style="text-align: left; padding: 7px 12px; font-size: 13px; border-right: 1px solid #e7e5e4; color: #1c1917; vertical-align: top;">
+                        {{ $originalVariationLabel ?: '-' }}
+                    </td>
                     <td style="text-align: right; padding: 7px 12px; font-size: 14px; border-right: 1px solid #e7e5e4; color: #1c1917;"
                         class="font-price">
                         {{ formatPrice($safeNumber($item?->original_unit_price)) }}</td>
@@ -405,7 +428,7 @@
         style="border-radius: 4px; overflow: hidden;">
         <thead>
             <tr style="background: #dbeafe; border-bottom: 2px solid #d6d3d1;">
-                <th colspan="4"
+                <th colspan="5"
                     style="font-weight: 700; font-size: 13px; padding: 7px 12px; text-align: left; text-transform: uppercase; letter-spacing: 0.5px; color: #1e40af;">
                     {{ translate('Exchange Items') }} ({{ translate('New Items Received') }})</th>
             </tr>
@@ -413,6 +436,9 @@
                 <th
                     style="font-weight: 700; font-size: 13px; padding: 8px 12px; text-align: left; border-right: 1px solid #e7e5e4; width: auto; text-transform: uppercase; letter-spacing: 0.5px; color: #44403c;">
                     {{ translate('Item & Description') }}</th>
+                <th
+                    style="font-weight: 700; font-size: 13px; padding: 8px 12px; text-align: left; border-right: 1px solid #e7e5e4; width: 82px; text-transform: uppercase; letter-spacing: 0.5px; color: #44403c;">
+                    {{ translate('Size') }}</th>
                 <th
                     style="font-weight: 700; font-size: 13px; padding: 8px 12px; text-align: right; border-right: 1px solid #e7e5e4; width: 100px; text-transform: uppercase; letter-spacing: 0.5px; color: #44403c;">
                     {{ translate('Unit Price') }}</th>
@@ -450,6 +476,9 @@
                             </tr>
                         </table>
                     </td>
+                    <td style="text-align: left; padding: 7px 12px; font-size: 13px; border-right: 1px solid #e7e5e4; color: #1c1917; vertical-align: top;">
+                        {{ $exchangeVariationLabel ?: '-' }}
+                    </td>
                     <td style="text-align: right; padding: 7px 12px; font-size: 14px; border-right: 1px solid #e7e5e4; color: #1c1917;"
                         class="font-price">
                         {{ formatPrice($safeNumber($item?->exchange_unit_price)) }}</td>
@@ -472,6 +501,9 @@
                     style="font-weight: 700; font-size: 13px; padding: 8px 12px; text-align: left; border-right: 1px solid #e7e5e4; width: auto; text-transform: uppercase; letter-spacing: 0.5px; color: #44403c;">
                     {{ translate('Item & Description') }}</th>
                 <th
+                    style="font-weight: 700; font-size: 13px; padding: 8px 12px; text-align: left; border-right: 1px solid #e7e5e4; width: 82px; text-transform: uppercase; letter-spacing: 0.5px; color: #44403c;">
+                    {{ translate('Size') }}</th>
+                <th
                     style="font-weight: 700; font-size: 13px; padding: 8px 12px; text-align: right; border-right: 1px solid #e7e5e4; width: 100px; text-transform: uppercase; letter-spacing: 0.5px; color: #44403c;">
                     {{ translate('Unit Price') }}</th>
                 <th
@@ -487,6 +519,7 @@
                 @php
                     $product = $item?->productVariation?->product;
                     $productImage = $pdfProductImage($item?->productVariation, $product);
+                    $variationLabel = $safeText($item?->productVariation?->combinations?->map(fn($c) => $c->variationValue?->name)?->filter()?->implode(' / '));
                 @endphp
                 <tr style="border-bottom: 1px solid #e7e5e4;">
                     <td
@@ -503,6 +536,9 @@
                                 </td>
                             </tr>
                         </table>
+                    </td>
+                    <td style="text-align: left; padding: 7px 12px; font-size: 13px; border-right: 1px solid #e7e5e4; color: #1c1917; vertical-align: top;">
+                        {{ $variationLabel ?: '-' }}
                     </td>
                     <td style="text-align: right; padding: 7px 12px; font-size: 14px; border-right: 1px solid #e7e5e4; color: #1c1917;"
                         class="font-price">

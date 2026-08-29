@@ -15,7 +15,7 @@ class OrderController extends Controller
     {
         $limit  = $request->limit ?? perPage();
 
-        $orders = apiUser()->orders()->latest();
+        $orders = apiUser()->orders()->with('orderGroup')->latest();
 
         // filter by delivery status
         if ($request->deliveryStatus != null) {
@@ -34,7 +34,7 @@ class OrderController extends Controller
     # show order
     public function show($code)
     {
-        $order = Order::where('order_code', $code)->first();
+        $order = Order::with('orderGroup')->where('order_code', $code)->first();
         if (!is_null($order)) {
             return [
                 'success'   => true,
@@ -58,6 +58,7 @@ class OrderController extends Controller
         $orderGroup = OrderGroup::where('code', $code)->first();
         if (!is_null($orderGroup)) {
             $orders = $orderGroup->orders;
+            $orders->load('orderGroup');
             $orderTotal = (float) $orders->sum('total_amount');
 
             $summary = [

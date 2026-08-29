@@ -56,6 +56,8 @@ const formatOrderDate = (dateString: string): string => {
 interface Order {
     id: number;
     code: number;
+    customerOrderCode?: number;
+    customerOrderCodeToShow?: string;
     customerName?: string;
     customerPhone?: string;
     agentId?: number | null;
@@ -846,7 +848,7 @@ const OrderPage: React.FC = () => {
                                         </div>
                                         <div className="font-medium flex items-center gap-1.5">
                                             <span>
-                                                {order.orderPrefix} {order.code}
+                                            {order.customerOrderCodeToShow || `${order.orderPrefix || ''}${order.customerOrderCode || order.code}`}
                                             </span>
                                             {order.isExchangeOrder && (
                                                 <a
@@ -1110,7 +1112,7 @@ const OrderPage: React.FC = () => {
                                             href={`/admin/orders/${order.code}`}
                                             className="font-semibold text-primary hover:underline"
                                         >
-                                            {order.orderPrefix}{order.code}
+                                            {order.customerOrderCodeToShow || `${order.orderPrefix || ''}${order.customerOrderCode || order.code}`}
                                         </a>
                                         <div className="mt-1 flex flex-wrap gap-1">
                                             <span className="rounded bg-sky-100 px-1.5 py-0.5 text-[10px] font-semibold text-sky-700 dark:bg-sky-900/40 dark:text-sky-300">

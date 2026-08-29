@@ -50,6 +50,7 @@ class BrandController extends Controller
         $brand = new Brand;
         $brand->name             = $request->name;
         $brand->thumbnail_image  = $request->thumbnail_image;
+        $brand->banner_image     = $request->banner_image;
         $brand->meta_title       = $request->meta_title;
         $brand->meta_description = $request->meta_description;
         $brand->meta_keywords    = $request->meta_keywords;
@@ -62,6 +63,7 @@ class BrandController extends Controller
         $brandTranslation = BrandTranslation::firstOrNew(['lang_key' => config('app.default_language'), 'brand_id' => $brand->id]);
         $brandTranslation->name             = $brand->name;
         $brandTranslation->thumbnail_image  = $request->thumbnail_image;
+        $brandTranslation->banner_image     = $request->banner_image;
         $brandTranslation->meta_title       = $request->meta_title;
         $brandTranslation->meta_description = $request->meta_description;
         $brandTranslation->meta_keywords    = $request->meta_keywords;
@@ -109,6 +111,7 @@ class BrandController extends Controller
         if ($request->lang_key == config("app.default_language")) {
             $brand->name = $request->name;
             $brand->thumbnail_image  = $request->thumbnail_image;
+            $brand->banner_image     = $request->banner_image;
             $brand->meta_title       = $request->meta_title;
             $brand->meta_description = $request->meta_description;
             $brand->meta_keywords    = $request->meta_keywords;
@@ -119,6 +122,7 @@ class BrandController extends Controller
         $brandTranslation = BrandTranslation::firstOrNew(['lang_key' => $request->lang_key, 'brand_id' => $brand->id]);
         $brandTranslation->name             = $request->name;
         $brandTranslation->thumbnail_image  = $request->thumbnail_image;
+        $brandTranslation->banner_image     = $request->banner_image;
         $brandTranslation->meta_title       = $request->meta_title;
         $brandTranslation->meta_description = $request->meta_description;
         $brandTranslation->meta_keywords    = $request->meta_keywords;

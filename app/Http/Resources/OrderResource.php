@@ -23,7 +23,9 @@ class OrderResource extends JsonResource
             'id' => $this->id,
             'orderGroupId' => $this->order_group_id,
             'code' => $this->order_code,
-            'codeToShow' => getSetting('orderCodePrefix').$this->order_code,
+            'codeToShow' => getSetting('orderCodePrefix').($this->orderGroup?->code ?? $this->order_code),
+            'customerOrderCode' => $this->orderGroup?->code ?? $this->order_code,
+            'customerOrderCodeToShow' => getSetting('orderCodePrefix').($this->orderGroup?->code ?? $this->order_code),
             'createdDate' => $this->created_at->toIso8601String(),
             'createdTime' => date('h:i A', strtotime($this->created_at)),
             'updatedDate' => date('d M, Y', strtotime($this->updated_at)),
@@ -93,6 +95,8 @@ class OrderResource extends JsonResource
                 'image' => $productImage ? uploadedAsset($productImage) : null,
             ] : null;
             $additionalData['orderPrefix'] = getSetting('orderCodePrefix');
+            $additionalData['customerOrderCode'] = $orderGroup?->code ?? $this->order_code;
+            $additionalData['customerOrderCodeToShow'] = getSetting('orderCodePrefix').($orderGroup?->code ?? $this->order_code);
             $additionalData['agentId'] = $this->agent_id;
             $additionalData['agentName'] = $this->agent?->name;
 

@@ -21,7 +21,14 @@ const brandApi = apiSlice
                 }),
                 providesTags: ['Brands'],
             }),
+            getBrandDetails: builder.query<IBrandShort | null, string>({
+                query: (slug) => `/brands/details/${slug}`,
+                transformResponse: (res: {
+                    result: IBrandShort | null;
+                }) => res.result,
+                providesTags: ['Brands'],
+            }),
         }),
     });
 
-export const { useGetBrandsQuery } = brandApi;
+export const { useGetBrandsQuery, useGetBrandDetailsQuery } = brandApi;

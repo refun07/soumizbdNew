@@ -19,7 +19,10 @@ class BrandResource extends JsonResource
             'id'                => $this->id,
             'name'              => $this->collectTranslation('name'),
             'slug'              => $this->slug,
-            'thumbnailImage'    => uploadedAsset($this->thumbnail_image)
+            'thumbnailImage'    => uploadedAsset($this->collectTranslation('thumbnail_image')),
+            'bannerImage'       => uploadedAsset($this->collectTranslation('banner_image') ?: $this->meta_image ?: $this->thumbnail_image),
+            'metaImage'         => uploadedAsset($this->collectTranslation('meta_image')),
+            'productsCount'     => $this->whenCounted('products'),
         ];
 
         return $data;

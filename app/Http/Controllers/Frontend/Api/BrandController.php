@@ -30,4 +30,17 @@ class BrandController extends Controller
             'result'    => BrandResource::collection($brands)->response()->getData(true)
         ];
     }
+
+    # get brand details by slug
+    public function show($slug)
+    {
+        $brand = Brand::isActive()->withCount('products')->where('slug', $slug)->first();
+
+        return [
+            'success'   => true,
+            'status'    => $brand ? 200 : 404,
+            'message'   => $brand ? '' : translate('Brand not found'),
+            'result'    => $brand ? new BrandResource($brand) : null,
+        ];
+    }
 }

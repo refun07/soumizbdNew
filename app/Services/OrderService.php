@@ -173,7 +173,7 @@ class OrderService
 
             foreach ($order->orderItems as $orderItem) {
                 $csv->insertOne([
-                    $orderPrefix.$order->order_code,
+                    $orderPrefix.($order->orderGroup?->code ?? $order->order_code),
                     $order->created_at ? $order->created_at->format('Y-m-d H:i:s') : '',
                     ucfirst(str_replace('_', ' ', $order->delivery_status)),
                     $orderGroup?->phone ?? $order->user?->phone ?? '',
@@ -673,7 +673,7 @@ class OrderService
         if ($multiple) {
             return PDF::loadView('backend.admin.orders.invoice', $viewData, [], $pdfConfig);
         } else {
-            $invoiceCode = trim((string) getSetting('order_code_prefix', '').(string) $order->order_code);
+            $invoiceCode = trim((string) getSetting('order_code_prefix', '').(string) ($order->orderGroup?->code ?? $order->order_code));
             $filename = preg_replace('/[^A-Za-z0-9._-]+/', '-', $invoiceCode);
             $filename = trim((string) $filename, '-_.');
             $filename = ($filename !== '' ? $filename : 'invoice-'.$order->id).'.pdf';
@@ -737,6 +737,7 @@ class OrderService
                 'orderGroup.shippingAddress',
                 'orderGroup.billingAddress',
                 'orderItems.productVariation.product',
+                'orderItems.productVariation.combinations.variationValue',
                 'user',
             ])
             ->whereIn('id', array_map('intval', $ids))

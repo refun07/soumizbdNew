@@ -117,7 +117,7 @@
                         <td class="text-ceter">
                             <a href="{{ route('admin.orders.downloadInvoice', $order->id) }}">
                                 <i data-feather="download" width="18"></i>
-                                {{ getSetting('orderCodePrefix') }}{{ $order->order_code }}
+                                {{ getSetting('orderCodePrefix') }}{{ $order->orderGroup?->code ?? $order->order_code }}
                                 <span class="text-lg text-theme-orange">
                                     <i class="fa-solid fa-file-arrow-down"></i>
                                 </span>
