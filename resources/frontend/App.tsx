@@ -238,9 +238,9 @@ const App = () => {
                 <Route path="/on-sale-products" element={<OnSaleProducts />} />
                 {/* end::uses search and filter */}
 
+                <Route path="/shops" element={<Shops />} />
                 {appMode === 'multiVendor' ? (
                     <>
-                        <Route path="/shops" element={<Shops />} />
                         <Route
                             path="/shops/:shopSlug"
                             element={
