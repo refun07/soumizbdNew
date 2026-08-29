@@ -643,7 +643,11 @@ const Checkout = () => {
             } catch (err: any) {
                 isSubmittingOrder.current = false;
 
-                toast.error(err.data.message);
+                toast.error(
+                    err?.data?.message ||
+                        err?.error ||
+                        'Unable to place the order. Please try again.',
+                );
                 navigate(`/orders/failed`);
             }
         }
