@@ -348,6 +348,15 @@ class CheckoutController extends Controller
             ]);
         }
 
+        if (empty($request->cartIds) || empty($request->shopIds)) {
+            return response()->json([
+                'success' => false,
+                'status' => 422,
+                'message' => translate('Please select at least one product'),
+                'result' => null,
+            ], 422);
+        }
+
         if (! $request->shippingAddressId && $request->shippingAddress) {
             $requestAddress = json_decode($request->shippingAddress, true);
 
@@ -465,10 +474,13 @@ class CheckoutController extends Controller
 
         $carts = Cart::whereHas('productVariation')
             ->whereIn('id', $request->cartIds)
-            ->when(apiUser(), function ($query) use ($user) {
+            ->where(function ($query) use ($user, $request) {
                 $query->where('user_id', $user->id);
+
+                if ($request->guestUserId) {
+                    $query->orWhere('guest_user_id', $request->guestUserId);
+                }
             })
-            // Remove warehouse filter - get all carts
             ->get();
 
         Log::debug('[CHECKOUT] Carts retrieved', ['cart_count' => count($carts), 'cart_ids' => $carts->pluck('id')->toArray()]);
@@ -683,6 +695,7 @@ class CheckoutController extends Controller
             $grandCouponDiscount = 0;
             if ($request->shopIds) {
                 Log::debug('[CHECKOUT] Processing shops', ['shop_ids' => $request->shopIds]);
+                $processedShopCount = 0;
                 foreach ($request->shopIds as $shopId) {
                     try {
                         $shop = Shop::find((int) $shopId);
@@ -690,8 +703,12 @@ class CheckoutController extends Controller
 
                         $shopCarts = Cart::query()
                             ->whereIn('id', $request->cartIds)
-                            ->when(apiUser(), function ($query) use ($user) {
+                            ->where(function ($query) use ($user, $request) {
                                 $query->where('user_id', $user->id);
+
+                                if ($request->guestUserId) {
+                                    $query->orWhere('guest_user_id', $request->guestUserId);
+                                }
                             })
                             ->whereHas('productVariation', function ($q) use ($shopId) {
                                 $q->whereHas('product', function ($q) use ($shopId) {
@@ -857,8 +874,12 @@ class CheckoutController extends Controller
 
                                 // product variation stock
                                 $stock = $productVariation->productVariationStocks()->where('warehouse_id', $shopCart->warehouse_id)->first();
-                                $stock->stock_qty -= $orderItem->qty;
-                                $stock->save();
+                                if ($stock) {
+                                    $stock->stock_qty -= $orderItem->qty;
+                                    $stock->save();
+                                } elseif (! $isPreOrder && ! $allowBackorder) {
+                                    throw new \RuntimeException('Stock record is unavailable for this product.');
+                                }
 
                                 // category sales count for only root category
                                 $categories = $product->categories;
@@ -889,6 +910,7 @@ class CheckoutController extends Controller
                             $order->coupon_discount_amount = $shopCouponDiscount;
                             $order->total_amount = $shopSubTotal + $shopTax + $shopShippingCharge - $shopDiscount - $shopCouponDiscount;
                             $order->save();
+                            $processedShopCount++;
 
                             // Send Facebook Purchase event
                             try {
@@ -960,9 +982,12 @@ class CheckoutController extends Controller
                         }
                     } catch (\Exception $e) {
                         \Log::error('Shop checkout processing failed for shop ID '.$shopId.': '.$e->getMessage());
-
-                        continue;
+                        throw $e;
                     }
+                }
+
+                if ($processedShopCount === 0) {
+                    throw new \RuntimeException('No valid shop products were found for this order.');
                 }
 
                 $grandTotal = $grandSubtotal + $grandTax + $grandShippingCharge - $grandDiscount - $grandCouponDiscount;

@@ -202,6 +202,7 @@ export interface InvoiceData {
 
 export interface InvoiceItem {
     name: string;
+    size?: string;
     unit_price: number;
     quantity: number;
     amount: number;

@@ -212,6 +212,7 @@ export interface IOrderPayload extends ICheckoutCustomerDetails {
 export interface IManualOrderPayload extends ICheckoutCustomerDetails {
     shippingAddress: IAddress;
     shippingZoneId: number;
+    guestUserId?: number | null;
     billingAddress?: IAddress;
     shopIds: number[];
     couponCodes: string[];

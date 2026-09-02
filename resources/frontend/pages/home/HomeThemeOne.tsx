@@ -305,7 +305,7 @@ const OnSaleCountdown = ({ endsAt }: { endsAt?: string | null }) => {
     useEffect(() => {
         if (!endsAt || Number.isNaN(endTime)) return;
 
-        const timer = window.setInterval(() => setNow(Date.now()), 1000);
+        const timer = window.setInterval(() => setNow(Date.now()), 60000);
         return () => window.clearInterval(timer);
     }, [endsAt, endTime]);
 
@@ -316,12 +316,10 @@ const OnSaleCountdown = ({ endsAt }: { endsAt?: string | null }) => {
     const days = Math.floor(totalSeconds / 86400);
     const hours = Math.floor((totalSeconds % 86400) / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
     const parts = [
         { value: days, label: translate('Days') },
         { value: hours, label: translate('Hour') },
         { value: minutes, label: translate('Min') },
-        { value: seconds, label: translate('Sec') },
     ];
 
     return (
@@ -436,10 +434,7 @@ const HomeThemeOne = () => {
                                 {banner?.banners?.map((item, idx) => (
                                     <SwiperSlide key={idx}>
                                         {({ isActive: isSlideActive }) => {
-                                            const shouldShowVideo =
-                                                item.useBackgroundVideo ===
-                                                    '1' &&
-                                                !!item.backgroundVideoLink;
+                                            const shouldShowVideo = false;
                                             const shouldShowForegroundImage =
                                                 item.showForegroundImage ===
                                                     '1' &&
@@ -846,7 +841,7 @@ const HomeThemeOne = () => {
                             <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-white/25 pb-3">
                                 <div className="flex flex-wrap items-end gap-x-5 gap-y-2">
                                     <h2 className="text-xl font-normal leading-tight text-white md:text-2xl">
-                                        <span className="border-b-[5px] border-[#F2C488] pb-2 font-semibold">
+                                        <span className="inline-block align-baseline border-b-[5px] border-[#F2C488] pb-1.5 font-semibold sm:pb-2">
                                             {translate('On Sale')}
                                         </span>{' '}
                                         {translate('Products')}
@@ -1141,9 +1136,7 @@ const HomeThemeOne = () => {
                     <div className="container">
                         {(() => {
                             const item = banner.secondaryBanner;
-                            const shouldShowVideo =
-                                item.useBackgroundVideo === '1' &&
-                                !!item.backgroundVideoLink;
+                            const shouldShowVideo = false;
                             const secondaryContentAlignment =
                                 item.contentAlignment ?? 'left';
 

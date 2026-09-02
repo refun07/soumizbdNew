@@ -26,8 +26,6 @@ const HeaderThemeTwo = () => {
         topbarConfig?.hotline_number || window.config.topbarHotlineLabel;
     const topbarPromoText =
         topbarConfig?.promo_text || window.config.topbarPromoText;
-    const promoTextAnimationEnabled =
-        topbarConfig?.promo_text_animation_enabled ?? true;
     const topbarPhone =
         topbarConfig?.hotline ||
         topbarHotline?.replace(/\D/g, '') ||
@@ -61,25 +59,6 @@ const HeaderThemeTwo = () => {
         <>
         <style>
             {`
-                @keyframes headerTwoPromoTextSwing {
-                    0%, 100% {
-                        transform: translateX(-18%);
-                    }
-                    50% {
-                        transform: translateX(18%);
-                    }
-                }
-
-                .header-two-promo-text {
-                    animation: headerTwoPromoTextSwing 5.5s ease-in-out infinite;
-                    will-change: transform;
-                }
-
-                @media (prefers-reduced-motion: reduce) {
-                    .header-two-promo-text {
-                        animation: none;
-                    }
-                }
             `}
         </style>
         <header className="sticky top-0 z-[3] bg-white shadow-sm">
@@ -90,13 +69,7 @@ const HeaderThemeTwo = () => {
                         <span>{topbarHotline}</span>
                     </a>
                     <div className="mx-4 hidden min-w-0 overflow-hidden text-inherit lg:mx-8 md:block">
-                        <p
-                            className={`mx-auto flex w-max max-w-full items-center justify-center gap-2 whitespace-nowrap text-center ${
-                                promoTextAnimationEnabled
-                                    ? 'header-two-promo-text'
-                                    : ''
-                            }`}
-                        >
+                        <p className="mx-auto flex w-max max-w-full items-center justify-center gap-2 whitespace-nowrap text-center">
                             {topbarConfig?.promo_text_icon ? (
                                 <img
                                     src={`/${topbarConfig.promo_text_icon}`}

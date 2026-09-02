@@ -41,7 +41,7 @@ export const buildThermalReceiptHtml = (invoiceData: InvoiceData): string => {
     const itemsRows = invoiceData.items.map(item => `
         <tr>
             <td style="padding: 3px 0; font-size: 10px; vertical-align: top; width: 100%;">
-                <div style="font-weight: 600; word-break: break-word;">${item.name}</div>
+                <div style="font-weight: 600; word-break: break-word;">${item.name}${item.size ? ` (${item.size})` : ''}</div>
                 <div style="font-size: 9px; color: #555;">${item.quantity} x ${formatCurrency(item.unit_price)}</div>
             </td>
             <td style="padding: 3px 0; font-size: 10px; text-align: right; vertical-align: top; white-space: nowrap;">${formatCurrency(item.amount)}</td>

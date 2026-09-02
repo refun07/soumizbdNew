@@ -18,9 +18,13 @@ const ReviewItem = ({ review, showProductDetails = false, ...rest }: Props) => {
                 {showProductDetails ? (
                     <div>
                         <h5 className="text-sm text-zinc-900 mb-0.5 line-clamp-2 max-w-[350px]">
-                            <Link to={`/products/${review.product.slug}`}>
-                                {review.product.name}
-                            </Link>
+                            {review.product?.slug ? (
+                                <Link to={`/products/${review.product.slug}`}>
+                                    {review.product.name}
+                                </Link>
+                            ) : (
+                                review.product?.name
+                            )}
                         </h5>
                         <time className="text-black/70 text-sm">
                             {review.createdDate}

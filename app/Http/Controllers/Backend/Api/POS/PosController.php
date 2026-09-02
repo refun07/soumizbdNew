@@ -914,7 +914,12 @@ class PosController extends Controller
             DB::commit();
 
             // Load relationships for invoice data
-            $order->load(['orderItems.productVariation.product', 'orderGroup.transaction', 'user']);
+            $order->load([
+                'orderItems.productVariation.product',
+                'orderItems.productVariation.combinations.variationValue',
+                'orderGroup.transaction',
+                'user',
+            ]);
 
             // Get warehouse separately (no relationship defined on Order model)
             $warehouse = Warehouse::find($order->warehouse_id);
@@ -946,15 +951,35 @@ class PosController extends Controller
     {
         try {
             // Calculate tax rate (simplified - assumes single rate)
-            $taxRate = $order->amount > 0 ? (($order->tax_amount / $order->amount) * 100) : 0;
+            $automaticItemDiscount = (float) $order->orderItems->sum(function ($item) {
+                return (float) ($item->total_discount ?? 0);
+            });
+            $invoiceSubtotal = (float) $order->orderItems->sum(function ($item) {
+                return max((float) $item->total_price - (float) ($item->total_tax ?? 0), 0);
+            });
+            $baseSubtotal = (float) $order->orderItems->sum(function ($item) {
+                return (float) $item->unit_price * max((int) $item->qty, 1);
+            });
+            $storesBaseSubtotal = abs((float) $order->amount - $baseSubtotal) < 0.01;
+            $manualDiscount = $storesBaseSubtotal
+                ? max((float) $order->discount_amount - $automaticItemDiscount, 0)
+                : max((float) $order->discount_amount, 0);
+            $displayDiscount = $manualDiscount + (float) ($order->coupon_discount_amount ?? 0);
+            $invoiceTotal = max($invoiceSubtotal + (float) $order->tax_amount + (float) $order->shipping_charge_amount - $displayDiscount, 0);
+            $taxRate = $invoiceSubtotal > 0 ? (($order->tax_amount / $invoiceSubtotal) * 100) : 0;
 
-            // Format order items
+            // Format invoice items with the final selling price. Product-level
+            // markdowns are already reflected in the line amount and should not
+            // be repeated as an order discount.
             $items = $order->orderItems->map(function ($item) {
                 $product = $item->productVariation->product ?? null;
+                $quantity = max((int) $item->qty, 1);
+                $lineSubtotal = max((float) $item->total_price - (float) ($item->total_tax ?? 0), 0);
 
                 return [
                     'name' => $product ? $product->collectTranslation('name') : 'Product not found',
-                    'unit_price' => (float) $item->unit_price,
+                    'size' => $item->productVariation?->combinations?->map(fn($combination) => $combination->variationValue?->name)->filter()->implode(' / '),
+                    'unit_price' => $lineSubtotal / $quantity,
                     'quantity' => (int) $item->qty,
                     'amount' => (float) $item->total_price,
                 ];
@@ -1048,12 +1073,12 @@ class PosController extends Controller
                     'email' => $orderGroup->email ?? '',
                 ],
                 'items' => $items->toArray(),
-                'subtotal' => (float) $order->amount,
+                'subtotal' => $invoiceSubtotal,
                 'tax_rate' => round((float) $taxRate, 2),
                 'tax_amount' => (float) $order->tax_amount,
                 'shipping' => (float) $order->shipping_charge_amount,
-                'discount' => (float) $order->discount_amount,
-                'total' => (float) $order->total_amount,
+                'discount' => $displayDiscount,
+                'total' => $invoiceTotal,
                 'notes' => $orderGroup->note ?? '',
                 'payment_method' => $transaction->payment_method ?? '',
                 'payment_splits' => $paymentSplits,

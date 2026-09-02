@@ -170,15 +170,17 @@ const CouponDetails = () => {
                         </p>
                     </div>
 
-                    <div className="flex justify-end mt-6">
-                        <Button
-                            as="link"
-                            variant="outline"
-                            to={`/products?couponCode=${coupon?.code}`}
-                        >
-                            {translate('View Shop')}
-                        </Button>
-                    </div>
+                    {coupon?.code ? (
+                        <div className="flex justify-end mt-6">
+                            <Button
+                                as="link"
+                                variant="outline"
+                                to={`/products?couponCode=${coupon.code}`}
+                            >
+                                {translate('View Shop')}
+                            </Button>
+                        </div>
+                    ) : null}
                 </div>
             </div>
         </ModalWrapper>

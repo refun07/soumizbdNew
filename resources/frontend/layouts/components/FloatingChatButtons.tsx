@@ -115,7 +115,7 @@ const FloatingChatButtons: React.FC = () => {
                 <button
                     onClick={() => setIsOpen(!isOpen)}
                     className={`w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center shadow-lg transition-all duration-300 ${
-                        isOpen ? 'hover:bg-primary/90 rotate-90' : 'hover:bg-primary/90 pulse-animation'
+                        isOpen ? 'hover:bg-primary/90 rotate-90' : 'hover:bg-primary/90'
                     }`}
                 >
                     {isOpen ? (
@@ -133,19 +133,6 @@ const FloatingChatButtons: React.FC = () => {
                 />
             )}
 
-            <style>{`
-                @keyframes pulse-animation {
-                    0%, 100% {
-                        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
-                    }
-                    50% {
-                        box-shadow: 0 0 0 10px rgba(34, 197, 94, 0);
-                    }
-                }
-                .pulse-animation {
-                    animation: pulse-animation 2s infinite;
-                }
-            `}</style>
         </>
     );
 };

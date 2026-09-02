@@ -670,6 +670,44 @@ class OrderService
             'exchange' => $exchange,
         ];
 
+        // Standard invoices use the compact template as two A5 copies on one
+        // A4 sheet. Exchange invoices keep the detailed template.
+        if (! $order->is_exchange_order) {
+            // Standard invoice downloads are an A4 portrait sheet with two
+            // landscape invoice copies, one above the other.
+            $pdfConfig['format'] = 'A4';
+            $pdfConfig['margin_left'] = 0;
+            $pdfConfig['margin_right'] = 0;
+            $pdfConfig['margin_top'] = 0;
+            $pdfConfig['margin_bottom'] = 0;
+
+            $compactViewData = [
+                'orders' => collect([$order]),
+                'single' => true,
+                'font_family' => $font_family,
+                'direction' => $direction,
+                'default_text_align' => $default_text_align,
+                'reverse_text_align' => $reverse_text_align,
+                'logo' => $logo,
+                'systemName' => $systemName,
+                'systemAddress' => $systemAddress,
+                'qrCodeImage' => $qrCodeImage,
+            ];
+
+            $pdf = PDF::loadView('backend.admin.orders.invoice-compact', $compactViewData, [], $pdfConfig);
+
+            if ($multiple) {
+                return $pdf;
+            }
+
+            $invoiceCode = trim((string) getSetting('order_code_prefix', '').(string) ($order->orderGroup?->code ?? $order->order_code));
+            $filename = preg_replace('/[^A-Za-z0-9._-]+/', '-', $invoiceCode);
+            $filename = trim((string) $filename, '-_.');
+            $filename = ($filename !== '' ? $filename : 'invoice-'.$order->id).'.pdf';
+
+            return $pdf->stream($filename);
+        }
+
         if ($multiple) {
             return PDF::loadView('backend.admin.orders.invoice', $viewData, [], $pdfConfig);
         } else {
@@ -757,6 +795,7 @@ class OrderService
 
         return PDF::loadView('backend.admin.orders.invoice-compact', [
             'orders' => $orders,
+            'single' => false,
             'font_family' => $font_family,
             'direction' => $direction,
             'default_text_align' => $default_text_align,

@@ -459,10 +459,14 @@ const SearchAndFilter = ({
                                 dispatch(togglePopup('product-filter'))
                             }
                         >
-                            <span className="text-secondary text-xl">
-                                <MdFilterListAlt />
+                            <span className="inline-flex items-center justify-center gap-2 leading-none">
+                                <span className="text-secondary text-xl leading-none">
+                                    <MdFilterListAlt />
+                                </span>
+                                <span className="leading-none">
+                                    {translate('Filter')}
+                                </span>
                             </span>
-                            {translate('Filter')}
                         </Button>
                     </div>
 

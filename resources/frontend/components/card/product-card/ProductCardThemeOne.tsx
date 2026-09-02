@@ -97,12 +97,12 @@ const ProductCardThemeOne = (props: Props) => {
                 <Button
                     arrow={false}
                     size="md"
-                    className="group/button w-full absolute bottom-0 left-0 right-0 translate-y-full group-hover:translate-y-0 rounded-none disabled:opacity-100 disabled:text-white"
+                    className="group/button absolute bottom-0 left-0 right-0 w-full translate-y-full rounded-none !h-auto min-h-[44px] px-3 py-2 text-center text-[12px] leading-tight group-hover:translate-y-0 disabled:opacity-100 disabled:text-white sm:min-h-[36px] sm:text-[15px] sm:py-0"
                     onClick={handleAddToCart}
                     isLoading={loading.gettingProduct || loading.addingToCart}
                     disabled={!product.isPreOrder && !product.hasAvailableStock && !window.config.generalSettings.allowBackorder}
                 >
-                    <span className="flex items-center gap-2">
+                    <span className="flex w-full items-center justify-center gap-2 text-center">
                         <span className="max-xs:hidden text-lg group-hover/button:text-white transition-all">
                             <FaCartShopping />
                         </span>

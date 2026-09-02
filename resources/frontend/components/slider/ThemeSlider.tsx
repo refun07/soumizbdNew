@@ -56,6 +56,7 @@ const ThemeSlider = ({
                 }
                 modules={[Pagination, Autoplay, ...(modules || [])]}
                 {...options}
+                autoplay={false}
             >
                 {children}
             </Swiper>

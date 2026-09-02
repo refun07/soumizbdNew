@@ -457,7 +457,14 @@
 
     /* skeleton */
     .skeleton {
-        @apply rounded h-3.5 block bg-gray-200 animate-pulse;
+        @apply rounded h-3.5 block bg-gray-200;
+    }
+
+    /* Keep storefront content stable while data is loading. */
+    #app .animate-pulse,
+    #app .animate-ping,
+    #app .animate-bounce {
+        animation: none !important;
     }
 
     .order-table {

@@ -547,6 +547,7 @@ const Checkout = () => {
             const payload: IManualOrderPayload = {
                 ...customerDetails,
                 email: '',
+                guestUserId: guestUserId || undefined,
                 shippingAddress: shippingAddress,
                 shippingZoneId,
                 billingAddress: billingAddress,

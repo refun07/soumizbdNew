@@ -7,7 +7,7 @@ interface IOptions {
 export const highlightOnTitle = (text: string = '', options?: IOptions) => {
     const borderClass =
         options?.renderBottomBorder !== false
-            ? 'border-b-[5px] border-[#F2C488] pb-3.5'
+            ? 'inline-block align-baseline border-b-[5px] border-[#F2C488] pb-1.5 sm:pb-3.5'
             : '';
     const highlightClassName = options?.highlightClassName ?? 'text-primary';
 

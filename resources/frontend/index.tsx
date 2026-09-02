@@ -1,5 +1,6 @@
 import 'swiper/css';
 
+import { MotionConfig } from 'framer-motion';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Toaster } from 'react-hot-toast';
@@ -29,10 +30,12 @@ root.render(
     <StrictMode>
         <Provider store={store}>
             <BrowserRouter>
-                <AuthInit>
-                    <App />
-                </AuthInit>
-                <Toaster position="bottom-center" />
+                <MotionConfig reducedMotion="always" transition={{ duration: 0 }}>
+                    <AuthInit>
+                        <App />
+                    </AuthInit>
+                    <Toaster position="bottom-center" />
+                </MotionConfig>
             </BrowserRouter>
         </Provider>
     </StrictMode>,

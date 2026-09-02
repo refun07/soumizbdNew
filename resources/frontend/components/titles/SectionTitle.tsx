@@ -4,7 +4,6 @@ import { highlightOnTitle } from '../../utils/highlightOnTitle';
 import { translate } from '../../utils/translate';
 import Button from '../buttons/Button';
 import CountDown from '../CountDown';
-import { useEffect, useRef, useState } from 'react';
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
     subTitle?: string;
@@ -55,29 +54,6 @@ const SectionTitle = ({
         viewport: { once: true },
     };
 
-    const titleRef = useRef<HTMLHeadingElement>(null);
-    const [isMultiLine, setIsMultiLine] = useState(false);
-
-    useEffect(() => {
-        const checkLines = () => {
-            if (titleRef.current) {
-                const height = titleRef.current.offsetHeight;
-                const lineHeight = parseFloat(getComputedStyle(titleRef.current).lineHeight);
-                const lineCount = Math.round(height / lineHeight);
-                setIsMultiLine(lineCount > 1);
-            }
-        };
-
-        checkLines();
-        
-        const resizeObserver = new ResizeObserver(checkLines);
-        if (titleRef.current) {
-            resizeObserver.observe(titleRef.current);
-        }
-
-        return () => resizeObserver.disconnect();
-    }, [title]);
-
     return (
         <div
             className={cn(
@@ -105,7 +81,6 @@ const SectionTitle = ({
                     )}
                 >
                     <motion.h2
-                        ref={titleRef}
                         {...(animated ? animation : {})}
                         transition={{ duration: 0.5, delay: 0.2 }}
                         className={cn(
@@ -116,7 +91,7 @@ const SectionTitle = ({
                             __html: highlightOnTitle(title, {
                                 highlightFirstWord,
                                 highlightClassName,
-                                renderBottomBorder: !isMultiLine,
+                                renderBottomBorder: true,
                             }),
                         }}
                     ></motion.h2>

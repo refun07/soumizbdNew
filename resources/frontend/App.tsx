@@ -239,25 +239,21 @@ const App = () => {
                 {/* end::uses search and filter */}
 
                 <Route path="/shops" element={<Shops />} />
-                {appMode === 'multiVendor' ? (
-                    <>
-                        <Route
-                            path="/shops/:shopSlug"
-                            element={
-                                <Suspense
-                                    fallback={<>{translate('loading')}</>}
-                                >
-                                    <ShopLayout />
-                                </Suspense>
-                            }
+                <Route
+                    path="/shops/:shopSlug"
+                    element={
+                        <Suspense
+                            fallback={<>{translate('loading')}</>}
                         >
-                            <Route index element={<ShopDetails />} />
-                            <Route path="products" element={<ShopProducts />} />
-                            <Route path="offers" element={<ShopOffers />} />
-                            <Route path="profile" element={<ShopProfile />} />
-                        </Route>
-                    </>
-                ) : null}
+                            <ShopLayout />
+                        </Suspense>
+                    }
+                >
+                    <Route index element={<ShopDetails />} />
+                    <Route path="products" element={<ShopProducts />} />
+                    <Route path="offers" element={<ShopOffers />} />
+                    <Route path="profile" element={<ShopProfile />} />
+                </Route>
 
                 {appMode === 'multiVendor' ? (
                     <>
@@ -303,6 +299,7 @@ const App = () => {
                     path="/orders/success/:orderCode"
                     element={<OrderSuccess />}
                 />
+                <Route path="/orders/failed" element={<OrderFailed />} />
                 <Route path="/payment" element={<PaymentGateway />} />
                 <Route element={<ProtectedLayout />}>
                     {/* <Route path="/checkout" element={<Checkout />} /> */}
@@ -311,7 +308,6 @@ const App = () => {
                         path="/orders/success/:orderCode"
                         element={<OrderSuccess />}
                     /> */}
-                    <Route path="/orders/failed" element={<OrderFailed />} />
                 </Route>
 
                 <Route path="/cart" element={<Cart />} />

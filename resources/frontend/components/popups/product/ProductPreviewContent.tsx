@@ -73,6 +73,10 @@ const isRenderableProductImage = (image?: string | null): image is string => {
     return Boolean(src && !src.endsWith(errorImgPath));
 };
 
+const isSizeVariation = (variation: VariationCombination) => {
+    return variation.name.toLowerCase().includes('size');
+};
+
 const ProductPreviewContent = ({
     slug,
     stickyButtons = true,
@@ -131,9 +135,26 @@ const ProductPreviewContent = ({
             .filter(isRenderableProductImage);
         const productImages = product.images.filter(isRenderableProductImage);
 
-        return Array.from(new Set([...variationImages, ...productImages]));
+        return Array.from(new Set([...productImages, ...variationImages]));
     }, [product]);
     const showThumbSlider = images.length > 1 || Boolean(product?.videoLink);
+    const requiredVariationIds = useMemo(() => {
+        if (!product?.variationCombinations.length) {
+            return [];
+        }
+
+        const sizeVariationIds = product.variationCombinations
+            .filter(isSizeVariation)
+            .map((variation) => variation.id);
+
+        if (sizeVariationIds.length) {
+            return sizeVariationIds;
+        }
+
+        return product.hasSizeChart
+            ? product.variationCombinations.map((variation) => variation.id)
+            : [];
+    }, [product]);
 
     // if window size is less then 1024px (max-lg)
     // add 136px padding to the bottom of the page to adjust the fixed buy now button
@@ -156,7 +177,12 @@ const ProductPreviewContent = ({
             const newSelectedVariations: ISelectedVariationCombinations = {};
 
             product.variationCombinations.forEach((variation) => {
-                newSelectedVariations[variation.id] = null;
+                const shouldRequireManualSelection = isSizeVariation(variation);
+
+                newSelectedVariations[variation.id] =
+                    shouldRequireManualSelection
+                        ? null
+                        : variation.values[0] || null;
             });
 
             // if (product) {

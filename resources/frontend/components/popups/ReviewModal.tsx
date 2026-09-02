@@ -165,24 +165,38 @@ const ReviewModal = () => {
                 <div
                     className={'px-4 sm:px-9 md:px-11 flex items-center gap-5'}
                 >
-                    <Link
-                        to={`/products/${product?.slug}`}
-                        className="rounded-card border border-primary-14 p-1"
-                    >
-                        <Image
-                            src={product?.thumbnailImg}
-                            alt={product?.name}
-                            className={`max-w-[52px] aspect-square`}
-                        />
-                    </Link>
+                    {product?.slug ? (
+                        <Link
+                            to={`/products/${product.slug}`}
+                            className="rounded-card border border-primary-14 p-1"
+                        >
+                            <Image
+                                src={product.thumbnailImg}
+                                alt={product.name}
+                                className={`max-w-[52px] aspect-square`}
+                            />
+                        </Link>
+                    ) : (
+                        <div className="rounded-card border border-primary-14 p-1">
+                            <Image
+                                src={product?.thumbnailImg}
+                                alt={product?.name}
+                                className={`max-w-[52px] aspect-square`}
+                            />
+                        </div>
+                    )}
 
                     <h3 className="text-black sm:text-sm mb-2 max-w-[220px]">
-                        <Link
-                            to={`/products/${product?.slug}`}
-                            className="hover:text-primary max-w-[300px] line-clamp-2"
-                        >
-                            {product?.name}
-                        </Link>
+                        {product?.slug ? (
+                            <Link
+                                to={`/products/${product.slug}`}
+                                className="hover:text-primary max-w-[300px] line-clamp-2"
+                            >
+                                {product.name}
+                            </Link>
+                        ) : (
+                            product?.name
+                        )}
                     </h3>
 
                     <div className="ml-auto flex flex-col items-end">
@@ -262,12 +276,18 @@ const ReviewModal = () => {
                             <span className="uppercase">
                                 {translate('Rate the seller?')}
                             </span>
-                            <Link
-                                to={`/shops/${review?.shop.slug}`}
-                                className="text-primary ml-2"
-                            >
-                                {review?.shop.name}
-                            </Link>
+                            {review?.shop?.slug ? (
+                                <Link
+                                    to={`/shops/${review.shop.slug}`}
+                                    className="text-primary ml-2"
+                                >
+                                    {review.shop.name}
+                                </Link>
+                            ) : (
+                                <span className="ml-2">
+                                    {review?.shop?.name}
+                                </span>
+                            )}
                         </p>
                         <p className="text-black/70">
                             {shopImpressionResponse?.impression ? (

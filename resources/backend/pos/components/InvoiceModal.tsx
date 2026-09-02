@@ -67,6 +67,7 @@ const InvoiceModal = ({ isActive, onClose, invoiceData }: Props) => {
         const itemsRows = invoiceData.items.map(item => `
             <tr style="border-bottom: 1px solid #000;">
                 <td style="text-align: left; padding: 12px 15px; font-size: 14px; border-right: 1px solid #000;">${item.name}</td>
+                <td style="text-align: left; padding: 12px 15px; font-size: 14px; border-right: 1px solid #000;">${item.size || '-'}</td>
                 <td style="text-align: right; padding: 12px 15px; font-size: 14px; border-right: 1px solid #000;">${formatCurrency(item.unit_price)}</td>
                 <td style="text-align: center; padding: 12px 15px; font-size: 14px; border-right: 1px solid #000;">${item.quantity}</td>
                 <td style="text-align: right; padding: 12px 15px; font-size: 14px;">${formatCurrency(item.amount)}</td>
@@ -119,43 +120,44 @@ const InvoiceModal = ({ isActive, onClose, invoiceData }: Props) => {
             <head>
                 <title>Invoice - ${invoiceData.order_number}</title>
                 <style>
-                    @page { margin: 0.5cm; }
+                    @page { size: 105mm 148.5mm; margin: 4mm; }
                     @media print {
-                        @page { margin: 0.5cm; }
+                        @page { size: 105mm 148.5mm; margin: 4mm; }
                         body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
                     }
                     * { box-sizing: border-box; }
                     body {
                         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                        font-size: 14px;
-                        line-height: 1.5;
+                        font-size: 8px;
+                        line-height: 1.2;
                         color: #000;
                         margin: 0;
-                        padding: 40px;
-                        width: 800px;
+                        padding: 0;
+                        width: auto;
                         max-width: 100%;
                     }
-                    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; }
-                    h1 { font-size: 42px; font-weight: 800; margin: 0; text-transform: uppercase; letter-spacing: -1px; }
-                    .invoice-meta { margin-top: 20px; font-size: 16px; line-height: 1.6; }
+                    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+                    h1 { font-size: 21px; font-weight: 800; margin: 0; text-transform: uppercase; }
+                    .invoice-meta { margin-top: 5px; font-size: 8px; line-height: 1.35; }
                     .invoice-meta strong { font-weight: 700; }
-                    .info-section { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; margin-bottom: 40px; }
-                    .section-title { font-weight: 700; font-size: 16px; text-transform: uppercase; margin-bottom: 12px; }
+                    .info-section { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+                    .section-title { font-weight: 700; font-size: 9px; text-transform: uppercase; margin-bottom: 3px; }
                     .text-right { text-align: right; }
-                    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; border: 1px solid #000; }
-                    th { font-weight: 700; font-size: 14px; padding: 12px 15px; text-align: left; border-right: 1px solid #000; border-bottom: 1px solid #000; }
+                    table { width: 100%; border-collapse: collapse; margin-bottom: 7px; border: 1px solid #000; table-layout: fixed; }
+                    th { font-weight: 700; font-size: 7px; padding: 2px; text-align: left; border-right: 1px solid #000; border-bottom: 1px solid #000; }
                     th:not(:last-child) { border-right: 1px solid #000; }
                     .text-right-th { text-align: right; }
                     .text-center-th { text-align: center; }
-                    .summary-section { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; }
-                    .summary-table { margin-left: auto; width: 250px; border: 1px solid #000; }
+                    td { font-size: 7px; padding: 2px; overflow-wrap: anywhere; }
+                    .summary-section { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+                    .summary-table { margin-left: auto; width: 48%; border: 1px solid #000; }
                     .summary-row { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid #000; }
                     .summary-row:last-child { border-bottom: none; }
-                    .summary-row td { padding: 8px 15px; font-size: 14px; }
+                    .summary-row td { padding: 2px; font-size: 7px; }
                     .summary-row td:last-child { text-align: right; }
-                    .total-row { background: #f5f5f5; font-weight: 700; font-size: 16px; }
-                    .footer { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; margin-top: 60px; padding-top: 30px; }
-                    .footer-title { font-weight: 700; font-size: 16px; text-transform: uppercase; margin-bottom: 12px; }
+                    .total-row { background: #f5f5f5; font-weight: 700; font-size: 9px; }
+                    .footer { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; padding-top: 5px; }
+                    .footer-title { font-weight: 700; font-size: 8px; text-transform: uppercase; margin-bottom: 3px; }
                     .print-button { display: none; }
                 </style>
             </head>
@@ -333,6 +335,7 @@ const InvoiceModal = ({ isActive, onClose, invoiceData }: Props) => {
                             <thead>
                                 <tr className="border-b border-black">
                                     <th className="text-left py-3 px-[15px] font-bold text-[14px] border-r border-black w-auto">Item & Description</th>
+                                    <th className="text-left py-3 px-[15px] font-bold text-[14px] border-r border-black w-[82px]">Size</th>
                                     <th className="text-right py-3 px-[15px] font-bold text-[14px] border-r border-black w-[100px]">Unit Price</th>
                                     <th className="text-center py-3 px-[15px] font-bold text-[14px] border-r border-black w-[60px]">Qty</th>
                                     <th className="text-right py-3 px-[15px] font-bold text-[14px] w-[120px]">Amount</th>
@@ -342,6 +345,7 @@ const InvoiceModal = ({ isActive, onClose, invoiceData }: Props) => {
                                 {invoiceData.items.map((item, index) => (
                                     <tr key={index} className="border-b border-black last:border-b-0">
                                         <td className="text-left py-3 px-[15px] text-[14px] border-r border-black text-gray-800 dark:text-gray-200">{item.name}</td>
+                                        <td className="text-left py-3 px-[15px] text-[14px] border-r border-black text-gray-800 dark:text-gray-200">{item.size || '-'}</td>
                                         <td className="text-right py-3 px-[15px] text-[14px] border-r border-black text-gray-800 dark:text-gray-200">{formatCurrency(item.unit_price)}</td>
                                         <td className="text-center py-3 px-[15px] text-[14px] border-r border-black text-gray-800 dark:text-gray-200">{item.quantity}</td>
                                         <td className="text-right py-3 px-[15px] text-[14px] text-gray-800 dark:text-gray-200">{formatCurrency(item.amount)}</td>

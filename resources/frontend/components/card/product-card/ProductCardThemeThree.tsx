@@ -134,7 +134,7 @@ const ProductCardThemeThree = (props: Props) => {
                     arrow={false}
                     size="md"
                     variant="secondary"
-                    className="rounded-none mt-5 disabled:opacity-100 disabled:text-white"
+                    className="mt-5 rounded-none !h-auto min-h-[44px] w-full px-3 py-2 text-center text-[12px] leading-tight disabled:opacity-100 disabled:text-white sm:min-h-[36px] sm:text-[15px] sm:py-0"
                     onClick={handleAddToCart}
                     isLoading={loading.gettingProduct || loading.addingToCart}
                     disabled={!product.isPreOrder && !product.hasAvailableStock && !window.config.generalSettings.allowBackorder}

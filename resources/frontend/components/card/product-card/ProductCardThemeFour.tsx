@@ -178,7 +178,7 @@ const ProductCardThemeFour = (props: Props) => {
                         arrow={false}
                         size="md"
                         variant="secondary"
-                        className="mt-auto w-full rounded-[4px] disabled:opacity-100 disabled:text-white"
+                        className="mt-auto w-full rounded-[4px] !h-auto min-h-[44px] px-3 py-2 text-center text-[12px] leading-tight disabled:opacity-100 disabled:text-white sm:min-h-[36px] sm:text-[15px] sm:py-0"
                         onClick={handleAddToCart}
                         isLoading={
                             loading.gettingProduct || loading.addingToCart
