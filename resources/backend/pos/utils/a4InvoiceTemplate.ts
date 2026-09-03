@@ -2,7 +2,7 @@ import { currencyFormatter } from '../../../frontend/utils/numberFormatter';
 import { normalizeAssetPath } from './helpers';
 import { InvoiceData } from '../types';
 
-const HALF_PAGE_ITEM_LIMIT = 20;
+const HALF_PAGE_ITEM_LIMIT = 10;
 
 const paymentMethodLabels: Record<string, string> = {
     cash: 'Cash',
@@ -25,20 +25,20 @@ export const invoiceDensityForCount = (itemCount: number): string => {
     if (itemCount > HALF_PAGE_ITEM_LIMIT) {
         return 'full';
     }
-    if (itemCount <= 4) {
+    if (itemCount <= 1) {
+        return 'spacious';
+    }
+    if (itemCount <= 3) {
+        return 'few';
+    }
+    if (itemCount <= 5) {
         return 'comfortable';
     }
     if (itemCount <= 8) {
         return 'medium';
     }
-    if (itemCount <= 12) {
-        return 'compact';
-    }
-    if (itemCount <= 16) {
-        return 'tight';
-    }
 
-    return 'dense';
+    return 'compact';
 };
 
 const a4InvoiceCss = `
@@ -125,79 +125,108 @@ const a4InvoiceCss = `
         font-size: 8px; text-align: center; color: #64748b; letter-spacing: .6px;
     }
 
-    .density-comfortable .shop-title { font-size: 16px; }
-    .density-comfortable .invoice-title { font-size: 26px; }
-    .density-comfortable .items th, .density-comfortable .items td { font-size: 10px; padding: 4px 3px; }
-    .density-comfortable .qr-code, .density-comfortable .qr-placeholder { width: 44px; height: 44px; }
-    .density-comfortable table.cod-box td.cod-cell { padding: 14px 16px !important; }
+    .density-spacious .shop-title,
+    .density-few .shop-title,
+    .density-comfortable .shop-title { font-size: 18px; }
+    .density-spacious .shop-line,
+    .density-few .shop-line,
+    .density-comfortable .shop-line { font-size: 11px; }
+    .density-spacious .invoice-title,
+    .density-few .invoice-title,
+    .density-comfortable .invoice-title { font-size: 30px; }
+    .density-spacious .invoice-meta,
+    .density-few .invoice-meta,
+    .density-comfortable .invoice-meta { font-size: 12px; margin-top: 6px; }
+    .density-spacious .section-title,
+    .density-few .section-title,
+    .density-comfortable .section-title { font-size: 14px; }
+    .density-spacious .customer,
+    .density-few .customer,
+    .density-comfortable .customer { font-size: 13px; line-height: 1.4; }
+    .density-spacious .summary,
+    .density-few .summary,
+    .density-comfortable .summary { font-size: 13px; margin-top: 8px; }
+    .density-spacious .summary td,
+    .density-few .summary td,
+    .density-comfortable .summary td { padding: 3px 0; }
+    .density-spacious .divider,
+    .density-few .divider,
+    .density-comfortable .divider { margin: 8px 0; }
+    .density-spacious .qr-code, .density-spacious .qr-placeholder,
+    .density-few .qr-code, .density-few .qr-placeholder,
+    .density-comfortable .qr-code, .density-comfortable .qr-placeholder { width: 52px; height: 52px; }
+    .density-spacious table.cod-box td.cod-cell,
+    .density-few table.cod-box td.cod-cell,
+    .density-comfortable table.cod-box td.cod-cell { padding: 16px 18px !important; }
+    .density-spacious .cod-amount,
+    .density-few .cod-amount,
+    .density-comfortable .cod-amount { font-size: 20px; }
+    .density-spacious .brand-logo,
+    .density-few .brand-logo,
+    .density-comfortable .brand-logo { max-width: 72px; max-height: 32px; }
+    .density-spacious .footer-line,
+    .density-few .footer-line,
+    .density-comfortable .footer-line { margin-top: 8px; padding-top: 5px; font-size: 9px; }
 
-    .density-medium .shop-title { font-size: 14px; }
-    .density-medium .shop-line { font-size: 9px; }
-    .density-medium .invoice-title { font-size: 22px; }
-    .density-medium .invoice-meta { font-size: 9px; margin-top: 3px; }
-    .density-medium .section-title { font-size: 11px; }
-    .density-medium .customer { font-size: 10px; line-height: 1.28; }
-    .density-medium .items th, .density-medium .items td { font-size: 9px; padding: 2.5px 3px; }
-    .density-medium .summary { font-size: 9px; margin-top: 3px; }
-    .density-medium .summary td { padding: 1.5px 0; }
-    .density-medium .divider { margin: 5px 0; }
-    .density-medium .qr-code, .density-medium .qr-placeholder { width: 38px; height: 38px; }
-    .density-medium table.cod-box td.cod-cell { padding: 12px 14px !important; }
-    .density-medium .cod-amount { font-size: 14px; }
-    .density-medium .brand-logo { max-width: 56px; max-height: 24px; }
+    .density-spacious .shop-title { font-size: 20px; }
+    .density-spacious .shop-line { font-size: 12px; }
+    .density-spacious .invoice-title { font-size: 32px; }
+    .density-spacious .invoice-meta { font-size: 12px; margin-top: 6px; }
+    .density-spacious .section-title { font-size: 15px; }
+    .density-spacious .customer { font-size: 14px; line-height: 1.4; }
+    .density-spacious .items { margin-top: 6px; }
+    .density-spacious .items th, .density-spacious .items td { font-size: 16px; padding: 5mm 2mm; }
+    .density-spacious .item-name { line-height: 1.4; }
+    .density-spacious .summary { font-size: 13px; margin-top: 8px; }
+    .density-spacious .qr-code, .density-spacious .qr-placeholder { width: 56px; height: 56px; }
+    .density-spacious table.cod-box td.cod-cell { padding: 16px 18px !important; }
+    .density-spacious .cod-amount { font-size: 22px; }
+    .density-spacious .brand-logo { max-width: 80px; max-height: 36px; }
+    .density-spacious .divider { margin: 8px 0; }
+    .density-spacious .footer-line { margin-top: 8px; padding-top: 5px; font-size: 10px; }
 
-    .density-compact .shop-title { font-size: 13px; }
-    .density-compact .shop-line { font-size: 8.5px; }
-    .density-compact .invoice-title { font-size: 18px; }
-    .density-compact .invoice-meta { font-size: 8.5px; margin-top: 2px; }
-    .density-compact .section-title { font-size: 10px; margin-bottom: 2px; }
-    .density-compact .customer { font-size: 9px; line-height: 1.22; }
-    .density-compact .items th, .density-compact .items td { font-size: 8.5px; padding: 1.5px 2px; }
-    .density-compact .summary { font-size: 8.5px; margin-top: 2px; }
-    .density-compact .summary td { padding: 1px 0; }
-    .density-compact .divider { margin: 4px 0; }
-    .density-compact .qr-code, .density-compact .qr-placeholder { width: 32px; height: 32px; }
-    .density-compact table.cod-box td.cod-cell { padding: 10px 12px !important; }
+    .density-few .items { margin-top: 5px; }
+    .density-few .items th, .density-few .items td { font-size: 14px; padding: 2.2mm 1.5mm; }
+    .density-few .item-name { line-height: 1.3; }
+
+    .density-comfortable .items { margin-top: 3px; }
+    .density-comfortable .items th, .density-comfortable .items td { font-size: 12px; padding: 1.1mm 1mm; }
+    .density-comfortable .item-name { line-height: 1.25; }
+
+    .density-medium .shop-title { font-size: 17px; }
+    .density-medium .shop-line { font-size: 11px; }
+    .density-medium .invoice-title { font-size: 28px; }
+    .density-medium .invoice-meta { font-size: 11px; margin-top: 4px; }
+    .density-medium .section-title { font-size: 13px; }
+    .density-medium .customer { font-size: 12px; line-height: 1.32; }
+    .density-medium .items { margin-top: 3px; }
+    .density-medium .items th, .density-medium .items td { font-size: 11px; padding: 1mm 0.8mm; }
+    .density-medium .summary { font-size: 11px; margin-top: 5px; }
+    .density-medium .summary td { padding: 2px 0; }
+    .density-medium .divider { margin: 6px 0; }
+    .density-medium .qr-code, .density-medium .qr-placeholder { width: 46px; height: 46px; }
+    .density-medium table.cod-box td.cod-cell { padding: 13px 15px !important; }
+    .density-medium .cod-amount { font-size: 18px; }
+    .density-medium .brand-logo { max-width: 64px; max-height: 28px; }
+    .density-medium .footer-line { margin-top: 6px; padding-top: 4px; font-size: 8px; }
+
+    .density-compact .shop-title { font-size: 16px; }
+    .density-compact .shop-line { font-size: 10px; }
+    .density-compact .invoice-title { font-size: 24px; }
+    .density-compact .invoice-meta { font-size: 10px; margin-top: 3px; }
+    .density-compact .section-title { font-size: 12px; margin-bottom: 2px; }
+    .density-compact .customer { font-size: 11px; line-height: 1.28; }
+    .density-compact .items { margin-top: 2px; }
+    .density-compact .items th, .density-compact .items td { font-size: 10px; padding: 1.1mm 0.8mm; }
+    .density-compact .summary { font-size: 10px; margin-top: 3px; }
+    .density-compact .summary td { padding: 1.5px 0; }
+    .density-compact .divider { margin: 5px 0; }
+    .density-compact .qr-code, .density-compact .qr-placeholder { width: 42px; height: 42px; }
+    .density-compact table.cod-box td.cod-cell { padding: 12px 14px !important; }
     .density-compact .cod-label { font-size: 8px; }
-    .density-compact .cod-amount { font-size: 12px; }
-    .density-compact .brand-logo { max-width: 48px; max-height: 22px; }
-    .density-compact .footer-line { margin-top: 4px; padding-top: 3px; font-size: 7px; }
-
-    .density-tight .shop-title { font-size: 12px; }
-    .density-tight .shop-line { font-size: 8px; }
-    .density-tight .invoice-title { font-size: 16px; }
-    .density-tight .invoice-meta { font-size: 8px; margin-top: 2px; }
-    .density-tight .section-title { font-size: 9px; margin-bottom: 1px; }
-    .density-tight .customer { font-size: 8px; line-height: 1.18; }
-    .density-tight .items { margin-top: 2px; }
-    .density-tight .items th, .density-tight .items td { font-size: 8px; padding: 1px 2px; }
-    .density-tight .summary { font-size: 8px; margin-top: 2px; }
-    .density-tight .summary td { padding: 0.5px 0; }
-    .density-tight .divider { margin: 3px 0; }
-    .density-tight .qr-code, .density-tight .qr-placeholder { width: 26px; height: 26px; }
-    .density-tight table.cod-box td.cod-cell { padding: 8px 10px !important; }
-    .density-tight .cod-label { font-size: 7px; }
-    .density-tight .cod-amount { font-size: 11px; }
-    .density-tight .brand-logo { max-width: 42px; max-height: 18px; }
-    .density-tight .footer-line { margin-top: 3px; padding-top: 2px; font-size: 7px; }
-
-    .density-dense .shop-title { font-size: 11px; }
-    .density-dense .shop-line { font-size: 7.5px; }
-    .density-dense .invoice-title { font-size: 14px; }
-    .density-dense .invoice-meta { font-size: 7.5px; margin-top: 1px; }
-    .density-dense .section-title { font-size: 8px; margin-bottom: 1px; }
-    .density-dense .customer { font-size: 7.5px; line-height: 1.15; }
-    .density-dense .items { margin-top: 1px; }
-    .density-dense .items th, .density-dense .items td { font-size: 7px; padding: 0 2px; }
-    .density-dense .summary { font-size: 7px; margin-top: 1px; }
-    .density-dense .summary td { padding: 0; }
-    .density-dense .divider { margin: 1.5px 0; }
-    .density-dense .qr-code, .density-dense .qr-placeholder { width: 20px; height: 20px; }
-    .density-dense table.cod-box td.cod-cell { padding: 7px 9px !important; }
-    .density-dense .cod-label { font-size: 6px; }
-    .density-dense .cod-amount { font-size: 9px; }
-    .density-dense .brand-logo { max-width: 36px; max-height: 16px; }
-    .density-dense .footer-line { display: none; }
+    .density-compact .cod-amount { font-size: 16px; }
+    .density-compact .brand-logo { max-width: 56px; max-height: 24px; }
+    .density-compact .footer-line { margin-top: 5px; padding-top: 3px; font-size: 8px; }
 
     .density-full .shop-title { font-size: 18px; }
     .density-full .shop-line { font-size: 11px; }

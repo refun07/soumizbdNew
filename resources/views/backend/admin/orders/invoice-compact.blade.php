@@ -7,7 +7,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta charset="UTF-8">
     @php
-        $halfPageItemLimit = 20;
+        $halfPageItemLimit = 10;
     @endphp
     <style type="text/css">
         @page {
@@ -304,111 +304,134 @@
             letter-spacing: .6px;
         }
 
-        /* 1-4 items: readable half-page */
-        .density-comfortable .shop-title { font-size: 16px; }
-        .density-comfortable .shop-line { font-size: 10px; }
-        .density-comfortable .invoice-title { font-size: 26px; }
-        .density-comfortable .invoice-meta { font-size: 10px; }
-        .density-comfortable .section-title { font-size: 12px; }
-        .density-comfortable .customer { font-size: 11px; }
-        .density-comfortable .items th,
-        .density-comfortable .items td { font-size: 10px; padding: 4px 3px; }
-        .density-comfortable .summary { font-size: 10px; }
+        /*
+         * Half-page invoices (1-10 items) target ~136mm.
+         * Product list is the primary font/padding knob.
+         * Header, bill-to, COD, and summary only shrink from 6 items up.
+         */
+
+        /* 1-5 items: shared large chrome so 2-5 only need to shrink the product list */
+        .density-spacious .shop-title,
+        .density-few .shop-title,
+        .density-comfortable .shop-title { font-size: 18px; }
+        .density-spacious .shop-line,
+        .density-few .shop-line,
+        .density-comfortable .shop-line { font-size: 11px; }
+        .density-spacious .invoice-title,
+        .density-few .invoice-title,
+        .density-comfortable .invoice-title { font-size: 30px; }
+        .density-spacious .invoice-meta,
+        .density-few .invoice-meta,
+        .density-comfortable .invoice-meta { font-size: 12px; margin-top: 6px; }
+        .density-spacious .section-title,
+        .density-few .section-title,
+        .density-comfortable .section-title { font-size: 14px; }
+        .density-spacious .customer,
+        .density-few .customer,
+        .density-comfortable .customer { font-size: 13px; line-height: 1.4; }
+        .density-spacious .summary,
+        .density-few .summary,
+        .density-comfortable .summary { font-size: 13px; margin-top: 8px; }
+        .density-spacious .summary td,
+        .density-few .summary td,
+        .density-comfortable .summary td { padding: 3px 0; }
+        .density-spacious .divider,
+        .density-few .divider,
+        .density-comfortable .divider { margin: 8px 0; }
+        .density-spacious .qr-code,
+        .density-spacious .qr-placeholder,
+        .density-few .qr-code,
+        .density-few .qr-placeholder,
         .density-comfortable .qr-code,
-        .density-comfortable .qr-placeholder { width: 44px; height: 44px; }
-        .density-comfortable table.cod-box td.cod-cell { padding: 14px 16px !important; }
-        .density-comfortable .cod-amount { font-size: 16px; }
-        .density-comfortable .brand-logo { max-width: 64px; max-height: 28px; }
+        .density-comfortable .qr-placeholder { width: 52px; height: 52px; }
+        .density-spacious table.cod-box td.cod-cell,
+        .density-few table.cod-box td.cod-cell,
+        .density-comfortable table.cod-box td.cod-cell { padding: 16px 18px !important; }
+        .density-spacious .cod-amount,
+        .density-few .cod-amount,
+        .density-comfortable .cod-amount { font-size: 20px; }
+        .density-spacious .brand-logo,
+        .density-few .brand-logo,
+        .density-comfortable .brand-logo { max-width: 72px; max-height: 32px; }
+        .density-spacious .footer-line,
+        .density-few .footer-line,
+        .density-comfortable .footer-line { margin-top: 8px; padding-top: 5px; font-size: 9px; }
 
-        /* 5-8 items */
-        .density-medium .shop-title { font-size: 14px; }
-        .density-medium .shop-line { font-size: 9px; }
-        .density-medium .invoice-title { font-size: 22px; }
-        .density-medium .invoice-meta { font-size: 9px; margin-top: 3px; }
-        .density-medium .section-title { font-size: 11px; }
-        .density-medium .customer { font-size: 10px; line-height: 1.28; }
+        /* 1 product: enlarge every font so the invoice occupies near half-page */
+        .density-spacious .shop-title { font-size: 20px; }
+        .density-spacious .shop-line { font-size: 12px; }
+        .density-spacious .invoice-title { font-size: 32px; }
+        .density-spacious .invoice-meta { font-size: 12px; margin-top: 6px; }
+        .density-spacious .section-title { font-size: 15px; }
+        .density-spacious .customer { font-size: 14px; line-height: 1.4; }
+        .density-spacious .items { margin-top: 6px; }
+        .density-spacious .items th,
+        .density-spacious .items td { font-size: 16px; padding: 5mm 2mm; }
+        .density-spacious .item-name { line-height: 1.4; }
+        .density-spacious .summary { font-size: 13px; margin-top: 8px; }
+        .density-spacious .qr-code,
+        .density-spacious .qr-placeholder { width: 56px; height: 56px; }
+        .density-spacious table.cod-box td.cod-cell { padding: 16px 18px !important; }
+        .density-spacious .cod-amount { font-size: 22px; }
+        .density-spacious .brand-logo { max-width: 80px; max-height: 36px; }
+        .density-spacious .divider { margin: 8px 0; }
+        .density-spacious .footer-line { margin-top: 8px; padding-top: 5px; font-size: 10px; }
+
+        /* 2-3 items: keep chrome, shrink product list only */
+        .density-few .items { margin-top: 5px; }
+        .density-few .items th,
+        .density-few .items td { font-size: 14px; padding: 2.2mm 1.5mm; }
+        .density-few .item-name { line-height: 1.3; }
+
+        /* 4-5 items: keep chrome, shrink product list further */
+        .density-comfortable .items { margin-top: 3px; }
+        .density-comfortable .items th,
+        .density-comfortable .items td { font-size: 12px; padding: 1.1mm 1mm; }
+        .density-comfortable .item-name { line-height: 1.25; }
+
+        /* 6-8 items: shrink product list more, ease other fonts a little */
+        .density-medium .shop-title { font-size: 17px; }
+        .density-medium .shop-line { font-size: 11px; }
+        .density-medium .invoice-title { font-size: 28px; }
+        .density-medium .invoice-meta { font-size: 11px; margin-top: 4px; }
+        .density-medium .section-title { font-size: 13px; }
+        .density-medium .customer { font-size: 12px; line-height: 1.32; }
+        .density-medium .items { margin-top: 3px; }
         .density-medium .items th,
-        .density-medium .items td { font-size: 9px; padding: 2.5px 3px; }
-        .density-medium .summary { font-size: 9px; margin-top: 3px; }
-        .density-medium .summary td { padding: 1.5px 0; }
-        .density-medium .divider { margin: 5px 0; }
+        .density-medium .items td { font-size: 11px; padding: 1mm 0.8mm; }
+        .density-medium .summary { font-size: 11px; margin-top: 5px; }
+        .density-medium .summary td { padding: 2px 0; }
+        .density-medium .divider { margin: 6px 0; }
         .density-medium .qr-code,
-        .density-medium .qr-placeholder { width: 38px; height: 38px; }
-        .density-medium table.cod-box td.cod-cell { padding: 12px 14px !important; }
-        .density-medium .cod-amount { font-size: 14px; }
-        .density-medium .brand-logo { max-width: 56px; max-height: 24px; }
+        .density-medium .qr-placeholder { width: 46px; height: 46px; }
+        .density-medium table.cod-box td.cod-cell { padding: 13px 15px !important; }
+        .density-medium .cod-amount { font-size: 18px; }
+        .density-medium .brand-logo { max-width: 64px; max-height: 28px; }
+        .density-medium .footer-line { margin-top: 6px; padding-top: 4px; font-size: 8px; }
 
-        /* 9-12 items */
-        .density-compact .shop-title { font-size: 13px; }
-        .density-compact .shop-line { font-size: 8.5px; }
-        .density-compact .invoice-title { font-size: 18px; }
-        .density-compact .invoice-meta { font-size: 8.5px; margin-top: 2px; }
-        .density-compact .section-title { font-size: 10px; margin-bottom: 2px; }
-        .density-compact .customer { font-size: 9px; line-height: 1.22; }
+        /* 9-10 items: tightest half-page */
+        .density-compact .shop-title { font-size: 16px; }
+        .density-compact .shop-line { font-size: 10px; }
+        .density-compact .invoice-title { font-size: 24px; }
+        .density-compact .invoice-meta { font-size: 10px; margin-top: 3px; }
+        .density-compact .section-title { font-size: 12px; margin-bottom: 2px; }
+        .density-compact .customer { font-size: 11px; line-height: 1.28; }
+        .density-compact .items { margin-top: 2px; }
         .density-compact .items th,
-        .density-compact .items td { font-size: 8.5px; padding: 1.5px 2px; }
-        .density-compact .summary { font-size: 8.5px; margin-top: 2px; }
-        .density-compact .summary td { padding: 1px 0; }
-        .density-compact .divider { margin: 4px 0; }
-        .density-compact .bill-rule { margin: 2px 0 3px; }
+        .density-compact .items td { font-size: 10px; padding: 1.1mm 0.8mm; }
+        .density-compact .summary { font-size: 10px; margin-top: 3px; }
+        .density-compact .summary td { padding: 1.5px 0; }
+        .density-compact .divider { margin: 5px 0; }
+        .density-compact .bill-rule { margin: 2px 0 4px; }
         .density-compact .qr-code,
-        .density-compact .qr-placeholder { width: 32px; height: 32px; }
-        .density-compact table.cod-box td.cod-cell { padding: 10px 12px !important; }
+        .density-compact .qr-placeholder { width: 42px; height: 42px; }
+        .density-compact table.cod-box td.cod-cell { padding: 12px 14px !important; }
         .density-compact .cod-label { font-size: 8px; }
-        .density-compact .cod-amount { font-size: 12px; }
-        .density-compact .brand-logo { max-width: 48px; max-height: 22px; }
-        .density-compact .footer-line { margin-top: 4px; padding-top: 3px; font-size: 7px; }
+        .density-compact .cod-amount { font-size: 16px; }
+        .density-compact .brand-logo { max-width: 56px; max-height: 24px; }
+        .density-compact .footer-line { margin-top: 5px; padding-top: 3px; font-size: 8px; }
 
-        /* 13-16 items */
-        .density-tight .shop-title { font-size: 12px; }
-        .density-tight .shop-line { font-size: 8px; }
-        .density-tight .invoice-title { font-size: 16px; }
-        .density-tight .invoice-meta { font-size: 8px; margin-top: 2px; }
-        .density-tight .section-title { font-size: 9px; margin-bottom: 1px; }
-        .density-tight .customer { font-size: 8px; line-height: 1.18; }
-        .density-tight .items { margin-top: 2px; }
-        .density-tight .items th,
-        .density-tight .items td { font-size: 8px; padding: 1px 2px; }
-        .density-tight .summary { font-size: 8px; margin-top: 2px; }
-        .density-tight .summary td { padding: 0.5px 0; }
-        .density-tight .summary-total td { padding-top: 2px; }
-        .density-tight .divider { margin: 3px 0; }
-        .density-tight .bill-rule { margin: 1px 0 2px; }
-        .density-tight .qr-code,
-        .density-tight .qr-placeholder { width: 26px; height: 26px; }
-        .density-tight table.cod-box td.cod-cell { padding: 8px 10px !important; }
-        .density-tight .cod-label { font-size: 7px; }
-        .density-tight .cod-amount { font-size: 11px; }
-        .density-tight .brand-logo { max-width: 42px; max-height: 18px; }
-        .density-tight .footer-line { margin-top: 3px; padding-top: 2px; font-size: 7px; }
-        .density-tight .company-logo-cell { width: 12%; padding-right: 4px; }
-
-        /* 17-20 items: smallest still readable half-page */
-        .density-dense .shop-title { font-size: 11px; }
-        .density-dense .shop-line { font-size: 7.5px; }
-        .density-dense .invoice-title { font-size: 14px; }
-        .density-dense .invoice-meta { font-size: 7.5px; margin-top: 1px; }
-        .density-dense .section-title { font-size: 8px; margin-bottom: 1px; }
-        .density-dense .customer { font-size: 7.5px; line-height: 1.15; }
-        .density-dense .items { margin-top: 1px; }
-        .density-dense .items th,
-        .density-dense .items td { font-size: 7px; padding: 0 2px; }
-        .density-dense .item-name { line-height: 1.1; }
-        .density-dense .summary { font-size: 7px; margin-top: 1px; }
-        .density-dense .summary td { padding: 0; }
-        .density-dense .summary-total td { padding-top: 1px; }
-        .density-dense .divider { margin: 1.5px 0; }
-        .density-dense .bill-rule { margin: 1px 0 1px; }
-        .density-dense .qr-code,
-        .density-dense .qr-placeholder { width: 20px; height: 20px; }
-        .density-dense table.cod-box td.cod-cell { padding: 7px 9px !important; }
-        .density-dense .cod-label { font-size: 6px; }
-        .density-dense .cod-amount { font-size: 9px; }
-        .density-dense .brand-logo { max-width: 36px; max-height: 16px; }
-        .density-dense .footer-line { display: none; }
-        .density-dense .company-logo-cell { width: 11%; padding-right: 3px; }
-
-        /* 21+ items: full A4, may flow to extra pages */
+        /* 11+ items: full A4, may flow to extra pages */
         .density-full .layout-half { max-height: none; overflow: visible; }
         .density-full .shop-title { font-size: 18px; }
         .density-full .shop-line { font-size: 11px; }
@@ -453,20 +476,20 @@
             if ($itemCount > $halfPageItemLimit) {
                 return 'full';
             }
-            if ($itemCount <= 4) {
+            if ($itemCount <= 1) {
+                return 'spacious';
+            }
+            if ($itemCount <= 3) {
+                return 'few';
+            }
+            if ($itemCount <= 5) {
                 return 'comfortable';
             }
             if ($itemCount <= 8) {
                 return 'medium';
             }
-            if ($itemCount <= 12) {
-                return 'compact';
-            }
-            if ($itemCount <= 16) {
-                return 'tight';
-            }
 
-            return 'dense';
+            return 'compact';
         };
         $shopPhone = getSetting('systemPhone') ?: getSetting('phone') ?: '01765765647';
         $shopAddress = $systemAddress ?: 'Elephant Road, Dhaka';
