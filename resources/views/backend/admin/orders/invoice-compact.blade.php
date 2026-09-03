@@ -7,12 +7,12 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta charset="UTF-8">
     @php
-        $isSingleInvoice = (bool) ($single ?? false);
+        $halfPageItemLimit = 20;
     @endphp
     <style type="text/css">
         @page {
             sheet-size: A4;
-            margin: {{ $isSingleInvoice ? '0' : '8mm' }};
+            margin: 8mm 10mm 8mm 10mm;
         }
 
         * {
@@ -21,14 +21,14 @@
 
         body {
             font-family: {{ $font_family ?? 'roboto' }};
-            color: #172033;
+            color: #0f172a;
             background: #ffffff;
             line-height: 1.25;
             margin: 0;
             padding: 0;
             direction: {{ $direction ?? 'ltr' }};
             text-align: {{ $default_text_align ?? 'left' }};
-            font-size: {{ $isSingleInvoice ? '8px' : '11px' }};
+            font-size: 11px;
         }
 
         table {
@@ -45,7 +45,6 @@
 
         .invoice-box {
             border: 0;
-            min-height: 0;
             padding: 0;
             background: #ffffff;
         }
@@ -55,38 +54,45 @@
             border-top: 0;
         }
 
+        .layout-half {
+            max-height: 136mm;
+            overflow: hidden;
+            page-break-inside: avoid;
+            page-break-after: auto;
+        }
+
         .invoice-header td {
             vertical-align: middle;
         }
 
         .company-logo-cell {
             width: 14%;
-            padding-right: 5px;
+            padding-right: 6px;
         }
 
         .company-info-cell {
-            width: 44%;
+            width: 48%;
         }
 
         .invoice-meta-cell {
-            width: 42%;
+            width: 38%;
             text-align: right;
             vertical-align: top;
         }
 
         .brand-logo {
-            max-width: 76px;
-            max-height: 34px;
+            max-width: 64px;
+            max-height: 28px;
         }
 
         .brand {
             font-weight: 700;
-            font-size: 20px;
+            font-size: 16px;
             color: #d90429;
         }
 
         .shop-title {
-            font-size: 21px;
+            font-size: 16px;
             font-weight: 800;
             color: #0f172a;
             line-height: 1.05;
@@ -94,56 +100,24 @@
         }
 
         .shop-line {
-            font-size: 13px;
-            line-height: 1.45;
+            font-size: 10px;
+            line-height: 1.35;
             color: #0f172a;
             white-space: nowrap;
         }
 
-        .shop-accent {
-            color: #d90429;
-            font-weight: 700;
-            display: inline-block;
-            min-width: 13px;
-        }
-
-        .contact-icon {
-            display: inline-block !important;
-            width: 6px !important;
-            height: 6px !important;
-            min-width: 6px !important;
-            max-width: 6px !important;
-            min-height: 6px !important;
-            max-height: 6px !important;
-            margin-right: 2px;
-            vertical-align: 0;
-            color: #d90429;
-        }
-
-        .contact-icon svg {
-            display: block;
-            width: 6px !important;
-            height: 6px !important;
-            fill: none;
-            stroke: currentColor;
-            stroke-width: 2;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
-
         .invoice-title {
-            font-size: 35px;
+            font-size: 26px;
             font-weight: 400;
             color: #000000;
             line-height: 1;
-            text-transform: uppercase;
         }
 
         .invoice-meta {
-            font-size: 13px;
-            line-height: 1.45;
+            font-size: 10px;
+            line-height: 1.4;
             color: #0f172a;
-            margin-top: 7px;
+            margin-top: 5px;
         }
 
         .invoice-meta-line {
@@ -152,14 +126,14 @@
 
         .divider {
             border-top: 1px solid #cbd5e1;
-            margin: 13px 0;
+            margin: 6px 0;
             height: 1px;
         }
 
         .section-title {
             font-weight: 800;
-            font-size: 16px;
-            margin-bottom: 5px;
+            font-size: 12px;
+            margin-bottom: 3px;
             color: #0f172a;
             text-transform: uppercase;
         }
@@ -169,8 +143,8 @@
         }
 
         .customer {
-            font-size: 14px;
-            line-height: 1.45;
+            font-size: 11px;
+            line-height: 1.35;
             color: #0f172a;
             word-break: break-word;
         }
@@ -182,81 +156,86 @@
         .bill-rule {
             border-top: 1px solid #cbd5e1;
             width: 92%;
-            margin: 5px 0 9px;
+            margin: 3px 0 5px;
         }
 
         .qr-placeholder {
-            width: 58px;
-            height: 58px;
-            border: 4px solid #111827;
+            width: 42px;
+            height: 42px;
+            border: 3px solid #111827;
             margin: 0 auto;
             text-align: center;
-            font-size: 9px;
-            line-height: 50px;
+            font-size: 8px;
+            line-height: 36px;
             color: #111827;
             font-weight: 800;
         }
 
         .qr-code {
             display: block;
-            width: 58px;
-            height: 58px;
+            width: 42px;
+            height: 42px;
             margin: 0 auto;
         }
 
-        .cod-box {
-            border: 0;
-            border-radius: 0;
-            padding: 11px 8px;
-            text-align: center;
+        table.cod-box {
+            width: 100%;
+            border: 1px solid #0f172a;
+            border-collapse: separate !important;
+            border-spacing: 0;
+            table-layout: auto;
             color: #0f172a;
-            min-height: 58px;
-            text-decoration: none;
+        }
+
+        table.cod-box td.cod-cell {
+            padding: 12px 16px !important;
+            border: 0 !important;
+            text-align: center;
+            vertical-align: middle !important;
         }
 
         .cod-label {
             color: #64748b;
-            font-size: 13px;
-            letter-spacing: .8px;
+            font-size: 9px;
+            letter-spacing: .6px;
             text-transform: uppercase;
-            margin-bottom: 7px;
-            text-decoration: none;
+            line-height: 1.5;
+            border: 0 !important;
         }
 
         .cod-amount {
-            font-size: 22px;
-            line-height: 1;
+            font-size: 16px;
+            line-height: 1.5;
             font-weight: 800;
-            letter-spacing: .4px;
-            text-decoration: none;
-            border: 0;
+            letter-spacing: .2px;
+            border: 0 !important;
         }
 
         .items {
-            margin-top: 8px;
+            margin-top: 4px;
             border: 0;
             table-layout: fixed;
         }
 
         .items th {
-            font-size: 13px;
+            font-size: 10px;
             font-weight: 700;
             text-align: center;
             border-top: 1px solid #cbd5e1;
             border-bottom: 1px solid #cbd5e1;
-            padding: 5px 4px;
+            padding: 3px 3px;
             color: #0f172a;
             background: #f1f5f9;
         }
 
         .items td {
-            font-size: 13px;
-            padding: 5px 4px;
+            font-size: 10px;
+            padding: 3px 3px;
             border-bottom: 1px solid #cbd5e1;
         }
 
         .item-name {
-            line-height: 1.25;
+            line-height: 1.2;
             color: #172033;
             word-break: break-word;
         }
@@ -287,14 +266,14 @@
         }
 
         .summary {
-            width: 46%;
+            width: 42%;
             margin-left: auto;
-            margin-top: 7px;
-            font-size: 13px;
+            margin-top: 4px;
+            font-size: 10px;
         }
 
         .summary td {
-            padding: 4px 0;
+            padding: 2px 0;
         }
 
         .summary .label {
@@ -312,70 +291,147 @@
         .summary-total td {
             border-top: 1px solid #cbd5e1;
             font-weight: 800;
-            padding-top: 7px;
+            padding-top: 4px;
         }
 
         .footer-line {
-            display: none;
-            margin-top: 12px;
+            margin-top: 6px;
             border-top: 1px solid #cbd5e1;
-            padding-top: 9px;
-            font-size: 11px;
+            padding-top: 4px;
+            font-size: 8px;
             text-align: center;
             color: #64748b;
-            letter-spacing: .8px;
+            letter-spacing: .6px;
         }
 
-        @if ($isSingleInvoice)
-        /* A6 landscape: two complete invoices print on one A4 sheet. */
-        .single-invoice { font-size: 10px !important; }
-        .single-invoice .invoice-box {
-            /* 194 + 16 mm padding = one 210 x 148.5 mm A5 half-sheet. */
-            width: 194mm;
-            min-height: 132.5mm;
-            padding: 8mm;
-            page-break-after: auto;
-            page-break-inside: avoid;
-        }
-        .single-invoice .invoice-box + .invoice-box { page-break-before: auto; }
-        .single-invoice .company-logo-cell { width: 15%; padding-right: 7px; }
-        .single-invoice .company-info-cell { width: 48%; }
-        .single-invoice .invoice-meta-cell { width: 37%; }
-        .single-invoice .brand-logo { max-width: 70px; max-height: 32px; }
-        .single-invoice .brand { font-size: 14px !important; }
-        .single-invoice .shop-title { font-size: 19px !important; line-height: 1.06 !important; }
-        .single-invoice .shop-line { font-size: 12px !important; line-height: 1.5 !important; }
-        .single-invoice .contact-icon { width: 11px !important; height: 11px !important; min-width: 11px !important; max-width: 11px !important; min-height: 11px !important; max-height: 11px !important; margin-right: 4px; vertical-align: -2px; }
-        .single-invoice .contact-icon svg { width: 11px !important; height: 11px !important; stroke: #e91e63 !important; }
-        .single-invoice .invoice-title { font-size: 31px !important; line-height: 1 !important; }
-        .single-invoice .invoice-meta { font-size: 12px !important; line-height: 1.45 !important; margin-top: 7px !important; white-space: nowrap !important; }
-        .single-invoice .divider { margin: 13px 0 !important; }
-        .single-invoice .section-title { font-size: 16px !important; margin-bottom: 6px !important; }
-        .single-invoice .customer { font-size: 13px !important; line-height: 1.48 !important; }
-        .single-invoice .bill-rule { margin: 5px 0 9px !important; }
-        .single-invoice .qr-placeholder { width: 57px; height: 57px; border-width: 3px; font-size: 9px; line-height: 49px; }
-        .single-invoice .qr-code { width: 57px; height: 57px; }
-        .single-invoice .cod-box { min-height: 60px; padding: 11px 8px; border: 1px solid #0f172a; border-radius: 3px; }
-        .single-invoice .cod-label { font-size: 12px !important; margin-bottom: 7px !important; letter-spacing: .8px !important; }
-        .single-invoice .cod-amount { font-size: 24px !important; }
-        .single-invoice .items { margin-top: 8px; }
-        .single-invoice .items th,
-        .single-invoice .items td { font-size: 11px !important; padding: 6px 4px !important; }
-        .single-invoice .items th { font-size: 11px !important; padding: 6px 4px !important; }
-        .single-invoice .items th { white-space: nowrap; }
-        .single-invoice .item-name { line-height: 1.22 !important; }
-        .single-invoice .summary { font-size: 11px !important; margin-top: 7px !important; }
-        .single-invoice .summary td { padding: 4px 0 !important; }
-        .single-invoice .summary-total td { padding-top: 7px !important; }
-        .single-invoice .footer-line { display: block; font-size: 10px; margin-top: 12px; padding-top: 8px; }
-        @endif
+        /* 1-4 items: readable half-page */
+        .density-comfortable .shop-title { font-size: 16px; }
+        .density-comfortable .shop-line { font-size: 10px; }
+        .density-comfortable .invoice-title { font-size: 26px; }
+        .density-comfortable .invoice-meta { font-size: 10px; }
+        .density-comfortable .section-title { font-size: 12px; }
+        .density-comfortable .customer { font-size: 11px; }
+        .density-comfortable .items th,
+        .density-comfortable .items td { font-size: 10px; padding: 4px 3px; }
+        .density-comfortable .summary { font-size: 10px; }
+        .density-comfortable .qr-code,
+        .density-comfortable .qr-placeholder { width: 44px; height: 44px; }
+        .density-comfortable table.cod-box td.cod-cell { padding: 14px 16px !important; }
+        .density-comfortable .cod-amount { font-size: 16px; }
+        .density-comfortable .brand-logo { max-width: 64px; max-height: 28px; }
+
+        /* 5-8 items */
+        .density-medium .shop-title { font-size: 14px; }
+        .density-medium .shop-line { font-size: 9px; }
+        .density-medium .invoice-title { font-size: 22px; }
+        .density-medium .invoice-meta { font-size: 9px; margin-top: 3px; }
+        .density-medium .section-title { font-size: 11px; }
+        .density-medium .customer { font-size: 10px; line-height: 1.28; }
+        .density-medium .items th,
+        .density-medium .items td { font-size: 9px; padding: 2.5px 3px; }
+        .density-medium .summary { font-size: 9px; margin-top: 3px; }
+        .density-medium .summary td { padding: 1.5px 0; }
+        .density-medium .divider { margin: 5px 0; }
+        .density-medium .qr-code,
+        .density-medium .qr-placeholder { width: 38px; height: 38px; }
+        .density-medium table.cod-box td.cod-cell { padding: 12px 14px !important; }
+        .density-medium .cod-amount { font-size: 14px; }
+        .density-medium .brand-logo { max-width: 56px; max-height: 24px; }
+
+        /* 9-12 items */
+        .density-compact .shop-title { font-size: 13px; }
+        .density-compact .shop-line { font-size: 8.5px; }
+        .density-compact .invoice-title { font-size: 18px; }
+        .density-compact .invoice-meta { font-size: 8.5px; margin-top: 2px; }
+        .density-compact .section-title { font-size: 10px; margin-bottom: 2px; }
+        .density-compact .customer { font-size: 9px; line-height: 1.22; }
+        .density-compact .items th,
+        .density-compact .items td { font-size: 8.5px; padding: 1.5px 2px; }
+        .density-compact .summary { font-size: 8.5px; margin-top: 2px; }
+        .density-compact .summary td { padding: 1px 0; }
+        .density-compact .divider { margin: 4px 0; }
+        .density-compact .bill-rule { margin: 2px 0 3px; }
+        .density-compact .qr-code,
+        .density-compact .qr-placeholder { width: 32px; height: 32px; }
+        .density-compact table.cod-box td.cod-cell { padding: 10px 12px !important; }
+        .density-compact .cod-label { font-size: 8px; }
+        .density-compact .cod-amount { font-size: 12px; }
+        .density-compact .brand-logo { max-width: 48px; max-height: 22px; }
+        .density-compact .footer-line { margin-top: 4px; padding-top: 3px; font-size: 7px; }
+
+        /* 13-16 items */
+        .density-tight .shop-title { font-size: 12px; }
+        .density-tight .shop-line { font-size: 8px; }
+        .density-tight .invoice-title { font-size: 16px; }
+        .density-tight .invoice-meta { font-size: 8px; margin-top: 2px; }
+        .density-tight .section-title { font-size: 9px; margin-bottom: 1px; }
+        .density-tight .customer { font-size: 8px; line-height: 1.18; }
+        .density-tight .items { margin-top: 2px; }
+        .density-tight .items th,
+        .density-tight .items td { font-size: 8px; padding: 1px 2px; }
+        .density-tight .summary { font-size: 8px; margin-top: 2px; }
+        .density-tight .summary td { padding: 0.5px 0; }
+        .density-tight .summary-total td { padding-top: 2px; }
+        .density-tight .divider { margin: 3px 0; }
+        .density-tight .bill-rule { margin: 1px 0 2px; }
+        .density-tight .qr-code,
+        .density-tight .qr-placeholder { width: 26px; height: 26px; }
+        .density-tight table.cod-box td.cod-cell { padding: 8px 10px !important; }
+        .density-tight .cod-label { font-size: 7px; }
+        .density-tight .cod-amount { font-size: 11px; }
+        .density-tight .brand-logo { max-width: 42px; max-height: 18px; }
+        .density-tight .footer-line { margin-top: 3px; padding-top: 2px; font-size: 7px; }
+        .density-tight .company-logo-cell { width: 12%; padding-right: 4px; }
+
+        /* 17-20 items: smallest still readable half-page */
+        .density-dense .shop-title { font-size: 11px; }
+        .density-dense .shop-line { font-size: 7.5px; }
+        .density-dense .invoice-title { font-size: 14px; }
+        .density-dense .invoice-meta { font-size: 7.5px; margin-top: 1px; }
+        .density-dense .section-title { font-size: 8px; margin-bottom: 1px; }
+        .density-dense .customer { font-size: 7.5px; line-height: 1.15; }
+        .density-dense .items { margin-top: 1px; }
+        .density-dense .items th,
+        .density-dense .items td { font-size: 7px; padding: 0 2px; }
+        .density-dense .item-name { line-height: 1.1; }
+        .density-dense .summary { font-size: 7px; margin-top: 1px; }
+        .density-dense .summary td { padding: 0; }
+        .density-dense .summary-total td { padding-top: 1px; }
+        .density-dense .divider { margin: 1.5px 0; }
+        .density-dense .bill-rule { margin: 1px 0 1px; }
+        .density-dense .qr-code,
+        .density-dense .qr-placeholder { width: 20px; height: 20px; }
+        .density-dense table.cod-box td.cod-cell { padding: 7px 9px !important; }
+        .density-dense .cod-label { font-size: 6px; }
+        .density-dense .cod-amount { font-size: 9px; }
+        .density-dense .brand-logo { max-width: 36px; max-height: 16px; }
+        .density-dense .footer-line { display: none; }
+        .density-dense .company-logo-cell { width: 11%; padding-right: 3px; }
+
+        /* 21+ items: full A4, may flow to extra pages */
+        .density-full .layout-half { max-height: none; overflow: visible; }
+        .density-full .shop-title { font-size: 18px; }
+        .density-full .shop-line { font-size: 11px; }
+        .density-full .invoice-title { font-size: 28px; }
+        .density-full .invoice-meta { font-size: 11px; }
+        .density-full .section-title { font-size: 13px; }
+        .density-full .customer { font-size: 12px; line-height: 1.4; }
+        .density-full .items th,
+        .density-full .items td { font-size: 11px; padding: 5px 4px; }
+        .density-full .summary { font-size: 11px; margin-top: 8px; }
+        .density-full .summary td { padding: 3px 0; }
+        .density-full .divider { margin: 8px 0; }
+        .density-full .qr-code,
+        .density-full .qr-placeholder { width: 52px; height: 52px; }
+        .density-full table.cod-box td.cod-cell { padding: 14px 16px !important; }
+        .density-full .cod-amount { font-size: 18px; }
+        .density-full .brand-logo { max-width: 72px; max-height: 32px; }
+        .density-full .footer-line { margin-top: 10px; padding-top: 6px; font-size: 9px; }
     </style>
 </head>
 
-<body class="{{ $isSingleInvoice ? 'single-invoice' : 'multi-invoice' }}">
+<body>
     @php
-        $host = request()->getSchemeAndHttpHost();
-        $logoText = strtoupper(substr($systemName ?? 'SHOP', 0, 2));
         $paymentMethodLabels = [
             'cash' => 'Cash',
             'card' => 'Card',
@@ -384,21 +440,6 @@
             'card_on_delivery' => 'Card On Delivery',
             'bank_transfer' => 'Bank Transfer',
         ];
-        $uploadedImagePath = function ($fileId) {
-            if (!$fileId) {
-                return null;
-            }
-
-            $mediaFile = \App\Models\MediaFile::find($fileId);
-            if ($mediaFile && $mediaFile->media_file) {
-                $absolutePath = public_path($mediaFile->media_file);
-                if (file_exists($absolutePath)) {
-                    return $absolutePath;
-                }
-            }
-
-            return uploadedAsset($fileId);
-        };
         $formatInvoicePrice = function ($amount) {
             $currencySymbol = (string) (getSetting('currencySymbol') ?? '$');
             $currencyCode = strtoupper((string) (getSetting('currencyCode') ?? ''));
@@ -407,6 +448,36 @@
             return $currencyCode === 'BDT' || bin2hex($currencySymbol) === 'e09fb3'
                 ? 'BDT '.formatPrice($amount, false, false)
                 : formatPrice($amount);
+        };
+        $invoiceDensityForCount = function (int $itemCount) use ($halfPageItemLimit): string {
+            if ($itemCount > $halfPageItemLimit) {
+                return 'full';
+            }
+            if ($itemCount <= 4) {
+                return 'comfortable';
+            }
+            if ($itemCount <= 8) {
+                return 'medium';
+            }
+            if ($itemCount <= 12) {
+                return 'compact';
+            }
+            if ($itemCount <= 16) {
+                return 'tight';
+            }
+
+            return 'dense';
+        };
+        $shopPhone = getSetting('systemPhone') ?: getSetting('phone') ?: '01765765647';
+        $shopAddress = $systemAddress ?: 'Elephant Road, Dhaka';
+        $logoText = strtoupper(substr($systemName ?? 'SHOP', 0, 2));
+        $formatInvoiceNumber = function ($code): string {
+            $raw = ltrim((string) $code, '# ');
+            if ($raw === '') {
+                return 'RM';
+            }
+
+            return str_starts_with(strtoupper($raw), 'RM') ? $raw : 'RM'.$raw;
         };
     @endphp
 
@@ -423,7 +494,6 @@
                     $paymentMethod = filled($paymentMethodRaw)
                         ? ($paymentMethodLabels[$paymentMethodRaw] ?? ucwords(str_replace('_', ' ', $paymentMethodRaw)))
                         : ucwords(str_replace('_', ' ', $order->payment_status));
-                    $totalQty = $order->orderItems->sum('qty');
                     $automaticItemDiscount = $order->orderItems->sum(fn($item) => (float) ($item->total_discount ?? 0));
                     $displaySubtotal = $order->orderItems->sum(function ($item) {
                         return max((float) $item->total_price - (float) ($item->total_tax ?? 0), 0);
@@ -438,10 +508,13 @@
                     $displayDiscount = $manualDiscount + (float) ($order->coupon_discount_amount ?? 0);
                     $displayTotal = max($displaySubtotal + (float) $order->tax_amount + (float) $order->shipping_charge_amount - $displayDiscount, 0);
                     $codAmount = in_array($paymentMethodRaw, ['cod', 'cash_on_delivery'], true) ? $displayTotal : 0;
+                    $itemCount = $order->orderItems->count();
+                    $isHalfPage = $itemCount <= $halfPageItemLimit;
+                    $density = $invoiceDensityForCount($itemCount);
+                    $invoiceCode = $formatInvoiceNumber(getSetting('order_code_prefix').($order->orderGroup?->code ?? $order->order_code));
                 @endphp
 
-                @for ($copy = 0; $copy < ($isSingleInvoice ? 2 : 1); $copy++)
-                <div class="invoice-box">
+                <div class="invoice-box layout-{{ $isHalfPage ? 'half' : 'full' }} density-{{ $density }}">
                     <table class="invoice-header">
                         <tr>
                             <td class="company-logo-cell">
@@ -453,24 +526,16 @@
                             </td>
                             <td class="company-info-cell">
                                 <div class="shop-title">{{ $systemName ?? 'RAISA MART' }}</div>
-                                <div class="shop-line">
-                                    <span class="contact-icon" aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" stroke="#e91e63"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 5.18 2 2 0 0 1 4.11 3h3a2 2 0 0 1 2 1.72c.12.9.33 1.78.62 2.63a2 2 0 0 1-.45 2.11L8 10.73a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.85.29 1.73.5 2.63.62A2 2 0 0 1 22 16.92z"/></svg>
-                                    </span>
-                                    {{ getSetting('systemPhone') ?? '01888830301' }}
-                                </div>
-                                <div class="shop-line">
-                                    <span class="contact-icon" aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" stroke="#e91e63"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>
-                                    </span>
-                                    Elephant Road, Dhaka
-                                </div>
+                                <div class="shop-line">Hotline: {{ $shopPhone }}</div>
+                                @if (filled($shopAddress))
+                                <div class="shop-line">{{ $shopAddress }}</div>
+                                @endif
                             </td>
                             <td class="invoice-meta-cell">
                                 <div class="invoice-title">Invoice</div>
                                 <div class="invoice-meta">
-                                    <div class="invoice-meta-line">Invoice Number: {{ getSetting('order_code_prefix') }}{{ $order->orderGroup?->code ?? $order->order_code }}</div>
-                                    <div class="invoice-meta-line">Invoice Date: {{ date('d M, Y', strtotime($order->created_at)) }}</div>
+                                    <div class="invoice-meta-line">Invoice No : {{ $invoiceCode }}</div>
+                                    <div class="invoice-meta-line">Date : {{ date('d-m-Y', strtotime($order->created_at)) }}</div>
                                 </div>
                             </td>
                         </tr>
@@ -496,18 +561,23 @@
                                     @endif
                                 </div>
                             </td>
-                            <td style="width: 18%; text-align: center;">
-                                @if (filled($qrCodeImage))
+                            <td style="width: 16%; text-align: center;">
+                                @if (filled($qrCodeImage ?? null))
                                     <img src="{{ $qrCodeImage }}" alt="Order QR code" class="qr-code">
                                 @else
                                     <div class="qr-placeholder">QR</div>
                                 @endif
                             </td>
-                            <td style="width: 37%; padding-left: 7px;">
-                                <div class="cod-box">
-                                    <div class="cod-label">{{ $paymentMethod }}</div>
-                                    <div class="cod-amount">COD: {{ formatPrice($codAmount, false, false) }} BDT</div>
-                                </div>
+                            <td style="width: 39%; padding-left: 12px;">
+                                <table class="cod-box" width="100%" cellpadding="12" cellspacing="0">
+                                    <tr>
+                                        <td class="cod-cell">
+                                            <span class="cod-label">{{ $paymentMethod }}</span>
+                                            <br><br>
+                                            <span class="cod-amount">{{ $codAmount > 0 ? 'COD' : 'TOTAL' }} : {{ formatPrice($codAmount > 0 ? $codAmount : $displayTotal, false, false) }} BDT</span>
+                                        </td>
+                                    </tr>
+                                </table>
                             </td>
                         </tr>
                     </table>
@@ -518,12 +588,12 @@
                     <table class="items">
                         <thead>
                             <tr>
-                                <th style="width: 9%;">S.No</th>
-                                <th style="width: 36%; text-align: left;">Product</th>
-                                <th style="width: 16%;">Size</th>
-                                <th style="width: 13%;">Quantity</th>
-                                <th style="width: 13%; text-align: right;">Unit price</th>
-                                <th style="width: 13%; text-align: right;">Total price</th>
+                                <th style="width: 8%;">S.No</th>
+                                <th style="width: 38%; text-align: left;">Product</th>
+                                <th style="width: 14%;">Size</th>
+                                <th style="width: 12%;">Quantity</th>
+                                <th style="width: 14%; text-align: right;">Unit price</th>
+                                <th style="width: 14%; text-align: right;">Total price</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -539,7 +609,7 @@
                                     <td class="qty">{{ $itemIndex + 1 }}</td>
                                     <td class="item-name">
                                         {{ $product?->CollectTranslation('name') ?? translate('Product not found') }}
-                                        @if ($item->productVariation?->code)
+                                        @if (! $isHalfPage && $item->productVariation?->code)
                                             <br><span>Code: {{ generateVariationName($item->productVariation->code) }}</span>
                                         @endif
                                     </td>
@@ -571,7 +641,7 @@
                         @endif
                         @if ((float) $order->shipping_charge_amount > 0)
                             <tr>
-                                <td class="label">Delivery Charge</td>
+                                <td class="label">Shipping</td>
                                 <td class="value amount-value" style="font-weight: bold;"><strong>{{ $formatInvoicePrice($order->shipping_charge_amount) }}</strong></td>
                             </tr>
                         @endif
@@ -585,7 +655,6 @@
                         Thank you for shopping with {{ $systemName ?? 'RAISA MART' }}
                     </div>
                 </div>
-                @endfor
     @endforeach
 </body>
 

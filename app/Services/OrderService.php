@@ -670,16 +670,15 @@ class OrderService
             'exchange' => $exchange,
         ];
 
-        // Standard invoices use the compact template as two A5 copies on one
-        // A4 sheet. Exchange invoices keep the detailed template.
+        // Standard invoices use the compact template: one copy on the top
+        // half of A4 so a second copy can be printed after rotating the paper.
+        // Exchange invoices keep the detailed template.
         if (! $order->is_exchange_order) {
-            // Standard invoice downloads are an A4 portrait sheet with two
-            // landscape invoice copies, one above the other.
             $pdfConfig['format'] = 'A4';
-            $pdfConfig['margin_left'] = 0;
-            $pdfConfig['margin_right'] = 0;
-            $pdfConfig['margin_top'] = 0;
-            $pdfConfig['margin_bottom'] = 0;
+            $pdfConfig['margin_left'] = 10;
+            $pdfConfig['margin_right'] = 10;
+            $pdfConfig['margin_top'] = 8;
+            $pdfConfig['margin_bottom'] = 8;
 
             $compactViewData = [
                 'orders' => collect([$order]),

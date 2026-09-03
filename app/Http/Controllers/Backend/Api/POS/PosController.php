@@ -986,14 +986,14 @@ class PosController extends Controller
             });
 
             // Get business info from settings
-            $systemName = getSetting('systemName') ?? (function_exists('shopName') ? shopName() : 'Business Name');
-            $systemAddress = getSetting('systemAddress') ?? '';
-            $businessPhone = getSetting('phone') ?? '';
+            $systemName = getSetting('invoiceCompanyName') ?: (getSetting('systemName') ?? (function_exists('shopName') ? shopName() : 'Business Name'));
+            $systemAddress = getSetting('invoiceCompanyAddress') ?: (getSetting('systemAddress') ?? '');
+            $businessPhone = getSetting('systemPhone') ?: (getSetting('phone') ?: '01765765647');
             $businessEmail = getSetting('email') ?? '';
 
             // Get logo from media files
             $logo = null;
-            $logoFileId = getSetting('websiteHeaderLogo');
+            $logoFileId = getSetting('invoiceLogo') ?: getSetting('websiteHeaderLogo');
             if ($logoFileId) {
                 $mediaFile = \App\Models\MediaFile::find($logoFileId);
                 if ($mediaFile && $mediaFile->media_file) {
@@ -1056,9 +1056,15 @@ class PosController extends Controller
                 }
             }
 
+            $rawOrderNumber = ($order->order_code ? getSetting('order_code_prefix') : '').($order->order_code ?? '');
+            $rawOrderNumber = ltrim((string) $rawOrderNumber, '# ');
+            $orderNumber = $rawOrderNumber === ''
+                ? 'RM'
+                : (str_starts_with(strtoupper($rawOrderNumber), 'RM') ? $rawOrderNumber : 'RM'.$rawOrderNumber);
+
             return [
-                'order_number' => ($order->order_code ? getSetting('order_code_prefix') : '').($order->order_code ?? ''),
-                'order_date' => date('d/m/Y', strtotime($order->created_at)),
+                'order_number' => $orderNumber,
+                'order_date' => date('d-m-Y', strtotime($order->created_at)),
                 'business' => [
                     'name' => $systemName,
                     'address' => $businessAddress ?: $systemAddress,
