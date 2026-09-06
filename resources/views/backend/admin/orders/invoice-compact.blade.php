@@ -100,7 +100,7 @@
         }
 
         .shop-line {
-            font-size: 10px;
+            font-size: 12px;
             line-height: 1.35;
             color: #0f172a;
             white-space: nowrap;
@@ -143,7 +143,7 @@
         }
 
         .customer {
-            font-size: 11px;
+            font-size: 13px;
             line-height: 1.35;
             color: #0f172a;
             word-break: break-word;
@@ -223,9 +223,13 @@
             text-align: center;
             border-top: 1px solid #cbd5e1;
             border-bottom: 1px solid #cbd5e1;
-            padding: 3px 3px;
+            padding: 3px 1px;
             color: #0f172a;
             background: #f1f5f9;
+            white-space: nowrap !important;
+            word-break: keep-all;
+            overflow-wrap: normal;
+            hyphens: none;
         }
 
         .items td {
@@ -242,7 +246,7 @@
 
         .price,
         .qty {
-            white-space: nowrap;
+            white-space: nowrap !important;
         }
 
         .price {
@@ -250,6 +254,15 @@
             font-family: hindsiliguri, {{ $font_family ?? 'roboto' }}, dejavusanscondensed;
             font-weight: bold !important;
             color: #000000;
+            white-space: nowrap !important;
+        }
+
+        .amount-inline {
+            white-space: nowrap !important;
+        }
+
+        .items td.price {
+            white-space: nowrap !important;
         }
 
         .amount-value {
@@ -316,7 +329,7 @@
         .density-comfortable .shop-title { font-size: 18px; }
         .density-spacious .shop-line,
         .density-few .shop-line,
-        .density-comfortable .shop-line { font-size: 11px; }
+        .density-comfortable .shop-line { font-size: 13px; }
         .density-spacious .invoice-title,
         .density-few .invoice-title,
         .density-comfortable .invoice-title { font-size: 30px; }
@@ -328,7 +341,7 @@
         .density-comfortable .section-title { font-size: 14px; }
         .density-spacious .customer,
         .density-few .customer,
-        .density-comfortable .customer { font-size: 13px; line-height: 1.4; }
+        .density-comfortable .customer { font-size: 15px; line-height: 1.4; }
         .density-spacious .summary,
         .density-few .summary,
         .density-comfortable .summary { font-size: 13px; margin-top: 8px; }
@@ -359,14 +372,15 @@
 
         /* 1 product: enlarge every font so the invoice occupies near half-page */
         .density-spacious .shop-title { font-size: 20px; }
-        .density-spacious .shop-line { font-size: 12px; }
+        .density-spacious .shop-line { font-size: 14px; }
         .density-spacious .invoice-title { font-size: 32px; }
         .density-spacious .invoice-meta { font-size: 12px; margin-top: 6px; }
         .density-spacious .section-title { font-size: 15px; }
-        .density-spacious .customer { font-size: 14px; line-height: 1.4; }
+        .density-spacious .customer { font-size: 16px; line-height: 1.4; }
         .density-spacious .items { margin-top: 6px; }
         .density-spacious .items th,
-        .density-spacious .items td { font-size: 16px; padding: 5mm 2mm; }
+        .density-spacious .items td { font-size: 16px; padding: 5mm 1mm; }
+        .density-spacious .items td.price { padding-left: 1mm; padding-right: 1mm; }
         .density-spacious .item-name { line-height: 1.4; }
         .density-spacious .summary { font-size: 13px; margin-top: 8px; }
         .density-spacious .qr-code,
@@ -391,11 +405,11 @@
 
         /* 6-8 items: shrink product list more, ease other fonts a little */
         .density-medium .shop-title { font-size: 17px; }
-        .density-medium .shop-line { font-size: 11px; }
+        .density-medium .shop-line { font-size: 13px; }
         .density-medium .invoice-title { font-size: 28px; }
         .density-medium .invoice-meta { font-size: 11px; margin-top: 4px; }
         .density-medium .section-title { font-size: 13px; }
-        .density-medium .customer { font-size: 12px; line-height: 1.32; }
+        .density-medium .customer { font-size: 14px; line-height: 1.32; }
         .density-medium .items { margin-top: 3px; }
         .density-medium .items th,
         .density-medium .items td { font-size: 11px; padding: 1mm 0.8mm; }
@@ -411,11 +425,11 @@
 
         /* 9-10 items: tightest half-page */
         .density-compact .shop-title { font-size: 16px; }
-        .density-compact .shop-line { font-size: 10px; }
+        .density-compact .shop-line { font-size: 12px; }
         .density-compact .invoice-title { font-size: 24px; }
         .density-compact .invoice-meta { font-size: 10px; margin-top: 3px; }
         .density-compact .section-title { font-size: 12px; margin-bottom: 2px; }
-        .density-compact .customer { font-size: 11px; line-height: 1.28; }
+        .density-compact .customer { font-size: 13px; line-height: 1.28; }
         .density-compact .items { margin-top: 2px; }
         .density-compact .items th,
         .density-compact .items td { font-size: 10px; padding: 1.1mm 0.8mm; }
@@ -434,11 +448,11 @@
         /* 11+ items: full A4, may flow to extra pages */
         .density-full .layout-half { max-height: none; overflow: visible; }
         .density-full .shop-title { font-size: 18px; }
-        .density-full .shop-line { font-size: 11px; }
+        .density-full .shop-line { font-size: 13px; }
         .density-full .invoice-title { font-size: 28px; }
         .density-full .invoice-meta { font-size: 11px; }
         .density-full .section-title { font-size: 13px; }
-        .density-full .customer { font-size: 12px; line-height: 1.4; }
+        .density-full .customer { font-size: 14px; line-height: 1.4; }
         .density-full .items th,
         .density-full .items td { font-size: 11px; padding: 5px 4px; }
         .density-full .summary { font-size: 11px; margin-top: 8px; }
@@ -468,8 +482,9 @@
             $currencyCode = strtoupper((string) (getSetting('currencyCode') ?? ''));
 
             // The bundled PDF fonts do not contain the Bengali taka glyph.
+            // NBSP keeps "BDT" glued to the amount so mPDF cannot wrap it onto its own line.
             return $currencyCode === 'BDT' || bin2hex($currencySymbol) === 'e09fb3'
-                ? 'BDT '.formatPrice($amount, false, false)
+                ? 'BDT'."\u{00A0}".formatPrice($amount, false, false)
                 : formatPrice($amount);
         };
         $invoiceDensityForCount = function (int $itemCount) use ($halfPageItemLimit): string {
@@ -611,12 +626,12 @@
                     <table class="items">
                         <thead>
                             <tr>
-                                <th style="width: 8%;">S.No</th>
-                                <th style="width: 38%; text-align: left;">Product</th>
-                                <th style="width: 14%;">Size</th>
-                                <th style="width: 12%;">Quantity</th>
-                                <th style="width: 14%; text-align: right;">Unit price</th>
-                                <th style="width: 14%; text-align: right;">Total price</th>
+                                <th nowrap style="width: 8%;">S.No</th>
+                                <th style="width: 30%; text-align: left;">Product</th>
+                                <th nowrap style="width: 10%;">Size</th>
+                                <th nowrap style="width: 14%;">Quantity</th>
+                                <th nowrap style="width: 19%; text-align: right;">Unit price</th>
+                                <th nowrap style="width: 19%; text-align: right;">Total price</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -638,8 +653,8 @@
                                     </td>
                                     <td class="qty">{{ $variationLabel ?: '-' }}</td>
                                     <td class="qty">{{ $item->qty }}</td>
-                                    <td class="price amount-value" style="font-weight: bold;"><strong>{{ $formatInvoicePrice($displayUnitPrice) }}</strong></td>
-                                    <td class="price amount-value" style="font-weight: bold;"><strong>{{ $formatInvoicePrice($item->total_price) }}</strong></td>
+                                    <td class="price amount-value" nowrap style="font-weight: bold; white-space: nowrap;"><strong class="amount-inline">{{ $formatInvoicePrice($displayUnitPrice) }}</strong></td>
+                                    <td class="price amount-value" nowrap style="font-weight: bold; white-space: nowrap;"><strong class="amount-inline">{{ $formatInvoicePrice($item->total_price) }}</strong></td>
                                 </tr>
                             @endforeach
                         </tbody>

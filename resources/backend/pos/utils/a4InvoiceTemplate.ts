@@ -12,7 +12,8 @@ const paymentMethodLabels: Record<string, string> = {
     split: 'Split Payment',
 };
 
-const formatCurrency = (amount: number) => currencyFormatter(amount);
+const formatCurrency = (amount: number) =>
+    String(currencyFormatter(amount) ?? '').replace(/ /g, '\u00A0');
 
 const escapeHtml = (value: string | number | null | undefined): string =>
     String(value ?? '')
@@ -73,14 +74,14 @@ const a4InvoiceCss = `
     .brand-logo { max-width: 64px; max-height: 28px; }
     .brand { font-weight: 700; font-size: 16px; color: #d90429; }
     .shop-title { font-size: 16px; font-weight: 800; color: #0f172a; line-height: 1.05; text-transform: uppercase; }
-    .shop-line { font-size: 10px; line-height: 1.35; color: #0f172a; white-space: nowrap; }
+    .shop-line { font-size: 12px; line-height: 1.35; color: #0f172a; white-space: nowrap; }
     .invoice-title { font-size: 26px; font-weight: 400; color: #000; line-height: 1; }
     .invoice-meta { font-size: 10px; line-height: 1.4; color: #0f172a; margin-top: 5px; }
     .invoice-meta-line { white-space: nowrap; }
     .divider { border-top: 1px solid #cbd5e1; margin: 6px 0; height: 1px; }
     .section-title { font-weight: 800; font-size: 12px; margin-bottom: 3px; color: #0f172a; text-transform: uppercase; }
     .bill-table td { vertical-align: middle; }
-    .customer { font-size: 11px; line-height: 1.35; color: #0f172a; word-break: break-word; }
+    .customer { font-size: 13px; line-height: 1.35; color: #0f172a; word-break: break-word; }
     .customer-label { font-weight: 700; }
     .bill-rule { border-top: 1px solid #cbd5e1; width: 92%; margin: 3px 0 5px; }
     .qr-placeholder {
@@ -108,12 +109,15 @@ const a4InvoiceCss = `
     .items th {
         font-size: 10px; font-weight: 700; text-align: center;
         border-top: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1;
-        padding: 3px; color: #0f172a; background: #f1f5f9;
+        padding: 3px 1px; color: #0f172a; background: #f1f5f9;
+        white-space: nowrap !important; word-break: keep-all; overflow-wrap: normal; hyphens: none;
     }
     .items td { font-size: 10px; padding: 3px; border-bottom: 1px solid #cbd5e1; }
     .item-name { line-height: 1.2; color: #172033; word-break: break-word; }
-    .price, .qty { white-space: nowrap; }
-    .price { text-align: right; font-weight: 700; color: #000; }
+    .price, .qty { white-space: nowrap !important; }
+    .price { text-align: right; font-weight: 700; color: #000; white-space: nowrap !important; }
+    .amount-inline { white-space: nowrap !important; }
+    .items td.price { white-space: nowrap !important; }
     .qty { text-align: center; font-weight: 700; color: #000; }
     .summary { width: 42%; margin-left: auto; margin-top: 4px; font-size: 10px; }
     .summary td { padding: 2px 0; }
@@ -130,7 +134,7 @@ const a4InvoiceCss = `
     .density-comfortable .shop-title { font-size: 18px; }
     .density-spacious .shop-line,
     .density-few .shop-line,
-    .density-comfortable .shop-line { font-size: 11px; }
+    .density-comfortable .shop-line { font-size: 13px; }
     .density-spacious .invoice-title,
     .density-few .invoice-title,
     .density-comfortable .invoice-title { font-size: 30px; }
@@ -142,7 +146,7 @@ const a4InvoiceCss = `
     .density-comfortable .section-title { font-size: 14px; }
     .density-spacious .customer,
     .density-few .customer,
-    .density-comfortable .customer { font-size: 13px; line-height: 1.4; }
+    .density-comfortable .customer { font-size: 15px; line-height: 1.4; }
     .density-spacious .summary,
     .density-few .summary,
     .density-comfortable .summary { font-size: 13px; margin-top: 8px; }
@@ -169,13 +173,14 @@ const a4InvoiceCss = `
     .density-comfortable .footer-line { margin-top: 8px; padding-top: 5px; font-size: 9px; }
 
     .density-spacious .shop-title { font-size: 20px; }
-    .density-spacious .shop-line { font-size: 12px; }
+    .density-spacious .shop-line { font-size: 14px; }
     .density-spacious .invoice-title { font-size: 32px; }
     .density-spacious .invoice-meta { font-size: 12px; margin-top: 6px; }
     .density-spacious .section-title { font-size: 15px; }
-    .density-spacious .customer { font-size: 14px; line-height: 1.4; }
+    .density-spacious .customer { font-size: 16px; line-height: 1.4; }
     .density-spacious .items { margin-top: 6px; }
-    .density-spacious .items th, .density-spacious .items td { font-size: 16px; padding: 5mm 2mm; }
+    .density-spacious .items th, .density-spacious .items td { font-size: 16px; padding: 5mm 1mm; }
+    .density-spacious .items td.price { padding-left: 1mm; padding-right: 1mm; }
     .density-spacious .item-name { line-height: 1.4; }
     .density-spacious .summary { font-size: 13px; margin-top: 8px; }
     .density-spacious .qr-code, .density-spacious .qr-placeholder { width: 56px; height: 56px; }
@@ -194,11 +199,11 @@ const a4InvoiceCss = `
     .density-comfortable .item-name { line-height: 1.25; }
 
     .density-medium .shop-title { font-size: 17px; }
-    .density-medium .shop-line { font-size: 11px; }
+    .density-medium .shop-line { font-size: 13px; }
     .density-medium .invoice-title { font-size: 28px; }
     .density-medium .invoice-meta { font-size: 11px; margin-top: 4px; }
     .density-medium .section-title { font-size: 13px; }
-    .density-medium .customer { font-size: 12px; line-height: 1.32; }
+    .density-medium .customer { font-size: 14px; line-height: 1.32; }
     .density-medium .items { margin-top: 3px; }
     .density-medium .items th, .density-medium .items td { font-size: 11px; padding: 1mm 0.8mm; }
     .density-medium .summary { font-size: 11px; margin-top: 5px; }
@@ -211,11 +216,11 @@ const a4InvoiceCss = `
     .density-medium .footer-line { margin-top: 6px; padding-top: 4px; font-size: 8px; }
 
     .density-compact .shop-title { font-size: 16px; }
-    .density-compact .shop-line { font-size: 10px; }
+    .density-compact .shop-line { font-size: 12px; }
     .density-compact .invoice-title { font-size: 24px; }
     .density-compact .invoice-meta { font-size: 10px; margin-top: 3px; }
     .density-compact .section-title { font-size: 12px; margin-bottom: 2px; }
-    .density-compact .customer { font-size: 11px; line-height: 1.28; }
+    .density-compact .customer { font-size: 13px; line-height: 1.28; }
     .density-compact .items { margin-top: 2px; }
     .density-compact .items th, .density-compact .items td { font-size: 10px; padding: 1.1mm 0.8mm; }
     .density-compact .summary { font-size: 10px; margin-top: 3px; }
@@ -229,11 +234,11 @@ const a4InvoiceCss = `
     .density-compact .footer-line { margin-top: 5px; padding-top: 3px; font-size: 8px; }
 
     .density-full .shop-title { font-size: 18px; }
-    .density-full .shop-line { font-size: 11px; }
+    .density-full .shop-line { font-size: 13px; }
     .density-full .invoice-title { font-size: 28px; }
     .density-full .invoice-meta { font-size: 11px; }
     .density-full .section-title { font-size: 13px; }
-    .density-full .customer { font-size: 12px; line-height: 1.4; }
+    .density-full .customer { font-size: 14px; line-height: 1.4; }
     .density-full .items th, .density-full .items td { font-size: 11px; padding: 5px 4px; }
     .density-full .summary { font-size: 11px; margin-top: 8px; }
     .density-full .summary td { padding: 3px 0; }
@@ -281,8 +286,8 @@ export const buildA4InvoiceHtml = (invoiceData: InvoiceData): string => {
                 <td class="item-name">${escapeHtml(item.name)}</td>
                 <td class="qty">${escapeHtml(item.size || '-')}</td>
                 <td class="qty">${escapeHtml(item.quantity)}</td>
-                <td class="price">${escapeHtml(formatCurrency(item.unit_price))}</td>
-                <td class="price">${escapeHtml(formatCurrency(item.amount))}</td>
+                <td class="price" nowrap><span class="amount-inline">${escapeHtml(formatCurrency(item.unit_price))}</span></td>
+                <td class="price" nowrap><span class="amount-inline">${escapeHtml(formatCurrency(item.amount))}</span></td>
             </tr>`,
         )
         .join('');
@@ -361,12 +366,12 @@ export const buildA4InvoiceHtml = (invoiceData: InvoiceData): string => {
         <table class="items">
             <thead>
                 <tr>
-                    <th style="width: 8%;">S.No</th>
-                    <th style="width: 38%; text-align: left;">Product</th>
-                    <th style="width: 14%;">Size</th>
-                    <th style="width: 12%;">Quantity</th>
-                    <th style="width: 14%; text-align: right;">Unit price</th>
-                    <th style="width: 14%; text-align: right;">Total price</th>
+                    <th nowrap style="width: 8%;">S.No</th>
+                    <th style="width: 30%; text-align: left;">Product</th>
+                    <th nowrap style="width: 10%;">Size</th>
+                    <th nowrap style="width: 14%;">Quantity</th>
+                    <th nowrap style="width: 19%; text-align: right;">Unit price</th>
+                    <th nowrap style="width: 19%; text-align: right;">Total price</th>
                 </tr>
             </thead>
             <tbody>${itemsRows}</tbody>
