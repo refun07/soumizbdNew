@@ -46,6 +46,12 @@
 
                                 <div class="grow">
                                     <h4 class="font-bold">{{ $brand->collectTranslation('name') }}</h4>
+                                    @if ($brand->brandGroup)
+                                        <p class="text-xs mt-1">
+                                            {{ translate('Group') }}:
+                                            <span class="text-muted ml-0.5">{{ $brand->brandGroup->name }}</span>
+                                        </p>
+                                    @endif
                                     <p class="text-xs mt-1 whitespace-nowrap">
                                         {{ translate('Total Products') }}:
                                         <span class="text-muted ml-0.5">{{ $brand->products_count }}</span>

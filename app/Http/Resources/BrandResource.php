@@ -23,6 +23,7 @@ class BrandResource extends JsonResource
             'bannerImage'       => uploadedAsset($this->collectTranslation('banner_image') ?: $this->meta_image ?: $this->thumbnail_image),
             'metaImage'         => uploadedAsset($this->collectTranslation('meta_image')),
             'productsCount'     => $this->whenCounted('products'),
+            'brandGroup'        => new BrandGroupResource($this->whenLoaded('brandGroup')),
         ];
 
         return $data;

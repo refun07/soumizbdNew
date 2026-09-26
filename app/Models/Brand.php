@@ -32,6 +32,11 @@ class Brand extends Model
         return $this->hasMany(BrandTranslation::class);
     }
 
+    public function brandGroup()
+    {
+        return $this->belongsTo(BrandGroup::class);
+    }
+
     public function products()
     {
         return $this->hasMany(Product::class);

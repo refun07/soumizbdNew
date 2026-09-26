@@ -191,7 +191,7 @@ class ProductController extends Controller
             'message'   => '',
             'result'    => [
                 'products'         => ProductResource::collection($products)->response()->getData(true),
-                'brands'           => BrandResource::collection(Brand::isActive()->get()),
+                'brands'           => BrandResource::collection(Brand::isActive()->with('brandGroup')->get()),
                 'selectedBrand'    => $request->brandSlug
                     ? ($brand ? BrandResource::make($brand) : null)
                     : null,

@@ -229,6 +229,7 @@
                     'admin.taxes.*',
                     'admin.badges.*',
                     'admin.brands.*',
+                    'admin.brand-groups.*',
                     'admin.categories.*',
                     'admin.variations.*',
                     'admin.variation-values.*',
@@ -277,6 +278,12 @@
                         <li class="{{ areActiveRoutes(['admin.brands.*']) }}">
                             <a href="{{ route('admin.brands.index') }}" class="py-3 w-full transition-all">
                                 <span class="sub-item--text">{{ translate('Brands') }}</span>
+                            </a>
+                        </li>
+
+                        <li class="{{ areActiveRoutes(['admin.brand-groups.*']) }}">
+                            <a href="{{ route('admin.brand-groups.index') }}" class="py-3 w-full transition-all">
+                                <span class="sub-item--text">{{ translate('Brand Groups') }}</span>
                             </a>
                         </li>
                     @endcan
