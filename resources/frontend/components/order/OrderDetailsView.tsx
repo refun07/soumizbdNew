@@ -178,7 +178,11 @@ const OrderDetailsView = ({ reviewActive = true }: Props) => {
                 <div className="px-3 sm:px-5 md:px-8 w-[calc(100%-120px)] py-5 uppercase space-y-5">
                     <div className="flex justify-between">
                         <span>{translate('subtotal')}</span>
-                        <span>{currencyFormatter(order.subtotalAmount)}</span>
+                        <span>
+                            {currencyFormatter(
+                                order.subtotalAmount + order.discountAmount
+                            )}
+                        </span>
                     </div>
                     <div className="flex justify-between">
                         <span>{translate('discount')}</span>
@@ -193,6 +197,14 @@ const OrderDetailsView = ({ reviewActive = true }: Props) => {
                             <span>{translate('coupon')}</span>
                             <span>
                                 {currencyFormatter(order.couponDiscountAmount)}
+                            </span>
+                        </div>
+                    ) : null}
+                    {order.adminDiscountAmount ? (
+                        <div className="flex justify-between">
+                            <span>{translate('admin discount')}</span>
+                            <span>
+                                {currencyFormatter(order.adminDiscountAmount)}
                             </span>
                         </div>
                     ) : null}

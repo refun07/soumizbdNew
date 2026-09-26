@@ -16,6 +16,7 @@ export interface OrderShort {
     shippingChargeAmount: number;
     discountAmount: number;
     couponDiscountAmount: number;
+    adminDiscountAmount: number;
     totalAmount: number;
     deliveryStatus: string;
     deliveryStatusToShow: string;
@@ -44,6 +45,7 @@ export interface IOrder {
     shippingChargeAmount: number;
     discountAmount: number;
     couponDiscountAmount: number;
+    adminDiscountAmount: number;
     totalAmount: number;
     deliveryStatus: string;
     deliveryStatusToShow: string;

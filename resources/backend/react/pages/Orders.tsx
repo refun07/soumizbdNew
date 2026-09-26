@@ -75,6 +75,7 @@ interface Order {
     shippingChargeAmount: number;
     discountAmount: number;
     couponDiscountAmount: number;
+    adminDiscountAmount?: number;
     totalAmount: number;
     deliveryStatus?: string;
     deliveryStatusToShow?: string;
@@ -1197,10 +1198,10 @@ const OrderPage: React.FC = () => {
                                             <span>Delivery</span>
                                             <span>{currencyFormatter(order.shippingChargeAmount)}</span>
                                         </div>
-                                        {(Number(order.discountAmount) + Number(order.couponDiscountAmount)) > 0 && (
+                                        {(Number(order.couponDiscountAmount || 0) + Number(order.adminDiscountAmount || 0)) > 0 && (
                                             <div className="mt-0.5 flex justify-between gap-3 text-red-500">
                                                 <span>Discount</span>
-                                                <span>-{currencyFormatter(Number(order.discountAmount) + Number(order.couponDiscountAmount))}</span>
+                                                <span>-{currencyFormatter(Number(order.couponDiscountAmount || 0) + Number(order.adminDiscountAmount || 0))}</span>
                                             </div>
                                         )}
                                         <div className="mt-1 flex justify-between gap-3 border-t border-border pt-1 text-sm font-bold text-foreground">

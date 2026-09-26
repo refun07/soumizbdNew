@@ -543,7 +543,7 @@
                     $manualDiscount = $storesBaseSubtotal
                         ? max((float) $order->discount_amount - $automaticItemDiscount, 0)
                         : max((float) $order->discount_amount, 0);
-                    $displayDiscount = $manualDiscount + (float) ($order->coupon_discount_amount ?? 0);
+                    $displayDiscount = $manualDiscount + (float) ($order->coupon_discount_amount ?? 0) + (float) ($order->admin_discount_amount ?? 0);
                     $displayTotal = max($displaySubtotal + (float) $order->tax_amount + (float) $order->shipping_charge_amount - $displayDiscount, 0);
                     $codAmount = in_array($paymentMethodRaw, ['cod', 'cash_on_delivery'], true) ? $displayTotal : 0;
                     $itemCount = $order->orderItems->count();

@@ -103,8 +103,7 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
                                                 <th className="p-3 font-medium">{t('stock', 'Stock')}</th>
                                                 <th className="p-3 font-medium">{t('unit_price', 'Unit Price')}</th>
                                                 <th className="p-3 font-medium">{t('qty', 'Qty')}</th>
-                                                <th className="p-3 font-medium">{t('discount', 'Discount')}</th>
-                                                <th className="p-3 font-medium">{t('tax', 'Tax')}</th>
+
                                                 <th className="p-3 font-medium">{t('subtotal', 'Subtotal')}</th>
                                                 {useInventory && isEdit && (
                                                     <th className="p-3 font-medium">{t('expiry', 'Expiry')}</th>
@@ -115,9 +114,7 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
                                         <tbody className="divide-y divide-border">
                                             {group.variations.map((variation) => {
                                                 const subtotal =
-                                                    variation.unitPrice * variation.quantity +
-                                                    variation.tax * variation.quantity -
-                                                    variation.discount * variation.quantity;
+                                                    variation.unitPrice * variation.quantity;
 
                                                 return (
                                                     <tr key={variation.variationId} className="hover:bg-background-hover">
@@ -176,28 +173,8 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
                                                                 className="w-20 text-center"
                                                             />
                                                         </td>
-                                                        <td className="p-3 text-foreground">
-                                                            <input
-                                                                type="hidden"
-                                                                name="discount[]"
-                                                                value={variation.discount}
-                                                            />
-                                                            <span>{formatPrice(variation.discount)}</span>
-                                                        </td>
-                                                        <td className="p-3 text-foreground">
-                                                            <input
-                                                                type="hidden"
-                                                                name="tax[]"
-                                                                value={variation.tax}
-                                                            />
-                                                            <span>{formatPrice(variation.tax)}</span>
-                                                        </td>
+
                                                         <td className="p-3 font-medium text-foreground">
-                                                            <input
-                                                                type="hidden"
-                                                                name="subtotal[]"
-                                                                value={subtotal}
-                                                            />
                                                             <span>{formatPrice(subtotal)}</span>
                                                         </td>
                                                         {useInventory && isEdit && (

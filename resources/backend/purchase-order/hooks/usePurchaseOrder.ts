@@ -81,10 +81,7 @@ export const usePurchaseOrder = ({
     // Calculate summary totals
     const summary = useMemo<ISummary>(() => {
         const subtotal = selectedVariations.reduce((sum, v) => {
-            const itemTotal = v.unitPrice * v.quantity;
-            const itemTax = v.tax * v.quantity;
-            const itemDiscount = v.discount * v.quantity;
-            return sum + itemTotal + itemTax - itemDiscount;
+            return sum + v.unitPrice * v.quantity;
         }, 0);
 
         const taxValue = (subtotal * formData.tax) / 100;

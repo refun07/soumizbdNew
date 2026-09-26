@@ -502,13 +502,9 @@ class PurchaseOrderService
         $purchaseOrder->supplier_id     = $request->supplier_id;
         $purchaseOrder->date            = strtotime($request->date);
         $purchaseOrder->status          = $request->status;
-        $purchaseOrder->sub_total       = array_sum($request->subtotal) ?? 0;
         $purchaseOrder->tax_percentage  = $request->tax;
-        $purchaseOrder->tax_value       = ($purchaseOrder->sub_total *  $request->tax) / 100;
         $purchaseOrder->shipping        = $request->shipping;
         $purchaseOrder->discount        = $request->discount;
-        $purchaseOrder->grand_total     = $purchaseOrder->sub_total + $purchaseOrder->tax_value + $purchaseOrder->shipping - $purchaseOrder->discount;
-        $purchaseOrder->due             = $purchaseOrder->grand_total;
         $purchaseOrder->note            = $request->note;
         $purchaseOrder->save();
 
@@ -543,8 +539,8 @@ class PurchaseOrderService
             }
             $pStock->save();
 
-            $unitDiscount                   = variationPrice($product, $productVariation, false) - variationDiscountedPrice($product, $productVariation, false);
-            $unitTax                        =  variationPrice($product, $productVariation) - variationPrice($product, $productVariation, false);
+            $unitDiscount                   = 0;
+            $unitTax                        = 0;
 
             $purchaseVariation              = new PurchaseOrderProductVariation;
 
@@ -576,6 +572,8 @@ class PurchaseOrderService
             $grandTotal += $purchaseVariation->grand_total;
         }
 
+        $purchaseOrder->sub_total       = $grandTotal;
+        $purchaseOrder->tax_value       = ($grandTotal * $purchaseOrder->tax_percentage) / 100;
         $purchaseOrder->grand_total     = $grandTotal + $purchaseOrder->tax_value + $purchaseOrder->shipping - $purchaseOrder->discount;
 
         $payments   = $purchaseOrder->payments;

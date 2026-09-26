@@ -109,13 +109,9 @@ const VariationModal: React.FC<VariationModalProps> = ({
     const calculateVariationValues = (
         variation: IProductVariation,
         quantity: number
-    ): { unitPrice: number; discount: number; tax: number } => {
-        // These calculations should match the backend logic
-        // For now, using variation price as unit price
+    ): { unitPrice: number } => {
         const unitPrice = variation.price;
-        const discount = 0; // Will be calculated based on product settings
-        const tax = 0; // Will be calculated based on product settings
-        return { unitPrice, discount, tax };
+        return { unitPrice };
     };
 
     const handleAdd = () => {
@@ -127,7 +123,7 @@ const VariationModal: React.FC<VariationModalProps> = ({
                 if (!variation) return null;
 
                 const quantity = quantities[variationId] || 1;
-                const { unitPrice, discount, tax } = calculateVariationValues(variation, quantity);
+                const { unitPrice } = calculateVariationValues(variation, quantity);
 
                 return {
                     variationId: variation.id,
@@ -139,8 +135,8 @@ const VariationModal: React.FC<VariationModalProps> = ({
                     quantity,
                     currentStock: variation.stockQty,
                     unitName: product.unitName,
-                    discount,
-                    tax,
+                    discount: 0,
+                    tax: 0,
                 };
             })
             .filter(Boolean) as ISelectedVariation[];

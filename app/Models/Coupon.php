@@ -12,6 +12,13 @@ class Coupon extends Model
 
     protected $guarded = [];
 
+    protected $casts = [
+        'shop_id'            => 'integer',
+        'discount_value'     => 'float',
+        'is_free_shipping'   => 'integer',
+        'max_discount_value' => 'float',
+    ];
+
     public function scopeIsActive($query)
     {
         return $query->where('is_active', 1);

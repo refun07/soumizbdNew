@@ -13,8 +13,18 @@ interface OrderItem {
     product_image: string | null;
     quantity: number;
     unit_price: number;
+    total_discount: number;
+    total_tax: number;
     total_price: number;
 }
+
+// Raisa Mart treats the product's discounted price as the real selling price,
+// so line prices are shown net of the product-level discount.
+const netLineTotal = (item: OrderItem) =>
+    (item.unit_price * item.quantity) - (item.total_discount || 0);
+
+const netUnitPrice = (item: OrderItem) =>
+    item.quantity > 0 ? netLineTotal(item) / item.quantity : item.unit_price;
 
 interface ExchangeItem {
     id: number;
@@ -70,6 +80,7 @@ interface OrderDetail {
     shippingChargeAmount: number;
     discountAmount: number;
     couponDiscountAmount: number;
+    adminDiscountAmount: number;
     totalAmount: number;
     isPosOrder: boolean;
     isExchangeOrder: boolean;
@@ -403,9 +414,9 @@ const OrderDetailPage: React.FC = () => {
                                                 </div>
                                             </td>
                                             <td className="py-3 px-2 text-center">{item.quantity}</td>
-                                            <td className="py-3 px-2 text-right">{currencyFormatter(item.unit_price)}</td>
+                                            <td className="py-3 px-2 text-right">{currencyFormatter(netUnitPrice(item))}</td>
                                             <td className="py-3 px-2 text-right font-medium">
-                                                {currencyFormatter(item.total_price)}
+                                                {currencyFormatter(netLineTotal(item))}
                                             </td>
                                         </tr>
                                     ))}
@@ -498,16 +509,16 @@ const OrderDetailPage: React.FC = () => {
                                 <span className="text-muted">Shipping</span>
                                 <span>{currencyFormatter(order.shippingChargeAmount)}</span>
                             </div>
-                            {order.couponDiscountAmount > 0 && (
+                            {(order.couponDiscountAmount || 0) > 0 && (
                                 <div className="flex justify-between text-green-500">
                                     <span>Coupon Discount</span>
                                     <span>-{currencyFormatter(order.couponDiscountAmount)}</span>
                                 </div>
                             )}
-                            {order.discountAmount > 0 && order.couponDiscountAmount === 0 && (
+                            {(order.adminDiscountAmount || 0) > 0 && (
                                 <div className="flex justify-between text-green-500">
-                                    <span>Discount</span>
-                                    <span>-{currencyFormatter(order.discountAmount)}</span>
+                                    <span>Admin Discount</span>
+                                    <span>-{currencyFormatter(order.adminDiscountAmount)}</span>
                                 </div>
                             )}
                             <div className="border-t border-border pt-2 mt-2">

@@ -30,12 +30,29 @@ class OrderProfitLog extends Model
 
         $cogs = $order->orderItems->sum('total_cost');
 
+        $returnedItems = ReturnRequestItem::whereHas('returnRequest', function ($q) use ($order) {
+            $q->where('order_id', $order->id)->where('status', 4);
+        })->get();
+
+        $returnedRevenue = $returnedItems->sum(fn ($i) => $i->price * $i->quantity);
+
+        $returnedCogs = 0;
+        foreach ($returnedItems as $item) {
+            $orderItem = $order->orderItems->firstWhere('product_variation_id', $item->product_variation_id);
+            if ($orderItem && $orderItem->qty > 0) {
+                $returnedCogs += ($orderItem->total_cost / $orderItem->qty) * $item->quantity;
+            }
+        }
+
+        $revenue -= $returnedRevenue;
+        $cogs -= $returnedCogs;
+
         $adminCommission = $order->commissionHistory->admin_earning_amount ?? 0;
         $sellerEarning = $order->commissionHistory->shop_earning_amount ?? 0;
         $agentCommission = $order->agentCommissionHistory->commission_amount ?? 0;
         $shippingCost = $order->shipping_charge_amount;
         $taxCollected = $order->tax_amount;
-        $discountGiven = $order->discount_amount + $order->coupon_discount_amount;
+        $discountGiven = $order->discount_amount + $order->coupon_discount_amount + $order->admin_discount_amount;
 
         $grossProfit = $revenue - $cogs;
         $netProfit = $grossProfit - $adminCommission - $agentCommission;

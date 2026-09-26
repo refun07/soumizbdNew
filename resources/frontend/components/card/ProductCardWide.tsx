@@ -52,6 +52,7 @@ const ProductCardWide = ({
     const discountPrice = cartProduct.variation!.discountedBasePrice;
 
     const totalPrice =
+        (cartProduct as any).totalPrice ??
         cartProduct.variation!.discountedBasePrice * cartProduct.qty;
 
     return (

@@ -13,7 +13,7 @@ class Order extends Model
     protected $fillable = [
         'user_id', 'agent_id', 'order_group_id', 'order_code', 'shop_id', 'warehouse_id',
         'amount', 'tax_amount', 'shipping_charge_amount', 'discount_amount',
-        'coupon_discount_amount', 'total_amount', 'coupon_id', 'pickup_or_delivery',
+        'coupon_discount_amount', 'admin_discount_amount', 'total_amount', 'coupon_id', 'pickup_or_delivery',
         'delivery_status', 'payment_status', 'courier_name', 'tracking_number',
         'tracking_url', 'ip_address', 'pos_order', 'is_exchange_order',
         'original_order_id', 'source',
@@ -158,5 +158,30 @@ class Order extends Model
     public function profitLog()
     {
         return $this->hasOne(OrderProfitLog::class);
+    }
+
+    /**
+     * Sum of all order items' original prices (unit_price × qty).
+     */
+    public function getOriginalPriceTotal(): float
+    {
+        return (float) $this->orderItems->sum(fn ($item) => $item->unit_price * $item->qty);
+    }
+
+    /**
+     * Sum of all order items' product line discounts.
+     * This is the product sale/campaign discount only — does NOT include coupon discount.
+     */
+    public function getLineDiscountTotal(): float
+    {
+        return (float) $this->orderItems->sum(fn ($item) => $item->getLineDiscount());
+    }
+
+    /**
+     * Coupon discount applied at the order level.
+     */
+    public function getCouponDiscountTotal(): float
+    {
+        return (float) $this->coupon_discount_amount;
     }
 }

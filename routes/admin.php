@@ -193,7 +193,6 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin', 'unbanned',
     Route::post('/orders/note', [OrderController::class, 'storeOrderUpdates'])->name('admin.orders.storeOrderUpdates');
     Route::post('/orders/note/delete/{id}', [OrderController::class, 'deleteOrderUpdate'])->name('admin.orders.deleteOrderUpdate');
     Route::get('/orders/{code}', [OrderController::class, 'show'])->name('admin.orders.show');
-    Route::get('/orders/{code}/edit', [OrderController::class, 'edit'])->name('admin.orders.edit');
     Route::post('/orders/{code}/update', [OrderController::class, 'updateOrder'])->name('admin.orders.updateOrder');
     Route::get('/api/products/search', [OrderController::class, 'searchProducts'])->name('admin.orders.searchProducts');
     Route::get('/invoice-download/{id}', [OrderController::class, 'downloadInvoice'])->name('admin.orders.downloadInvoice');

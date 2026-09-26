@@ -222,6 +222,10 @@ class ReturnRequestService
         $returnRequest->status = 4;
         $returnRequest->refund_amount = $attributes['amount'];
         $returnRequest->save();
+
+        $returnRequest->load('order');
+        syncOrderProfitLog($returnRequest->order);
+
         $data = [
             'status'    => 200,
             'message'   => translate('Refund payment has been updated successfully'),

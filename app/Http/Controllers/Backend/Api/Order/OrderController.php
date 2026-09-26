@@ -181,6 +181,8 @@ class OrderController extends Controller
                     'product_image' => $item->productVariation->product->thumbnail_image ? uploadedAsset($item->productVariation->product->thumbnail_image) : null,
                     'quantity' => $item->qty,
                     'unit_price' => (float) $item->unit_price,
+                    'total_discount' => (float) ($item->total_discount ?? 0),
+                    'total_tax' => (float) ($item->total_tax ?? 0),
                     'total_price' => (float) $item->total_price,
                 ];
             });
@@ -217,7 +219,7 @@ class OrderController extends Controller
                 ], 404);
             }
 
-            $response = $this->orderService->updateOrder($request, $order->order_code);
+            $response = $this->orderService->updateOrder($request, $order->id);
 
             return response()->json($response);
         } catch (\Exception $e) {

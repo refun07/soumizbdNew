@@ -51,4 +51,38 @@ class OrderItem extends Model
     {
         return $this->pre_order_info['deposit_paid'] ?? 0;
     }
+
+    /**
+     * Product line discount for this item.
+     * Calculated as: (original unit price - discounted unit price) × qty.
+     * This is the product sale/campaign discount only — does NOT include coupon discount.
+     * Coupon discount is tracked separately at the order level (orders.coupon_discount_amount).
+     */
+    public function getLineDiscount(): float
+    {
+        return (float) $this->total_discount;
+    }
+
+    /**
+     * Calculate and set the product line discount for this item.
+     * Discount = (original unit price - discounted unit price) × qty.
+     * This is the product sale/campaign discount only — does NOT include coupon discount.
+     * Coupon discount belongs at the order level (orders.coupon_discount_amount).
+     */
+    public function setLineDiscount(int $productVariationId, int $qty): void
+    {
+        $variation = ProductVariation::with(['product.taxes.tax', 'campaignProducts.campaign'])
+            ->find($productVariationId);
+
+        if (! $variation || ! $variation->product) {
+            $this->total_discount = 0;
+
+            return;
+        }
+
+        $unitPrice = variationPrice($variation->product, $variation, false);
+        $discountedUnitPrice = variationDiscountedPrice($variation->product, $variation, false);
+
+        $this->total_discount = max(0, ($unitPrice - $discountedUnitPrice) * $qty);
+    }
 }

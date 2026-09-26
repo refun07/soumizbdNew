@@ -123,29 +123,13 @@ class OrderController extends Controller
         return redirect()->route('admin.orders.index');
     }
 
-    // edit order
-    public function edit($code)
-    {
-        $order = Order::whereOrderCode($code)->firstOrFail();
-        $this->authorizeOrderManagement($order);
-
-        $response = $this->orderService->show($code);
-        if ($response['status'] == 200) {
-            return view('backend.admin.orders.edit', $response['result']);
-        }
-
-        flash($response['message'] ?? translate('Something went wrong'))->error();
-
-        return redirect()->route('admin.orders.index');
-    }
-
     // update order
     public function updateOrder(Request $request, $code)
     {
         $order = Order::whereOrderCode($code)->firstOrFail();
         $this->authorizeOrderManagement($order);
 
-        $response = $this->orderService->updateOrder($request, $code);
+        $response = $this->orderService->updateOrder($request, $order->id);
         if ($response['status'] == 200) {
             flash($response['message'])->success();
 
@@ -180,6 +164,7 @@ class OrderController extends Controller
                         'id' => $variation->id,
                         'name' => $variation->code ? generateVariationName($variation->code) : null,
                         'price' => $variation->price ?? $product->base_price,
+                        'discounted_price' => variationDiscountedPrice($product, $variation, false),
                         'stock' => $stock,
                     ];
                 }),
@@ -446,11 +431,12 @@ class OrderController extends Controller
                 'billing_address' => $billingAddress,
                 'shipping_city' => null,
                 'shipping_country' => null,
-                'subtotalAmount' => (float) $order->amount,
+                'subtotalAmount' => $order->getOriginalPriceTotal() - $order->getLineDiscountTotal(),
                 'taxAmount' => (float) $order->tax_amount,
                 'shippingChargeAmount' => (float) $order->shipping_charge_amount,
                 'discountAmount' => (float) $order->discount_amount,
                 'couponDiscountAmount' => (float) $order->coupon_discount_amount,
+                'adminDiscountAmount' => (float) $order->admin_discount_amount,
                 'totalAmount' => (float) $order->total_amount,
                 'isPosOrder' => $orderGroup?->is_pos_order ?? false,
                 'isExchangeOrder' => $order->is_exchange_order,
@@ -483,8 +469,10 @@ class OrderController extends Controller
                     'product_name' => $item->productVariation->product->name ?? 'N/A',
                     'variant' => $variantName,
                     'product_image' => $item->productVariation->product->thumbnail_image ? uploadedAsset($item->productVariation->product->thumbnail_image) : null,
-                    'quantity' => $item->qty,
+                    'quantity' => (int) $item->qty,
                     'unit_price' => (float) $item->unit_price,
+                    'total_discount' => (float) ($item->total_discount ?? 0),
+                    'total_tax' => (float) ($item->total_tax ?? 0),
                     'total_price' => (float) $item->total_price,
                 ];
             });
