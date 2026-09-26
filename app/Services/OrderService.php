@@ -22,6 +22,8 @@ class OrderService
     {
         $orders = Order::shopOrders()->with([
             'orderGroup.shippingAddress',
+            'orderGroup.transaction',
+            'orderGroup.latestBkashPersonalPayment',
             'orderItems.productVariation.product',
             'user',
             'agent',
@@ -64,6 +66,26 @@ class OrderService
 
         if ($request->has('payment_status') && $request->query('payment_status') !== '') {
             $orders->where('payment_status', $request->query('payment_status'));
+        }
+
+        if ($request->filled('payment_method')) {
+            $orders->whereHas('orderGroup.transaction', function ($q) use ($request) {
+                $q->where('payment_method', $request->query('payment_method'));
+            });
+        }
+
+        // bKash personal verification state (based on the latest submission of the order group)
+        if ($request->filled('bkash_status')) {
+            $bkashStatus = $request->query('bkash_status');
+            $orders->whereHas('orderGroup', function ($q) use ($bkashStatus) {
+                $q->whereHas('transaction', fn ($t) => $t->where('payment_method', 'bkash_personal'));
+
+                if ($bkashStatus === 'not_submitted') {
+                    $q->whereDoesntHave('bkashPersonalPayments');
+                } elseif (in_array($bkashStatus, ['pending', 'verified', 'rejected'], true)) {
+                    $q->whereHas('latestBkashPersonalPayment', fn ($p) => $p->where('status', $bkashStatus));
+                }
+            });
         }
 
         if ($request->has('pos_order') && $request->query('pos_order') !== '') {

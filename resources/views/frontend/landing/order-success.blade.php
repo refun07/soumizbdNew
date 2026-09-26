@@ -46,6 +46,26 @@
 
             <!-- Order Details -->
             <div class="p-8">
+                @if($orderGroup->isBkashPersonal())
+                    @if($orderGroup->needsBkashPersonalSubmission())
+                        <div class="mb-6 rounded-lg border border-pink-200 bg-pink-50 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div>
+                                <p class="font-semibold" style="color: #E2136E;">
+                                    {{ $orderGroup->latestBkashPersonalPayment ? translate('Your bKash payment could not be verified') : translate('Complete your bKash payment') }}
+                                </p>
+                                <p class="text-sm text-gray-600">{{ translate('Send money via bKash and submit the transaction ID so we can verify your payment.') }}</p>
+                            </div>
+                            <a href="{{ url('/orders/bkash-payment/'.$orderGroup->code.'?source=landing') }}"
+                                class="shrink-0 inline-flex items-center justify-center rounded-md text-white font-semibold px-5 h-10 text-sm" style="background-color: #E2136E;">
+                                {{ translate('Submit bKash Payment') }}
+                            </a>
+                        </div>
+                    @else
+                        <div class="mb-6 rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
+                            {{ $orderGroup->latestBkashPersonalPayment?->status === 'verified' ? translate('Your bKash payment has been verified.') : translate('Your bKash payment information has been received and is awaiting verification.') }}
+                        </div>
+                    @endif
+                @endif
                 <!-- Order Code -->
                 <div class="text-center mb-6">
                     <p class="text-gray-500 text-sm">Order Number</p>

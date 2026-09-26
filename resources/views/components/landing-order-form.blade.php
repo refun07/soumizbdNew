@@ -178,6 +178,9 @@
                                                     case 'paypal':
                                                         $methodImage = '/images/payment/paypal.png';
                                                         break;
+                                                    case 'bkash_personal':
+                                                        $methodImage = '/images/payment/bkash_personal.png';
+                                                        break;
                                                 }
                                             @endphp
                                             <label class="relative flex items-center justify-center px-4 py-4 border rounded-lg cursor-pointer transition-all hover:border-gray-300" style="border-color: {{ $borderColor }};">
@@ -187,7 +190,12 @@
                                                         <i class="fa-solid fa-check text-white text-xs"></i>
                                                     </span>
                                                 @endif
-                                                @if($methodImage)
+                                                @if($method->value === 'bkash_personal')
+                                                    <span class="flex flex-col items-center gap-1">
+                                                        <img src="{{ $methodImage }}" alt="{{ $method->name }}" class="h-8 object-contain">
+                                                        <span class="text-xs font-semibold text-gray-600">{{ translate('Send Money') }}</span>
+                                                    </span>
+                                                @elseif($methodImage)
                                                     <img src="{{ $methodImage }}" alt="{{ $method->name }}" class="h-8 object-contain">
                                                 @else
                                                     <span class="font-semibold text-sm text-gray-700">{{ $method->name }}</span>

@@ -43,10 +43,22 @@ const PaymentMethodForm = () => {
                                     <FaCheck />
                                 </span>
                             )}
-                            <img
-                                src={`/images/payment/${method.value}.png`}
-                                alt={method.name}
-                            />
+                            {method.value === 'bkash_personal' ? (
+                                <span className="flex flex-col items-center gap-1">
+                                    <img
+                                        src={`/images/payment/${method.value}.png`}
+                                        alt={method.name}
+                                    />
+                                    <span className="text-xs font-semibold text-slate-600">
+                                        {translate('Send Money')}
+                                    </span>
+                                </span>
+                            ) : (
+                                <img
+                                    src={`/images/payment/${method.value}.png`}
+                                    alt={method.name}
+                                />
+                            )}
                         </button>
                     ))
                 )}

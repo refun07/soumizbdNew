@@ -2,6 +2,7 @@ import { FaCheckCircle } from 'react-icons/fa';
 import { IoMdCheckmark } from 'react-icons/io';
 import { Link, useParams } from 'react-router-dom';
 import AddressCard from '../../components/card/AddressCard';
+import BkashPersonalNotice from './BkashPersonalNotice';
 import ProductCardWide from '../../components/card/ProductCardWide';
 import { OrderDetailsSkeleton } from '../../components/skeletons/from-svg';
 import NoDataFound from '../../layouts/components/not-found/NoDataFound';
@@ -245,6 +246,15 @@ const OrderDetailsView = ({ reviewActive = true }: Props) => {
                             <span>{order.paymentStatus}</span>
                         </div>
                     </div>
+
+                    {order.bkashPersonal && order.paymentStatus !== 'paid' && (
+                        <BkashPersonalNotice
+                            orderCode={order.bkashPersonal.orderGroupCode}
+                            status={order.bkashPersonal.status}
+                            needsSubmission={order.bkashPersonal.needsSubmission}
+                            className="mb-0"
+                        />
+                    )}
                 </div>
                 <div className="border-t border-primary-14 px-3 sm:px-5 md:px-8 pt-7">
                     <h6 className="mb-5 text-sm uppercase">

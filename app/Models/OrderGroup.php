@@ -55,6 +55,33 @@ class OrderGroup extends Model
     {
         return $this->belongsTo(User::class)->withTrashed();
     }
+
+    public function bkashPersonalPayments()
+    {
+        return $this->hasMany(BkashPersonalPayment::class)->latest('id');
+    }
+
+    public function latestBkashPersonalPayment()
+    {
+        return $this->hasOne(BkashPersonalPayment::class)->latestOfMany();
+    }
+
+    public function isBkashPersonal(): bool
+    {
+        return $this->transaction?->payment_method === BkashPersonalPayment::METHOD;
+    }
+
+    // customer still has to submit (or resubmit after rejection) a bKash TrxID
+    public function needsBkashPersonalSubmission(): bool
+    {
+        if (! $this->isBkashPersonal()) {
+            return false;
+        }
+
+        $latest = $this->latestBkashPersonalPayment;
+
+        return ! $latest || $latest->status === BkashPersonalPayment::STATUS_REJECTED;
+    }
     public function getTotalQuantity(): int
     {
         return $this->orders->flatMap->orderItems->sum('qty');

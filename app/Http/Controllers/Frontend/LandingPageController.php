@@ -221,6 +221,13 @@ class LandingPageController extends Controller
             $paymentMethods[] = $payment;
         }
 
+        if (getSetting('bkash_personal_activation') == 1 && getSetting('bkash_personal_number')) {
+            $payment = new SystemSetting;
+            $payment->name = translate("bKash Personal");
+            $payment->value = "bkash_personal";
+            $paymentMethods[] = $payment;
+        }
+
         // Filter by landing page configuration if set
         if ($configuredPaymentMethods !== null && is_array($configuredPaymentMethods)) {
             $paymentMethods = array_filter($paymentMethods, function($method) use ($configuredPaymentMethods) {
@@ -737,7 +744,7 @@ class LandingPageController extends Controller
             DB::commit();
 
             // Send notifications for COD/Card on delivery
-            if ($paymentMethod == 'cash_on_delivery' || $paymentMethod == 'card_on_delivery') {
+            if (in_array($paymentMethod, ['cash_on_delivery', 'card_on_delivery', 'bkash_personal'])) {
                 try {
                     GlobalNotification::send($user, new OrderPlacedNotification($orderGroup));
                 } catch (\Exception $e) {
@@ -754,6 +761,11 @@ class LandingPageController extends Controller
                 }
             } catch (\Exception $e) {
                 \Log::error('Landing page order SMS failed: ' . $e->getMessage());
+            }
+
+            // bKash personal: order is placed, next page only records the send-money details
+            if ($paymentMethod === 'bkash_personal') {
+                return redirect('/orders/bkash-payment/'.$orderGroup->code.'?source=landing');
             }
 
             // Check if payment is needed

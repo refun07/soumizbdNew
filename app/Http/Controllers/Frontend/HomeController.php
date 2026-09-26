@@ -133,6 +133,12 @@ class HomeController extends Controller
             $payment->value = "bkash";
             array_push($paymentMethods, $payment);
         }
+        if (getSetting('bkash_personal_activation') == 1 && getSetting('bkash_personal_number')) {
+            $payment        = new SystemSetting;
+            $payment->name  = translate("bKash Personal");
+            $payment->value = "bkash_personal";
+            array_push($paymentMethods, $payment);
+        }
 
         // social logins
         $socialLogins = [];

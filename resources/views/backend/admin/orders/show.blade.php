@@ -258,6 +258,124 @@
                 </div>
             </div>
 
+            @if($orderGroup->isBkashPersonal())
+                @php
+                    $bkashPayments = $orderGroup->bkashPersonalPayments()->with('verifier')->get();
+                    $bkashLatest = $bkashPayments->first();
+                    $bkashStatusClasses = [
+                        'pending' => 'bg-amber-100 text-amber-700',
+                        'verified' => 'bg-green-100 text-green-700',
+                        'rejected' => 'bg-red-100 text-red-700',
+                    ];
+                    $bkashStatusLabels = [
+                        'pending' => translate('Awaiting verification'),
+                        'verified' => translate('Verified'),
+                        'rejected' => translate('Rejected'),
+                    ];
+                @endphp
+                <!-- bKash Personal Payment Card -->
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-200 gap-2">
+                        <h4 class="text-lg font-semibold flex items-center gap-2">
+                            <img src="/images/payment/bkash_personal.png" alt="bKash" class="h-5 object-contain">
+                            {{ translate('bKash Personal Payment') }}
+                        </h4>
+                        @if($bkashLatest)
+                            <span class="px-2.5 py-1 rounded text-xs font-semibold {{ $bkashStatusClasses[$bkashLatest->status] ?? '' }}">
+                                {{ $bkashStatusLabels[$bkashLatest->status] ?? $bkashLatest->status }}
+                            </span>
+                        @else
+                            <span class="px-2.5 py-1 rounded text-xs font-semibold bg-gray-100 text-gray-700">{{ translate('Not submitted') }}</span>
+                        @endif
+                    </div>
+
+                    @if(!$bkashLatest)
+                        <p class="text-sm text-gray-500">
+                            {{ translate('The customer has not submitted a bKash transaction ID yet.') }}
+                            {{ translate('Expected amount') }}: <strong class="text-gray-800">{{ formatPrice($orderGroup->transaction->total_amount ?? 0) }}</strong>
+                            @if(getSetting('bkash_personal_number'))
+                                {{ translate('to') }} <strong class="text-gray-800">{{ getSetting('bkash_personal_number') }}</strong>
+                            @endif
+                        </p>
+                    @else
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div>
+                                <p class="text-xs text-gray-500 uppercase mb-1">{{ translate('Transaction ID') }}</p>
+                                <p class="font-mono font-semibold">{{ $bkashLatest->trx_id }}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500 uppercase mb-1">{{ translate('Sender Number') }}</p>
+                                <p class="font-medium">{{ $bkashLatest->sender_number }}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500 uppercase mb-1">{{ translate('Expected Amount') }}</p>
+                                <p class="font-medium">{{ formatPrice($bkashLatest->amount) }}</p>
+                                @if(abs($bkashLatest->amount - (float) ($orderGroup->transaction->total_amount ?? 0)) > 0.009)
+                                    <p class="text-xs text-amber-600">{{ translate('Order total is now') }} {{ formatPrice($orderGroup->transaction->total_amount ?? 0) }}</p>
+                                @endif
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500 uppercase mb-1">{{ translate('Submitted') }}</p>
+                                <p class="font-medium">{{ $bkashLatest->created_at?->format('d M, Y h:i A') }}</p>
+                            </div>
+                        </div>
+
+                        @if(getSetting('bkash_personal_number'))
+                            <p class="mt-3 text-sm text-gray-500">
+                                {{ translate('Check the bKash app for number') }} <strong class="text-gray-800">{{ getSetting('bkash_personal_number') }}</strong>: {{ translate('look for a Send Money of the expected amount with this TrxID.') }}
+                            </p>
+                        @endif
+
+                        @if($bkashLatest->status !== 'pending')
+                            <p class="mt-3 text-sm text-gray-500">
+                                {{ $bkashLatest->status === 'verified' ? translate('Verified') : translate('Rejected') }}
+                                @if($bkashLatest->verifier) {{ translate('by') }} {{ $bkashLatest->verifier->name }} @endif
+                                @if($bkashLatest->verified_at) {{ translate('on') }} {{ $bkashLatest->verified_at->format('d M, Y h:i A') }} @endif
+                                @if($bkashLatest->admin_note) · {{ $bkashLatest->admin_note }} @endif
+                            </p>
+                        @endif
+
+                        <div id="bkash-reject-form" class="mt-4 hidden">
+                            <textarea id="bkash-reject-note" rows="2" maxlength="500"
+                                class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500"
+                                placeholder="{{ translate('Reason (the customer will see this and can submit again)') }}"></textarea>
+                        </div>
+
+                        <div class="mt-4 flex flex-wrap justify-end gap-2">
+                            @if($bkashLatest->status === 'pending')
+                                <button type="button" id="bkash-verify-btn"
+                                    class="px-4 py-2 rounded text-sm font-semibold text-white bg-green-600 hover:bg-green-700">
+                                    <i class="fa-solid fa-circle-check"></i> {{ translate('Verify & Mark Paid') }}
+                                </button>
+                            @endif
+                            @if($bkashLatest->status !== 'rejected')
+                                <button type="button" id="bkash-reject-btn"
+                                    class="px-4 py-2 rounded text-sm font-semibold text-red-600 border border-red-300 hover:bg-red-50">
+                                    <i class="fa-solid fa-circle-xmark"></i> {{ translate('Reject') }}
+                                </button>
+                            @endif
+                        </div>
+                    @endif
+
+                    @if($bkashPayments->count() > 1)
+                        <div class="mt-4 pt-4 border-t border-gray-200">
+                            <p class="text-xs text-gray-500 uppercase mb-2">{{ translate('Previous Submissions') }}</p>
+                            <div class="space-y-1 text-sm">
+                                @foreach($bkashPayments->skip(1) as $item)
+                                    <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+                                        <span class="font-mono">{{ $item->trx_id }}</span>
+                                        <span class="text-gray-500">{{ $item->sender_number }}</span>
+                                        <span class="px-1.5 py-0.5 rounded text-[11px] font-semibold {{ $bkashStatusClasses[$item->status] ?? '' }}">{{ $bkashStatusLabels[$item->status] ?? $item->status }}</span>
+                                        <span class="text-gray-500 text-xs">{{ $item->created_at?->format('d M, Y h:i A') }}</span>
+                                        @if($item->admin_note)<span class="text-gray-500 text-xs">· {{ $item->admin_note }}</span>@endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            @endif
+
             <!-- Product Details Card -->
             <div class="bg-white rounded-lg shadow-sm p-6">
                 <h4 class="text-lg font-semibold mb-6 pb-4 border-b border-gray-200">{{ translate('Product Details') }}</h4>
@@ -702,6 +820,99 @@
 
 @section('scripts')
     <script>
+        // system confirmation modal (x-backend.modals.confirm) instead of window.confirm
+        function openSystemConfirm(title, text, buttonText, buttonClass, onConfirm) {
+            $('#confirm-modal-title').text(title);
+            $('#confirm-modal-text').text(text);
+            $('#confirm-modal form').removeAttr('action');
+            $('#confirm-modal-method').val('');
+
+            const $submitBtn = $('#confirm-modal-submit');
+            $submitBtn.text(buttonText);
+            $submitBtn.removeClass().addClass('modal__btn modal__btn-success ' + buttonClass + ' leading-none text-white px-10 py-2.5 rounded uppercase');
+            $submitBtn.off('click').on('click', function(e) {
+                e.preventDefault();
+                MicroModal.close('confirm-modal');
+                onConfirm();
+            });
+
+            MicroModal.show('confirm-modal');
+        }
+
+        // toast the result, then reload so the page reflects the change
+        function notifyAndReload(response, successMessage) {
+            if (response.ok) {
+                notifyMe('success', successMessage);
+                setTimeout(() => window.location.reload(), 1200);
+            } else {
+                notifyMe('error', '{{ translate('Something went wrong') }}');
+            }
+        }
+
+        // bKash personal payment verification
+        (function() {
+            const sendBkashAction = (action, note) => {
+                return fetch(`{{ url('admin/api/orders/'.$order->id.'/bkash-personal') }}/${action}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ note: note || null })
+                })
+                .then(response => response.json().then(data => ({ ok: response.ok, data })))
+                .then(({ ok, data }) => {
+                    notifyMe(ok ? 'success' : 'error', data.message || (ok ? '{{ translate('Done') }}' : '{{ translate('Something went wrong') }}'));
+                    if (ok) setTimeout(() => window.location.reload(), 1200);
+                })
+                .catch(() => notifyMe('error', '{{ translate('Something went wrong') }}'));
+            };
+
+
+            const verifyBtn = document.getElementById('bkash-verify-btn');
+            if (verifyBtn) {
+                verifyBtn.addEventListener('click', function() {
+                    const btn = this;
+                    openSystemConfirm(
+                        '{{ translate('Verify bKash payment?') }}',
+                        '{{ translate('This will mark the bKash payment as verified and the order as paid.') }}',
+                        '{{ translate('Verify') }}',
+                        'bg-green-600',
+                        () => {
+                            btn.disabled = true;
+                            sendBkashAction('verify').finally(() => { btn.disabled = false; });
+                        }
+                    );
+                });
+            }
+
+            const rejectBtn = document.getElementById('bkash-reject-btn');
+            if (rejectBtn) {
+                rejectBtn.addEventListener('click', function() {
+                    const form = document.getElementById('bkash-reject-form');
+                    if (form.classList.contains('hidden')) {
+                        form.classList.remove('hidden');
+                        document.getElementById('bkash-reject-note').focus();
+                        this.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> {{ translate('Confirm Reject') }}';
+                        return;
+                    }
+                    const btn = this;
+                    openSystemConfirm(
+                        '{{ translate('Reject bKash payment?') }}',
+                        '{{ translate('The order will stay unpaid and the customer can submit the payment again.') }}',
+                        '{{ translate('Reject') }}',
+                        'bg-red-500',
+                        () => {
+                            btn.disabled = true;
+                            sendBkashAction('reject', document.getElementById('bkash-reject-note').value)
+                                .finally(() => { btn.disabled = false; });
+                        }
+                    );
+                });
+            }
+        })();
+
         // Payment Status Update
         document.getElementById('update_payment_status').addEventListener('change', function() {
             const orderId = {{ $order->id }};
@@ -715,13 +926,8 @@
                 },
                 body: JSON.stringify({ order_id: orderId, status: status })
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data) {
-                    alert('{{ translate('Payment status has been updated') }}');
-                    window.location.reload();
-                }
-            });
+            .then(response => notifyAndReload(response, '{{ translate('Payment status has been updated') }}'))
+            .catch(() => notifyMe('error', '{{ translate('Something went wrong') }}'));
         });
 
         // Delivery Status Update
@@ -737,13 +943,8 @@
                 },
                 body: JSON.stringify({ order_id: orderId, status: status })
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data) {
-                    alert('{{ translate('Delivery status has been updated') }}');
-                    window.location.reload();
-                }
-            });
+            .then(response => notifyAndReload(response, '{{ translate('Delivery status has been updated') }}'))
+            .catch(() => notifyMe('error', '{{ translate('Something went wrong') }}'));
         });
 
         // Address Modal Functions
@@ -765,15 +966,22 @@
 
         // Delete Note
         function deleteNote(noteId) {
-            if (confirm('{{ translate('Are you sure want to delete this item?') }}')) {
-                fetch(`{{ route('admin.orders.deleteOrderUpdate', '') }}/${noteId}`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    }
-                })
-                .then(() => window.location.reload());
-            }
+            openSystemConfirm(
+                '{{ translate('Are you sure?') }}',
+                '{{ translate('Are you sure want to delete this item?') }}',
+                '{{ translate('Delete') }}',
+                'bg-red-500',
+                () => {
+                    fetch(`{{ route('admin.orders.deleteOrderUpdate', '') }}/${noteId}`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        }
+                    })
+                    .then(response => notifyAndReload(response, '{{ translate('Note deleted successfully') }}'))
+                    .catch(() => notifyMe('error', '{{ translate('Something went wrong') }}'));
+                }
+            );
         }
 
         // Close modal when clicking outside
@@ -834,15 +1042,15 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('{{ translate('IP address blocked successfully') }}');
+                    notifyMe('success', '{{ translate('IP address blocked successfully') }}');
                     closeBlockIpModal();
                 } else {
-                    alert(data.message || '{{ translate('Failed to block IP') }}');
+                    notifyMe('error', data.message || '{{ translate('Failed to block IP') }}');
                 }
             })
             .catch(error => {
                 console.error('Error blocking IP:', error);
-                alert('{{ translate('Failed to block IP address') }}');
+                notifyMe('error', '{{ translate('Failed to block IP address') }}');
             })
             .finally(() => {
                 blockBtn.disabled = false;

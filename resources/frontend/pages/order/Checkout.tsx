@@ -639,7 +639,11 @@ const Checkout = () => {
                     },
                 });
 
-                navigate(`/orders/success/${orderGroup.orderCode}`);
+                navigate(
+                    paymentMethod === 'bkash_personal'
+                        ? `/orders/bkash-payment/${orderGroup.orderCode}`
+                        : `/orders/success/${orderGroup.orderCode}`,
+                );
                 getCartProducts();
             } catch (err: any) {
                 isSubmittingOrder.current = false;

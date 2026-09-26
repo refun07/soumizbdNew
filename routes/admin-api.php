@@ -133,6 +133,9 @@ Route::group(['prefix' => 'admin/api', 'middleware' => ['auth', 'admin', 'unbann
     Route::get('/orders/export',[OrderController::class, 'export'])->name('admin.orders.export');
     // get single order details
     Route::get('/orders/{orderId}',[AdminOrderController::class, 'getOrderDetails'])->name('admin.orders.show');
+    // bKash personal payment verification
+    Route::post('/orders/{orderId}/bkash-personal/verify',[AdminOrderController::class, 'verifyBkashPersonalPayment'])->name('admin.orders.bkashPersonal.verify');
+    Route::post('/orders/{orderId}/bkash-personal/reject',[AdminOrderController::class, 'rejectBkashPersonalPayment'])->name('admin.orders.bkashPersonal.reject');
     // get return details
     Route::get('/return-details',[OrderController::class, 'getReturnDetails'])->name('admin.return-details');
     // get order items

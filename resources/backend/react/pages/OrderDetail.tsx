@@ -1,5 +1,6 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
+import BkashPersonalPaymentCard, { BkashPersonalInfo } from '../components/order/BkashPersonalPaymentCard';
 import { useParams, useNavigate } from 'react-router-dom';
 import { currencyFormatter } from '../../../frontend/utils/numberFormatter';
 import Button from '../components/inputs/Button';
@@ -91,6 +92,7 @@ interface OrderDetail {
     courier_response: Record<string, any> | null;
     ipAddress: string | null;
     exchangeInfo: ExchangeInfo | null;
+    bkashPersonal: BkashPersonalInfo | null;
     latestDeliveryUpdate?: {
         status: string;
         note: string;
@@ -379,6 +381,16 @@ const OrderDetailPage: React.FC = () => {
                             </div>
                         )}
                     </div>
+
+                    {order.bkashPersonal && (
+                        <BkashPersonalPaymentCard
+                            orderId={order.id}
+                            info={order.bkashPersonal}
+                            onUpdated={(bkashPersonal, paymentStatus) =>
+                                setOrder((prev) => (prev ? { ...prev, bkashPersonal, paymentStatus } : prev))
+                            }
+                        />
+                    )}
 
                     {/* Order Items */}
                     <div className="card rounded-lg border border-border bg-card p-4 text-foreground shadow-sm">

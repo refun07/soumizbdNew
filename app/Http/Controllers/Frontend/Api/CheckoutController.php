@@ -1032,8 +1032,8 @@ class CheckoutController extends Controller
             DB::commit();
             Log::debug('[CHECKOUT] DB transaction committed');
 
-            // send notifications if cod or cardOD
-            if ($request->paymentMethod == 'cash_on_delivery' || $request->paymentMethod == 'card_on_delivery') {
+            // send notifications for offline methods (order is placed without an online gateway)
+            if (in_array($request->paymentMethod, ['cash_on_delivery', 'card_on_delivery', 'bkash_personal'])) {
                 try {
                     // OrderPlaced::dispatch($orderGroup);
                     GlobalNotification::send($user, new OrderPlacedNotification($orderGroup));
@@ -1102,7 +1102,7 @@ class CheckoutController extends Controller
                 'message' => translate('Your order has been placed successfully'),
                 'result' => [
                     'orderCode' => $orderGroup->code,
-                    'goToPayment' => $request->paymentMethod != 'cash_on_delivery' && $request->paymentMethod != 'card_on_delivery' ? true : false,
+                    'goToPayment' => ! in_array($request->paymentMethod, ['cash_on_delivery', 'card_on_delivery', 'bkash_personal']),
                     'paymentMethod' => $request->paymentMethod,
                 ],
             ], 200);

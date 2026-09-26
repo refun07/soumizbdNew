@@ -429,6 +429,19 @@ class SettingController extends Controller
             }
         }
 
+        if ($request->payment_method === 'bkash_personal' && ! trim((string) $request->input('settings.bkash_personal_number'))) {
+            flash(translate('bKash personal number is required'))->error();
+            return back();
+        }
+
+        # plain (non-secret) settings stored in the database, e.g. bKash personal number
+        $allowedSettings = ['bkash_personal_number', 'bkash_personal_instructions'];
+        foreach ((array) $request->input('settings', []) as $type => $value) {
+            if (in_array($type, $allowedSettings, true)) {
+                SystemSetting::updateOrCreate(['type' => $type], ['value' => $value]);
+            }
+        }
+
         $business_settings_sandbox = SystemSetting::where('type', $request->payment_method . '_sandbox')->first();
 
         if ($business_settings_sandbox != null) {

@@ -939,6 +939,13 @@ class LandingPageController extends Controller
                 ];
             }
 
+            if (getSetting('bkash_personal_activation') == 1 && getSetting('bkash_personal_number')) {
+                $methods[] = [
+                    'value' => 'bkash_personal',
+                    'name' => translate('bKash Personal'),
+                ];
+            }
+
             return response()->json([
                 'success' => true,
                 'data' => $methods

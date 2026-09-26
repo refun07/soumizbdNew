@@ -61,6 +61,11 @@ class OrderResource extends JsonResource
 
             $additionalData = [
                 'paymentMethod' => ucfirst(str_replace('_', ' ', $orderGroup->transaction->payment_method)),
+                'bkashPersonal' => $orderGroup->isBkashPersonal() ? [
+                    'orderGroupCode' => (string) $orderGroup->code,
+                    'status' => $orderGroup->latestBkashPersonalPayment?->status ?? 'not_submitted',
+                    'needsSubmission' => $orderGroup->needsBkashPersonalSubmission(),
+                ] : null,
                 'deliveryAddress' => [
                     'type' => $orderGroup->shipping_address_type,
                     'address' => $orderGroup->shipping_address,
@@ -98,6 +103,10 @@ class OrderResource extends JsonResource
             $additionalData['orderPrefix'] = getSetting('orderCodePrefix');
             $additionalData['customerOrderCode'] = $orderGroup?->code ?? $this->order_code;
             $additionalData['customerOrderCodeToShow'] = getSetting('orderCodePrefix').($orderGroup?->code ?? $this->order_code);
+            $additionalData['paymentMethod'] = $orderGroup?->transaction?->payment_method ?? $this->payment_type;
+            $additionalData['bkashPersonalStatus'] = $orderGroup?->isBkashPersonal()
+                ? ($orderGroup->latestBkashPersonalPayment?->status ?? 'not_submitted')
+                : null;
             $additionalData['agentId'] = $this->agent_id;
             $additionalData['agentName'] = $this->agent?->name;
 

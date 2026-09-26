@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import Button from '../../components/buttons/Button';
+import BkashPersonalNotice from '../../components/order/BkashPersonalNotice';
 import ConfigurableOrderSuccessHero from '../../components/order/ConfigurableOrderSuccessHero';
 import { useGetOrderSuccessDataQuery } from '../../store/features/api/orderApi';
 import { clearCheckoutData } from '../../store/features/checkout/checkoutSlice';
@@ -25,6 +26,16 @@ const OrderSuccess = () => {
     return (
         <div className="container">
             <ConfigurableOrderSuccessHero data={orderSuccessData} />
+
+            {orderSuccessData?.summary?.bkashPersonal && (
+                <BkashPersonalNotice
+                    orderCode={orderSuccessData.summary.orderCode}
+                    status={orderSuccessData.summary.bkashPersonal.status}
+                    needsSubmission={
+                        orderSuccessData.summary.bkashPersonal.needsSubmission
+                    }
+                />
+            )}
 
             {orderSuccessData &&
                 orderSuccessData.successPage?.showCustomerDetails !== false && (
