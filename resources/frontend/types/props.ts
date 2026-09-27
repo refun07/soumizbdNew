@@ -4,5 +4,4 @@ export interface ICategoryCardProps {
     quantity?: number | string;
     to: string;
     image: string;
-    showFullTitle?: boolean;
 }

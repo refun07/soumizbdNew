@@ -280,8 +280,6 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin', 'unbanned',
     Route::delete('/variation-values/{id}/delete', [VariationValueController::class, 'destroy'])->name('admin.variation-values.destroy');
 
     # brands
-    Route::get('/brands/categories/manage', [BrandController::class, 'categories'])->name('admin.brands.categories.index');
-    Route::post('/brands/categories/manage', [BrandController::class, 'updateCategories'])->name('admin.brands.categories.update');
     Route::resource('/brands', BrandController::class, ['names' => 'admin.brands']);
 
     # units

@@ -994,18 +994,6 @@
                         {{ translate('Product Brand') }}
                     </div>
                     <div class="card__content">
-                        <div class="mb-4">
-                            <div class="theme-input-wrapper relative">
-                                <input type="search" class="theme-input pr-10 product-brand-search"
-                                    data-brand-search placeholder="{{ translate('Search brands') }}"
-                                    autocomplete="off">
-                                <span
-                                    class="absolute top-0 right-0 h-full flex items-center justify-center px-3 text-muted pointer-events-none">
-                                    <i class="fa-solid fa-magnifying-glass"></i>
-                                </span>
-                            </div>
-                        </div>
-
                         <ul class="space-y-5 max-h-[315px] overflow-y-auto brand-tree-data">
 
                             @include('components.backend.inc.products.brand-list', [
@@ -1014,9 +1002,6 @@
                                 'selectedBrand' => null,
                             ])
                         </ul>
-                        <p class="brand-search-empty mt-3 hidden text-sm text-muted" data-brand-search-empty>
-                            {{ translate('No brands found') }}
-                        </p>
 
                         @if (user()->user_type != 'seller')
                             @can('create_brands')
@@ -1847,15 +1832,9 @@
     document.addEventListener('DOMContentLoaded', function() {
         const discountScheduleToggle = document.getElementById('discount_schedule_toggle');
         const discountScheduleEnabled = document.getElementById('discount_schedule_enabled');
-        const discountValueInput = document.querySelector('[name="discount_value"]');
 
         const syncDiscountSchedule = () => {
-            const hasDiscountValue = Number(discountValueInput?.value || 0) > 0;
-            const isEnabled = (discountScheduleToggle?.checked ?? false) || hasDiscountValue;
-
-            if (hasDiscountValue && discountScheduleToggle) {
-                discountScheduleToggle.checked = true;
-            }
+            const isEnabled = discountScheduleToggle?.checked ?? false;
 
             if (discountScheduleEnabled) {
                 discountScheduleEnabled.value = isEnabled ? '1' : '0';
@@ -1863,36 +1842,7 @@
         };
 
         discountScheduleToggle?.addEventListener('change', syncDiscountSchedule);
-        discountValueInput?.addEventListener('input', syncDiscountSchedule);
         syncDiscountSchedule();
-
-        const brandSearchInput = document.querySelector('[data-brand-search]');
-        const brandList = document.querySelector('.brand-tree-data');
-        const brandSearchEmpty = document.querySelector('[data-brand-search-empty]');
-
-        const filterBrands = () => {
-            if (!brandSearchInput || !brandList) {
-                return;
-            }
-
-            const query = brandSearchInput.value.trim().toLocaleLowerCase();
-            let visibleBrands = 0;
-
-            brandList.querySelectorAll('[data-brand-item]').forEach((brandItem) => {
-                const brandName = brandItem.textContent.trim().toLocaleLowerCase();
-                const isVisible = !query || brandName.includes(query);
-
-                brandItem.classList.toggle('hidden', !isVisible);
-                if (isVisible) {
-                    visibleBrands += 1;
-                }
-            });
-
-            brandSearchEmpty?.classList.toggle('hidden', visibleBrands > 0);
-        };
-
-        brandSearchInput?.addEventListener('input', filterBrands);
-        filterBrands();
 
         const preOrderToggle = document.getElementById('pre_order_is_active');
         const preOrderSection = document.getElementById('pre_order_section');

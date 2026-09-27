@@ -154,14 +154,11 @@ class ProductResource extends JsonResource
 
             // 3 related products
             $relatedProducts = collect();
-            if ($categories && count($categories) > 0 && $this->brand_id) {
+            if ($categories && count($categories) > 0) {
                 $categoryIds = $categories->pluck('id');
-                $relatedProducts = Product::where('brand_id', $this->brand_id)
-                    ->whereHas('productCategories', function ($q) use ($categoryIds) {
+                $relatedProducts = Product::whereHas('productCategories', function ($q) use ($categoryIds) {
                     $q->whereIn('category_id', $categoryIds)->whereNot('product_id', $this->id);
-                    })
-                    ->take(3)
-                    ->get();
+                })->take(3)->get();
             }
 
             // valid promoCode

@@ -254,53 +254,6 @@
 
     initProductCategorySearch();
 
-    function initProductBrandSearch() {
-        const input = document.querySelector('[data-brand-search]');
-        const list = document.querySelector('.brand-tree-data');
-        const emptyState = document.querySelector('[data-brand-search-empty]');
-
-        if (!input || !list || input.dataset.searchInitialized === 'true') {
-            return;
-        }
-
-        input.dataset.searchInitialized = 'true';
-
-        const normalize = (value) => (value || '').toString().trim().toLowerCase();
-        const getBrandItems = () => Array.from(list.querySelectorAll(':scope > [data-brand-item]'));
-
-        const resetSearchState = () => {
-            getBrandItems().forEach((item) => {
-                item.hidden = false;
-                item.classList.remove('brand-search-match');
-            });
-
-            emptyState?.classList.add('hidden');
-        };
-
-        input.addEventListener('input', function() {
-            const query = normalize(this.value);
-
-            if (!query) {
-                resetSearchState();
-                return;
-            }
-
-            let hasResults = false;
-
-            getBrandItems().forEach((item) => {
-                const isMatch = normalize(item.textContent).includes(query);
-
-                item.hidden = !isMatch;
-                item.classList.toggle('brand-search-match', isMatch);
-                hasResults = hasResults || isMatch;
-            });
-
-            emptyState?.classList.toggle('hidden', hasResults);
-        });
-    }
-
-    initProductBrandSearch();
-
     // initCategoryCreateModal
     function initCategoryCreateModal() {
         $('.category-create-modal').on('click', async function() {
@@ -377,8 +330,6 @@
                 url: '{{ route('admin.brands.store') }}',
                 success: function(data) {
                     $('.brand-tree-data').empty().html(data);
-                    initProductBrandSearch();
-                    document.querySelector('[data-brand-search]')?.dispatchEvent(new Event('input'));
                     MicroModal.close('brand-create-modal');
                     notifyMe('success', '{{ translate('Brand added successfully.') }}');
                 }

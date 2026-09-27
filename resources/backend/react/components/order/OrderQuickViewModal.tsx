@@ -18,8 +18,6 @@ interface OrderItem {
 interface OrderDetail {
     id: number;
     order_code: number;
-    customerOrderCode?: number;
-    customerOrderCodeToShow?: string;
     orderPrefix: string;
     customerName: string | null;
     customerEmail: string | null;
@@ -30,8 +28,6 @@ interface OrderDetail {
     deliveryStatusToShow: string;
     paymentStatus: string;
     paymentType: string | null;
-    bkashAccountNumber?: string | null;
-    bkashTransactionId?: string | null;
     shipping_address: string | null;
     shipping_city: string | null;
     shipping_country: string | null;
@@ -119,7 +115,7 @@ const OrderQuickViewModal: React.FC = () => {
                         <div className="flex items-center justify-between mb-5">
                             <div className="flex items-center gap-3">
                                 <h2 className="text-lg font-semibold text-foreground">
-                                    {order.customerOrderCodeToShow || `${order.orderPrefix}${order.order_code}`}
+                                    {order.orderPrefix}{order.order_code}
                                 </h2>
                                 <span className={`px-2.5 py-0.5 rounded text-xs font-medium text-white ${statusColorMap[order.deliveryStatus] || '!bg-gray-500'}`}>
                                     {order.deliveryStatusToShow}
@@ -207,12 +203,6 @@ const OrderQuickViewModal: React.FC = () => {
                                 <div className="font-medium capitalize">{order.paymentStatus}</div>
                                 {order.paymentType && (
                                     <div className="text-sm text-muted mt-0.5">{order.paymentType}</div>
-                                )}
-                                {order.paymentType === 'bkash' && (
-                                    <div className="mt-2 space-y-1 text-sm">
-                                        <div><span className="text-muted">bKash number:</span> <span className="font-medium">{order.bkashAccountNumber || 'N/A'}</span></div>
-                                        <div><span className="text-muted">TrxID:</span> <span className="font-medium uppercase">{order.bkashTransactionId || 'N/A'}</span></div>
-                                    </div>
                                 )}
                             </div>
                             {(order.tracking_number || order.courier_partner) && (

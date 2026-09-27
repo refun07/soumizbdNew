@@ -11,10 +11,8 @@ interface OrderItem {
     product_image?: string;
     quantity: number;
     unit_price: number;
-    total_discount?: number;
     total_price: number;
     product_variation_id?: number;
-    is_new?: boolean;
 }
 
 interface OrderDetails {
@@ -126,16 +124,14 @@ const EditOrderModal: React.FC = () => {
     };
 
     const handleAddProduct = (product: any, variation: any) => {
-        const unitPrice = Number(variation.discounted_price ?? variation.price ?? 0);
         const newItem: OrderItem = {
-            id: -Date.now(), // Temporary negative ID for new items
+            id: Date.now(), // Temporary negative ID for new items
             product_name: product.name,
             variant: variation.name,
             product_image: product.image,
             quantity: 1,
-            unit_price: unitPrice,
-            total_discount: 0,
-            total_price: unitPrice,
+            unit_price: variation.price,
+            total_price: variation.price,
             product_variation_id: variation.id,
             is_new: true,
         };
@@ -182,7 +178,6 @@ const EditOrderModal: React.FC = () => {
                 product_variation_id: item.product_variation_id,
                 qty: item.quantity,
                 unit_price: item.unit_price,
-                discount: item.total_discount || 0,
                 total_price: item.total_price,
                 is_new: item.is_new || false,
             }));
@@ -438,13 +433,7 @@ const EditOrderModal: React.FC = () => {
                                                                     onClick={() => handleAddProduct(product, variation)}
                                                                     className="w-full text-left px-2 py-1 text-sm text-muted hover:bg-muted/20 hover:text-foreground"
                                                                 >
-                                                                    {variation.name} - {currencyFormatter(variation.discounted_price ?? variation.price)}
-                                                                    {variation.base_price > (variation.discounted_price ?? variation.price) ? (
-                                                                        <span className="ml-1 text-xs line-through opacity-70">
-                                                                            {currencyFormatter(variation.base_price)}
-                                                                        </span>
-                                                                    ) : null}
-                                                                    {' '}(Stock: {variation.stock})
+                                                                    {variation.name} - {currencyFormatter(variation.price)} (Stock: {variation.stock})
                                                                 </button>
                                                             ))}
                                                         </div>

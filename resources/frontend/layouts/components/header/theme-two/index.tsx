@@ -41,9 +41,9 @@ const HeaderThemeTwo = () => {
         /^(https?:)?\/\//i.test(actionButtonLink) ||
         /^[a-z][a-z\d+.-]*:/i.test(actionButtonLink);
     const actionButtonClassName =
-        'group inline-flex h-9 max-w-[110px] items-center justify-center gap-1 rounded-button bg-[#B3052A] px-2 text-[10px] font-semibold uppercase leading-none text-white transition hover:bg-[#900421] sm:h-10 sm:max-w-[190px] sm:gap-2 sm:px-4 sm:text-sm';
+        'group inline-flex h-9 max-w-[120px] items-center justify-center gap-1.5 rounded-button bg-[#B3052A] px-3 text-xs font-semibold uppercase leading-none text-white transition hover:bg-[#900421] sm:h-10 sm:max-w-[190px] sm:gap-2 sm:px-4 sm:text-sm';
     const iconButtonClassName =
-        'relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-[#b3052a] text-3xl leading-none text-[#b3052a] transition hover:bg-[#b3052a] hover:text-white sm:h-12 sm:w-12';
+        'relative inline-flex h-10 w-10 shrink-0 items-center justify-center text-2xl leading-none text-[#b3052a] transition hover:text-[#900421]';
     const actionButtonContent = (
         <>
             <span className="truncate">{actionButtonName}</span>

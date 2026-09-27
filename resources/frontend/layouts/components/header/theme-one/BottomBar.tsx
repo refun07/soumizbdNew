@@ -1,10 +1,11 @@
 import {
-    FaBoxOpen,
     FaHome,
+    FaSearch,
     FaShoppingCart,
-    FaTags,
+    FaStore,
     FaUser,
 } from 'react-icons/fa';
+import { IoMdClose } from 'react-icons/io';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../../store/features/auth/authSlice';
 import {
@@ -23,6 +24,8 @@ interface Props {
 }
 
 const BottomBar = ({
+    showShop = true,
+    showSearch = true,
     accentColor = 'var(--color-primary)',
 }: Props) => {
     const { user, carts } = useAuth();
@@ -30,6 +33,21 @@ const BottomBar = ({
     const dispatch = useAppDispatch();
     const { pathname } = useLocation();
     const totalProductInCart = carts.reduce((total, item) => total + item.qty, 0);
+
+    const handleSearchClick = () => {
+        if (popup === 'search') {
+            dispatch(closePopup());
+        } else {
+            dispatch(
+                togglePopup({
+                    popup: 'search',
+                    popupProps: {
+                        overlay: false,
+                    },
+                }),
+            );
+        }
+    };
 
     const handleCartClick = () => {
         if (popup === 'cart') {
@@ -70,30 +88,6 @@ const BottomBar = ({
                 <span className="text-[10px]">Home</span>
             </Link>
 
-            <Link
-                to={'/products'}
-                className={getItemClassName()}
-                style={getItemStyle(pathname === '/products')}
-                onClick={scrollToPageTop}
-            >
-                <span className="text-base">
-                    <FaBoxOpen />
-                </span>
-                <span className="text-[10px]">All Products</span>
-            </Link>
-
-            <Link
-                to={'/brands'}
-                className={getItemClassName()}
-                style={getItemStyle(pathname === '/brands')}
-                onClick={scrollToPageTop}
-            >
-                <span className="text-base">
-                    <FaTags />
-                </span>
-                <span className="text-[10px]">Brands</span>
-            </Link>
-
             <button
                 className={getItemClassName()}
                 style={getItemStyle(popup === 'cart')}
@@ -112,6 +106,35 @@ const BottomBar = ({
                 </span>
                 <span className="text-[10px]">My Cart</span>
             </button>
+
+            {showShop ? (
+                <Link
+                    to={
+                        window.config.generalSettings.appMode === 'multiVendor'
+                            ? '/shops'
+                            : '/products'
+                    }
+                    className={getItemClassName()}
+                >
+                    <span className="text-base">
+                        <FaStore />
+                    </span>
+                    <span className="text-[10px]">Shop</span>
+                </Link>
+            ) : null}
+
+            {showSearch ? (
+                <button
+                    className={getItemClassName()}
+                    style={getItemStyle(popup === 'search')}
+                    onClick={handleSearchClick}
+                >
+                    <span className="">
+                        {popup === 'search' ? <IoMdClose /> : <FaSearch />}
+                    </span>
+                    <span className="text-[10px]">Search</span>
+                </button>
+            ) : null}
 
             {user ? (
                 <button

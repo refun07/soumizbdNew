@@ -229,7 +229,6 @@
                     'admin.taxes.*',
                     'admin.badges.*',
                     'admin.brands.*',
-                    'admin.brands.categories.*',
                     'admin.categories.*',
                     'admin.variations.*',
                     'admin.variation-values.*',
@@ -275,17 +274,9 @@
                     @endcan
 
                     @can('view_brands')
-                        <li class="{{ areActiveRoutes(['admin.brands.index', 'admin.brands.create', 'admin.brands.edit']) }}">
+                        <li class="{{ areActiveRoutes(['admin.brands.*']) }}">
                             <a href="{{ route('admin.brands.index') }}" class="py-3 w-full transition-all">
                                 <span class="sub-item--text">{{ translate('Brands') }}</span>
-                            </a>
-                        </li>
-                    @endcan
-
-                    @can('view_brands')
-                        <li class="{{ areActiveRoutes(['admin.brands.categories.*']) }}">
-                            <a href="{{ route('admin.brands.categories.index') }}" class="py-3 w-full transition-all">
-                                <span class="sub-item--text">{{ translate('Brand Categories') }}</span>
                             </a>
                         </li>
                     @endcan

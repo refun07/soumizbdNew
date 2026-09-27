@@ -2,7 +2,7 @@ import qs from 'qs';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { FaHome, FaSpinner } from 'react-icons/fa';
 import { MdFilterListAlt } from 'react-icons/md';
-import { Link, useLocation, useSearchParams } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import NoDataFound from '../../layouts/components/not-found/NoDataFound';
 import NotFound from '../../pages/NotFound';
 import { useLazyGetProductsQuery } from '../../store/features/api/productApi';
@@ -71,7 +71,6 @@ const SearchAndFilter = ({
     const pagination = productsRes?.products?.meta;
     const brands = productsRes?.brands;
     const rootCategories = productsRes?.rootCategories;
-    const brandCategories = productsRes?.brandCategories;
     const filterAttributes = productsRes?.filterAttributes;
     const selectedCategory = productsRes?.selectedCategory;
     const priceFilter = productsRes?.priceFilter;
@@ -82,11 +81,6 @@ const SearchAndFilter = ({
         plainObjects: true,
     });
     filters.limit = 16;
-    const activeCategorySlug =
-        categorySlug ||
-        (typeof filters.categorySlug === 'string'
-            ? filters.categorySlug
-            : undefined);
 
     // Reset accumulated products when filters change (not just page)
     useEffect(() => {
@@ -128,7 +122,7 @@ const SearchAndFilter = ({
             hasTriggeredRef.current = false;
         }
     }, [
-        activeCategorySlug,
+        categorySlug,
         brandSlug,
         shopSlug,
         discounted,
@@ -181,7 +175,7 @@ const SearchAndFilter = ({
 
         const scopedFilters: URLFilterParams = {
             ...filters,
-            categorySlug: activeCategorySlug,
+            categorySlug,
             brandSlug,
             shopSlug,
             ...(discounted ? { discounted } : {}),
@@ -219,7 +213,7 @@ const SearchAndFilter = ({
             },
         );
         getProducts(queryStr, true);
-    }, [location.search, location.pathname, isInfiniteScrollEnabled, activeCategorySlug, brandSlug, shopSlug, discounted, onSaleProducts, featuredProducts]);
+    }, [location.search, location.pathname, isInfiniteScrollEnabled, categorySlug, brandSlug, shopSlug, discounted, onSaleProducts, featuredProducts]);
 
     // Load more products for infinite scroll
     const loadMoreProducts = useCallback(() => {
@@ -236,7 +230,7 @@ const SearchAndFilter = ({
 
         const newFilters = {
             ...filters,
-            categorySlug: activeCategorySlug,
+            categorySlug,
             brandSlug,
             shopSlug,
             ...(discounted ? { discounted } : {}),
@@ -264,7 +258,7 @@ const SearchAndFilter = ({
         isFetching,
         isLoadingMore,
         filters,
-        activeCategorySlug,
+        categorySlug,
         brandSlug,
         shopSlug,
         discounted,
@@ -353,24 +347,21 @@ const SearchAndFilter = ({
 
     const pageTitle =
         title ||
-        (activeCategorySlug || brandSlug || shopSlug)?.replace(/[-_]/g, ' ') ||
+        (categorySlug || brandSlug || shopSlug)?.replace(/[-_]/g, ' ') ||
         (filters.query &&
             `${translate('Search result for')} '${filters.query || ''}'`) ||
         'All Products';
 
     // Show 404 if category doesn't exist (slug provided but no valid category found)
     // Only show after loading completes and we never got a valid category
-    if (!isLoading && !isFetching && activeCategorySlug && !selectedCategory && !hasValidCategoryRef.current) {
+    if (!isLoading && !isFetching && categorySlug && !selectedCategory && !hasValidCategoryRef.current) {
         return <NotFound />;
     }
 
     // Determine which products to display
     const displayProducts = isInfiniteScrollEnabled ? accumulatedProducts : products;
     const showLoading = isFetching && !isLoadingMore;
-    const brandCategoryLinks = brandSlug ? brandCategories || [] : [];
-    const sidebarCategories = brandSlug
-        ? brandCategoryLinks
-        : rootCategories;
+    const hasMore = pagination ? pagination.current_page < pagination.last_page : false;
 
     return (
         <>
@@ -403,10 +394,9 @@ const SearchAndFilter = ({
                 <FilterSidebar
                     isLoading={isLoading}
                     productsRes={productsRes}
-                    selectedCategory={brandSlug ? null : selectedCategory}
-                    rootCategories={sidebarCategories}
-                    categorySlug={activeCategorySlug}
-                    brandSlug={brandSlug}
+                    selectedCategory={selectedCategory}
+                    rootCategories={rootCategories}
+                    categorySlug={categorySlug}
                     priceFilter={priceFilter}
                     brands={brands}
                     filterAttributes={filterAttributes}
@@ -418,38 +408,6 @@ const SearchAndFilter = ({
                 />
 
                 <div className="lg:col-span-3">
-                    {brandSlug && brandCategoryLinks.length > 0 ? (
-                        <div className="mb-5 flex flex-wrap items-center gap-2 border-b border-primary-14 pb-4">
-                            <span className="mr-1 text-sm font-semibold uppercase text-primary">
-                                {translate('Categories')}
-                            </span>
-                            <Link
-                                to={`/brands/${brandSlug}`}
-                                className={`rounded-full border px-4 py-2 text-sm transition ${
-                                    !activeCategorySlug
-                                        ? 'border-primary bg-primary text-white'
-                                        : 'border-primary-14 text-black/70 hover:border-primary hover:text-primary'
-                                }`}
-                            >
-                                {translate('All Products')}
-                            </Link>
-
-                            {brandCategoryLinks.map((category) => (
-                                <Link
-                                    key={category.id}
-                                    to={`/brands/${brandSlug}?categorySlug=${category.slug}`}
-                                    className={`rounded-full border px-4 py-2 text-sm transition ${
-                                        activeCategorySlug === category.slug
-                                            ? 'border-primary bg-primary text-white'
-                                            : 'border-primary-14 text-black/70 hover:border-primary hover:text-primary'
-                                    }`}
-                                >
-                                    {category.name}
-                                </Link>
-                            ))}
-                        </div>
-                    ) : null}
-
                     <div className="flex items-end gap-3.5">
                         <SectionTitle
                             title={`[${pageTitle}]`}

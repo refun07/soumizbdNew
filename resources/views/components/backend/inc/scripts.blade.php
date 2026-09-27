@@ -444,30 +444,12 @@
             const selectionCssClass = $(this).data('selection-css-class') ||
                 "input-select2"; // or 'multi-select2'
             const noAddNew = $(this).data('no-add-new');
-            const allowTags = $(this).data('tags') === true || $(this).data('tags') === 1;
             let config = {
                 selectionCssClass: selectionCssClass,
                 escapeMarkup: function(markup) {
                     return markup; // Let our custom HTML render
                 }
             };
-
-            if (allowTags) {
-                config.tags = true;
-                config.createTag = function(params) {
-                    const name = $.trim(params.term);
-
-                    if (!name) {
-                        return null;
-                    }
-
-                    return {
-                        id: `__new__:${name}`,
-                        text: name,
-                        newTag: true
-                    };
-                };
-            }
 
             if ($(this).hasClass('social-icon-select')) {
                 var formatSocialIcon = function(data) {

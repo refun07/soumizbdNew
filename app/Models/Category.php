@@ -51,9 +51,4 @@ class Category extends Model
     {
         return $this->belongsToMany(Variation::class, 'category_variations', 'category_id', 'variation_id');
     }
-
-    public function brands()
-    {
-        return $this->belongsToMany(Brand::class, 'brand_categories', 'category_id', 'brand_id')->withTimestamps();
-    }
 }

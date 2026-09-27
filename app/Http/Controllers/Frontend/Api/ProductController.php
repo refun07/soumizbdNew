@@ -16,7 +16,6 @@ use App\Models\Product;
 use App\Models\Variation;
 use App\Traits\CategoryTrait;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Schema;
 
 
 class ProductController extends Controller
@@ -100,16 +99,9 @@ class ProductController extends Controller
 
         // Brand wise product
         $brand = null;
-        $brandCategories = collect();
         if ($request->brandSlug != null) {
             $brand = Brand::isActive()->withCount('products')->where('slug', $request->brandSlug)->first();
-            if ($brand) {
-                $products = $products->where('brand_id', $brand->id);
-                $brandCategories = $this->brandCategories($brand);
-            } else {
-                $products = $products->whereRaw('1 = 0');
-                $brandCategories = collect();
-            }
+            $products = $brand ? $products->where('brand_id', $brand->id) : $products->whereRaw('1 = 0');
         } else {
             // [TODO::Advance search -> if request has search keyword, split the text and find brands, take brand ids, make an array]
         }
@@ -119,20 +111,11 @@ class ProductController extends Controller
         if ($request->categorySlug != null) {
             $category = Category::with('childrenCategories')->where('slug', $request->categorySlug)->first();
             if ($category) {
-                $isAllowedBrandCategory = !$brand || $brandCategories->contains('id', $category->id);
-
-                if ($isAllowedBrandCategory) {
-                    $categoryIds = array_merge([$category->id], CategoryTrait::childrenIds($category->id));
-                    $products = $products->with('productCategories')->whereHas('productCategories', function ($query) use ($categoryIds) {
-                        return $query->whereIn('category_id', $categoryIds);
-                    });
-                    $variations = $category->variations;
-                } else {
-                    $products = $products->whereRaw('1 = 0');
-                    $category = null;
-                }
-            } else {
-                $products = $products->whereRaw('1 = 0');
+                $categoryIds = array_merge([$category->id], CategoryTrait::childrenIds($category->id));
+                $products = $products->with('productCategories')->whereHas('productCategories', function ($query) use ($categoryIds) {
+                    return $query->whereIn('category_id', $categoryIds);
+                });
+                $variations = $category->variations;
             }
         } else {
             // [TODO::Advance search -> if request has search keyword, split the text and find categories, take category ids, make an array]
@@ -215,10 +198,7 @@ class ProductController extends Controller
                 'selectedCategory' => $request->categorySlug 
                     ? ($category ? CategoryResource::make($category) : null) 
                     : null,
-                'rootCategories'   => RootCategoryResource::collection(
-                    $brand ? collect() : Category::isRoot()->get()
-                ),
-                'brandCategories'  => RootCategoryResource::collection($brandCategories),
+                'rootCategories'   => RootCategoryResource::collection(Category::isRoot()->get()),
                 'filterAttributes' => VariationResource::collection($variations),
                 'priceFilter'      => [
                     'minPrice' => (float) $products->min('min_price') ?? 0,
@@ -226,17 +206,6 @@ class ProductController extends Controller
                 ]
             ]
         ];
-    }
-
-    private function brandCategories(Brand $brand)
-    {
-        if (!Schema::hasTable('brand_categories')) {
-            return collect();
-        }
-
-        return $brand->categories()
-            ->orderBy('sorting_order_level', 'ASC')
-            ->get();
     }
 
     # get product details

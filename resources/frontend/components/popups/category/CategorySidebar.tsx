@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { LiaTimesSolid } from 'react-icons/lia';
-import { Link } from 'react-router-dom';
 import { useGetAllCategoriesQuery } from '../../../store/features/api/apiSlice';
 import { closePopup, usePopup } from '../../../store/features/popup/popupSlice';
 import { useAppDispatch } from '../../../store/store';
@@ -64,25 +63,6 @@ const CategorySidebar = () => {
                         ))
                     )}
                 </ul>
-
-                {!isLoading ? (
-                    <nav className="mt-3 border-t border-zinc-100 py-3">
-                        <Link
-                            to="/products"
-                            className="flex min-h-11 items-center px-9 text-primary hover:bg-primary/5"
-                            onClick={() => dispatch(closePopup())}
-                        >
-                            {translate('All Products')}
-                        </Link>
-                        <Link
-                            to="/brands"
-                            className="flex min-h-11 items-center px-9 text-primary hover:bg-primary/5"
-                            onClick={() => dispatch(closePopup())}
-                        >
-                            {translate('Brands')}
-                        </Link>
-                    </nav>
-                ) : null}
             </div>
         </aside>
     );

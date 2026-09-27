@@ -10,7 +10,6 @@ import ProductCard from '../../components/card/product-card';
 import TallBannerCard from '../../components/card/TallBannerCard';
 import CategoryCard from '../../components/category-card';
 import DynamicSectionRenderer from '../../components/home/DynamicSectionRenderer';
-import TestimonialsSection from '../../components/home/TestimonialsSection';
 import ProductSectionSkeleton from '../../components/skeletons/ProductSectionSkeleton';
 import CategorySlider from '../../components/slider/CategorySlider';
 import ProductsSlider from '../../components/slider/ProductsSlider';
@@ -20,7 +19,6 @@ import {
     useGetBannerQuery,
     useGetBannerSliderQuery,
     useGetBottomImageBannersQuery,
-    useGetReviewsQuery,
     useGetCategoryProductsQuery,
     useGetFeaturedCategoriesQuery,
     useGetFlashSaleProductsQuery,
@@ -360,7 +358,6 @@ const HomeThemeOne = () => {
     const fourImageBannerRes = useGetFourImageBannersQuery();
     const categoryProductsRes = useGetCategoryProductsQuery();
     const bottomImageBannerRes = useGetBottomImageBannersQuery();
-    const reviewsRes = useGetReviewsQuery();
 
     // Get dynamic sections from window.config
     const dynamicSections = (window as any).config?.dynamicSections || [];
@@ -691,7 +688,7 @@ const HomeThemeOne = () => {
                                     rewind={mainSideBanners.length > 1}
                                     pagination={mainSideBanners.length > 1}
                                     containerClass="min-w-0"
-                                    paginationContainerClass="mt-2 flex justify-center gap-2.5"
+                                    paginationContainerClass="absolute inset-x-0 bottom-4 z-20 mt-0"
                                 >
                                     {mainSideBanners.map((item, idx) => {
                                         const image = (
@@ -1890,11 +1887,6 @@ const HomeThemeOne = () => {
                     </motion.div>
                 </section>
             ) : null}
-
-            <TestimonialsSection
-                reviews={reviewsRes.data?.reviews ?? []}
-                visible={reviewsRes.data?.showThemeOneReviewSection}
-            />
 
             {/* Dynamic Sections */}
             {dynamicSections.length > 0 && (

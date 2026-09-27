@@ -78,29 +78,12 @@ class OrderController extends Controller
             'countries'     => Country::where('is_active', 1)->get(),
         ];
 
-        $summary = $this->orderService->buildFilteredQuery(new Request())
-            ->select('delivery_status', DB::raw('COUNT(*) as total'))
-            ->groupBy('delivery_status')
-            ->pluck('total', 'delivery_status');
-        $summaryData = [
-            'all' => (int) $summary->sum(),
-            'order_placed' => (int) ($summary['order_placed'] ?? 0),
-            'confirmed' => (int) ($summary['confirmed'] ?? 0),
-            'processing' => (int) ($summary['processing'] ?? 0),
-            'shipped' => (int) ($summary['shipped'] ?? 0),
-            'delivered' => (int) ($summary['delivered'] ?? 0),
-            'cancelled' => (int) ($summary['cancelled'] ?? 0),
-            'exchange' => (int) $this->orderService->buildFilteredQuery(new Request())->whereHas('exchangeAsOriginal')->count(),
-        ];
-        $resourceResult = OrderResource::collection($orders["result"]["orders"])->response()->getData(true);
-        $resourceResult['summary'] = $summaryData;
-
         // $view = view('backend.admin.pos.index', compact('settings'));
             return [
                 'success'   => true,
                 'status'    => 200,
                 'message'   => '',
-                'result'    => $resourceResult
+                'result'    => OrderResource::collection($orders["result"]["orders"])->response()->getData(true)
             ];
     }
 

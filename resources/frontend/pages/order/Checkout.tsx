@@ -141,8 +141,6 @@ const Checkout = () => {
         shippingAddress,
         billingAddress,
         paymentMethod,
-        bkashAccountNumber,
-        bkashTransactionId,
         coupons,
         selectedShops,
         shippingCharge,
@@ -488,10 +486,6 @@ const Checkout = () => {
                 toast.error('Please select a payment method');
                 return;
             }
-            if (paymentMethod === 'bkash' && (!/^01\d{9}$/.test(bkashAccountNumber || '') || !(bkashTransactionId || '').trim())) {
-                toast.error('Please enter a valid bKash number and transaction ID');
-                return;
-            }
             handleSubmitOrder();
         }
     };
@@ -561,8 +555,6 @@ const Checkout = () => {
                 couponCodes: coupons.map((coupon) => coupon.code),
                 cartIds: selectedCartIds,
                 paymentMethod,
-                bkashAccountNumber,
-                bkashTransactionId,
                 password,
                 eventId: eventId,
             };

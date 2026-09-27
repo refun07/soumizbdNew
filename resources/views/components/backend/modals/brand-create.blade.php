@@ -15,36 +15,11 @@
                     @csrf
                     @php
                         $langKey = config('app.default_language');
-                        $categories = \App\Models\Category::isRoot()
-                            ->orderBy('sorting_order_level', 'ASC')
-                            ->get();
-                        $selectedCategories = [];
                     @endphp
 
                     <div class="space-y-3">
                         <x-backend.inputs.text label="Name" name="name" placeholder="Type brand name"
                             value="" />
-
-                        <x-backend.inputs.file label="Thumbnail Image" name="thumbnail_image"
-                            filesHint="This image will be used as thumbnail of the brand. Recommended size: 300*300" />
-
-                        <x-backend.inputs.select label="Brand Categories" name="category_ids[]" multiple
-                            data-selection-css-class="multi-select2"
-                            data-placeholder="{{ translate('Select categories for this brand') }}" :isRequired="false">
-                            @foreach ($categories as $category)
-                                <x-backend.inputs.select-option name="{{ $category->collectTranslation('name', $langKey) }}"
-                                    value="{{ $category->id }}" />
-
-                                @foreach ($category->childrenCategories as $childCategory)
-                                    @include('backend.admin.categories.subCategory', [
-                                        'subCategory' => $childCategory,
-                                        'langKey' => $langKey,
-                                        'category' => null,
-                                        'selectedCategories' => $selectedCategories,
-                                    ])
-                                @endforeach
-                            @endforeach
-                        </x-backend.inputs.select>
 
                         <x-backend.inputs.text label="Meta Title" name="meta_title" placeholder="Type meta title"
                             value="" :isRequired="false" />

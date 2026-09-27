@@ -25,9 +25,6 @@
                         @elseif ($theme == 'theme-three')
                             <x-backend.forms.homepage-theme-three-form langKey="{{ $lang_key }}" />
                         @endif
-                        @if ($theme == 'theme-one')
-                            <x-backend.forms.homepage-theme-one-reviews-form />
-                        @endif
                         <x-backend.forms.search-result-settings-form />
                         <x-backend.forms.header-customer-menu-settings-form />
                         <x-backend.forms.featured-brands-form langKey="{{ $lang_key }}" />

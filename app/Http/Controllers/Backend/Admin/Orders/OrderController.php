@@ -175,16 +175,11 @@ class OrderController extends Controller
                 'image' => uploadedAsset($product->thumbnail_image),
                 'variations' => $product->variations->map(function ($variation) use ($product) {
                     $stock = $variation->productVariationStocks->sum('stock_qty');
-                    $basePrice = (float) variationPrice($product, $variation, false);
-                    $discountedPrice = (float) variationDiscountedPrice($product, $variation, false);
 
                     return [
                         'id' => $variation->id,
                         'name' => $variation->code ? generateVariationName($variation->code) : null,
-                        'price' => $discountedPrice,
-                        'base_price' => $basePrice,
-                        'discounted_price' => $discountedPrice,
-                        'discount' => max($basePrice - $discountedPrice, 0),
+                        'price' => $variation->price ?? $product->base_price,
                         'stock' => $stock,
                     ];
                 }),
@@ -436,8 +431,6 @@ class OrderController extends Controller
             $orderData = [
                 'id' => $order->id,
                 'order_code' => $order->order_code,
-                'customerOrderCode' => $orderGroup?->code ?? $order->order_code,
-                'customerOrderCodeToShow' => getSetting('orderCodePrefix').($orderGroup?->code ?? $order->order_code),
                 'orderPrefix' => getSetting('orderCodePrefix'),
                 // Prefer order-specific snapshot values from order_group over current user profile values.
                 'customerName' => $orderGroup?->name ?? $order->user?->name,
@@ -449,8 +442,6 @@ class OrderController extends Controller
                 'deliveryStatusToShow' => ucfirst(str_replace('_', ' ', $order->delivery_status)),
                 'paymentStatus' => $order->payment_status,
                 'paymentType' => $orderGroup?->transaction?->payment_method ?? $order->payment_type,
-                'bkashAccountNumber' => $orderGroup?->transaction?->bkash_account_number,
-                'bkashTransactionId' => $orderGroup?->transaction?->bkash_transaction_id,
                 'shipping_address' => $shippingAddress,
                 'billing_address' => $billingAddress,
                 'shipping_city' => null,
@@ -494,9 +485,7 @@ class OrderController extends Controller
                     'product_image' => $item->productVariation->product->thumbnail_image ? uploadedAsset($item->productVariation->product->thumbnail_image) : null,
                     'quantity' => $item->qty,
                     'unit_price' => (float) $item->unit_price,
-                    'total_discount' => (float) ($item->total_discount ?? 0),
                     'total_price' => (float) $item->total_price,
-                    'product_variation_id' => $item->product_variation_id,
                 ];
             });
 

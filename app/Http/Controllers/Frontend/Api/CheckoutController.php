@@ -299,11 +299,6 @@ class CheckoutController extends Controller
     // store new order
     public function store(Request $request)
     {
-        $request->validate([
-            'paymentMethod' => ['required', 'string'],
-            'bkashAccountNumber' => ['required_if:paymentMethod,bkash', 'nullable', 'regex:/^01[0-9]{9}$/'],
-            'bkashTransactionId' => ['required_if:paymentMethod,bkash', 'nullable', 'string', 'max:30'],
-        ]);
         Log::debug('[CHECKOUT] Store method started', [
             'user_id' => auth()->id(),
             'cart_ids' => $request->cartIds,
@@ -1013,8 +1008,6 @@ class CheckoutController extends Controller
                 $transaction->coupon_discount_amount = $grandCouponDiscount;
                 $transaction->total_amount = $grandTotal;
                 $transaction->payment_method = $request->paymentMethod;
-                $transaction->bkash_account_number = $request->paymentMethod === 'bkash' ? $request->bkashAccountNumber : null;
-                $transaction->bkash_transaction_id = $request->paymentMethod === 'bkash' ? strtoupper($request->bkashTransactionId) : null;
                 $transaction->save();
 
                 Log::debug('[CHECKOUT] Transaction created', [
@@ -1109,7 +1102,7 @@ class CheckoutController extends Controller
                 'message' => translate('Your order has been placed successfully'),
                 'result' => [
                     'orderCode' => $orderGroup->code,
-                    'goToPayment' => !in_array($request->paymentMethod, ['cash_on_delivery', 'card_on_delivery', 'bkash'], true),
+                    'goToPayment' => $request->paymentMethod != 'cash_on_delivery' && $request->paymentMethod != 'card_on_delivery' ? true : false,
                     'paymentMethod' => $request->paymentMethod,
                 ],
             ], 200);

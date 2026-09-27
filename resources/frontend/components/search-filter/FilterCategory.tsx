@@ -5,14 +5,13 @@ import Image from '../Image';
 interface Props {
     category: ICategoryShort;
     selected?: boolean;
-    path?: string;
 }
 
-const FilterCategory = ({ category, selected, path }: Props) => {
+const FilterCategory = ({ category, selected }: Props) => {
     return (
         <li>
             <Link
-                to={path || `/categories/${category.slug}`}
+                to={`/categories/${category.slug}`}
                 className={`group flex items-center justify-between py-2 w-full text-black/70 hover:text-black ${
                     selected && 'text-primary'
                 }`}
