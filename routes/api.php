@@ -120,6 +120,7 @@ Route::group(['prefix' => config('app.api_version')], function () {
             Route::get('/four-image-banner', [HomePageThemeOneController::class, 'fourImageBanner']);
             Route::get('/category-products', [HomePageThemeOneController::class, 'categoryProducts'])->middleware('zone');
             Route::get('/bottom-image-banner', [HomePageThemeOneController::class, 'bottomImageBanner']);
+            Route::get('/reviews', [HomePageThemeOneController::class, 'reviewSection']);
         });
 
         // theme-two

@@ -90,6 +90,7 @@ class OrderResource extends JsonResource
             $additionalData['tracking_number'] = $orderGroup?->tracking_number ?: ($this->tracking_number ?? '');
             $additionalData['customerName'] = $orderGroup?->name ?? $this->user?->name;
             $additionalData['customerPhone'] = $orderGroup?->phone ?? $this->user?->phone;
+            $additionalData['customerOrderLabel'] = $this->customer_order_label;
             $additionalData['address'] = $orderGroup?->shipping_address ?? '';
             $additionalData['shipping_address'] = $orderGroup?->shipping_address ?? '';
             $additionalData['orderCount'] = (int) ($this->order_items_count ?? $this->orderItems->count());

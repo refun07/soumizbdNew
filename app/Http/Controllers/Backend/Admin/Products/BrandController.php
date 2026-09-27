@@ -48,6 +48,10 @@ class BrandController extends Controller
     # Store a newly created resource in storage.
     public function store(Request $request)
     {
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+        ]);
+
         $brand = new Brand;
         $brand->name             = $request->name;
         $brand->thumbnail_image  = $request->thumbnail_image;
@@ -58,7 +62,7 @@ class BrandController extends Controller
         $brand->meta_image       = $request->meta_image;
         $brand->brand_group_id   = BrandGroup::resolveId($request->brand_group_id);
 
-        $brand->slug = preg_replace('/[^A-Za-z0-9\-]/', '', str_replace(' ', '-', $request->name));
+        $brand->slug = Str::slug($request->name, '-');
 
         $brand->save();
 

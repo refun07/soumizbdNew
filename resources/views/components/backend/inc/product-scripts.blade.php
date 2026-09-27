@@ -330,6 +330,7 @@
                 url: '{{ route('admin.brands.store') }}',
                 success: function(data) {
                     $('.brand-tree-data').empty().html(data);
+                    document.querySelector('[data-brand-search]')?.dispatchEvent(new Event('input'));
                     MicroModal.close('brand-create-modal');
                     notifyMe('success', '{{ translate('Brand added successfully.') }}');
                 }

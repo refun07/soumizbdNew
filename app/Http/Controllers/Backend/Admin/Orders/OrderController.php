@@ -469,6 +469,7 @@ class OrderController extends Controller
 
                 return [
                     'id' => $item->id,
+                    'product_variation_id' => $item->product_variation_id,
                     'product_name' => $item->productVariation->product->name ?? 'N/A',
                     'variant' => $variantName,
                     'product_image' => $item->productVariation->product->thumbnail_image ? uploadedAsset($item->productVariation->product->thumbnail_image) : null,

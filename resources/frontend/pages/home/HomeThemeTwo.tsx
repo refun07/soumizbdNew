@@ -4,6 +4,7 @@ import { LuEye } from 'react-icons/lu';
 import { Link } from 'react-router-dom';
 import { useProductActions } from '../../components/card/product-card';
 import DynamicSectionRenderer from '../../components/home/DynamicSectionRenderer';
+import TestimonialsSection from '../../components/home/TestimonialsSection';
 import ThemeRating from '../../components/reviews/ThemeRating';
 import { useGetFlashSaleProductsQuery } from '../../store/features/api/homeApis/theme-one/homeApiThemeOne';
 import {
@@ -13,6 +14,7 @@ import {
     useGetFourImageBannerQuery,
     useGetThreeImageBannerQuery,
     useGetTrendyProductsQuery,
+    useGetReviewsQuery,
 } from '../../store/features/api/homeApis/theme-two/homeApiThemeTwo';
 import { ICategoryShort } from '../../types';
 import { IProductShort } from '../../types/product';
@@ -323,6 +325,7 @@ const HomeThemeTwo = () => {
     const { data: flashSaleProduct } = useGetFlashSaleProductsQuery();
     const { data: fourImageBanner } = useGetFourImageBannerQuery();
     const { data: trendyProducts } = useGetTrendyProductsQuery();
+    const { data: reviews } = useGetReviewsQuery();
 
     const dynamicSections = (window as any).config?.dynamicSections || [];
     const categoryProductGroups = categoryProducts || [];
@@ -493,6 +496,11 @@ const HomeThemeTwo = () => {
                 subtitle="Popular"
                 link="/products"
                 limit={20}
+            />
+
+            <TestimonialsSection
+                reviews={reviews?.reviews}
+                visible={reviews?.showThemeTwoReviewSection}
             />
 
             {dynamicSections.length > 0 && (

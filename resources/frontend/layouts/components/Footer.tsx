@@ -177,7 +177,7 @@ const Footer = () => {
 
                             <ThemeSlider
                                 containerClass="grow"
-                                wrapperClass="items-center"
+                                wrapperClass="items-start"
                                 spaceBetween={20}
                                 slidesPerView={2}
                                 breakpoints={{
@@ -197,11 +197,22 @@ const Footer = () => {
                                         key={brand.id}
                                         className="inline-flex justify-center"
                                     >
-                                        <Link to={`/brands/${brand.slug}`}>
+                                        <Link
+                                            to={`/brands/${brand.slug}`}
+                                            className="flex w-full min-w-0 flex-col items-center gap-3 px-1 text-center"
+                                            aria-label={brand.name}
+                                        >
                                             <img
                                                 src={brand.thumbnailImage}
                                                 alt={brand.name}
+                                                width={112}
+                                                height={112}
+                                                loading="lazy"
+                                                className="h-20 w-20 object-contain sm:h-24 sm:w-24 lg:h-28 lg:w-28"
                                             />
+                                            <span className="w-full whitespace-normal break-words text-sm font-medium leading-5 text-foreground">
+                                                {brand.name}
+                                            </span>
                                         </Link>
                                     </SwiperSlide>
                                 ))}

@@ -20,6 +20,8 @@ interface OrderItem {
 interface OrderDetail {
     id: number;
     order_code: number;
+    customerOrderCode?: number;
+    customerOrderCodeToShow?: string;
     orderPrefix: string;
     customerName: string | null;
     customerEmail: string | null;
@@ -126,7 +128,7 @@ const OrderQuickViewModal: React.FC = () => {
                         <div className="flex items-center justify-between mb-5">
                             <div className="flex items-center gap-3">
                                 <h2 className="text-lg font-semibold text-foreground">
-                                    {order.orderPrefix}{order.order_code}
+                                    {order.customerOrderCodeToShow || `${order.orderPrefix}${order.order_code}`}
                                 </h2>
                                 <span className={`px-2.5 py-0.5 rounded text-xs font-medium text-white ${statusColorMap[order.deliveryStatus] || '!bg-gray-500'}`}>
                                     {order.deliveryStatusToShow}

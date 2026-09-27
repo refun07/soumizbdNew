@@ -79,11 +79,31 @@ class OrderController extends Controller
         ];
 
         // $view = view('backend.admin.pos.index', compact('settings'));
+        $summaryCounts = $this->orderService->buildFilteredQuery(new Request())
+            ->reorder()
+            ->select('delivery_status', DB::raw('COUNT(*) as total'))
+            ->groupBy('delivery_status')
+            ->pluck('total', 'delivery_status');
+        $summaryData = [
+            'all' => (int) $summaryCounts->sum(),
+            'new' => (int) $this->orderService->buildFilteredQuery(new Request())->reorder()->where('created_at', '>=', \Carbon\Carbon::now()->subDay())->count(),
+            'order_placed' => (int) ($summaryCounts['order_placed'] ?? 0),
+            'confirmed' => (int) ($summaryCounts['confirmed'] ?? 0),
+            'processing' => (int) ($summaryCounts['processing'] ?? 0),
+            'shipped' => (int) ($summaryCounts['shipped'] ?? 0),
+            'completed' => (int) ($summaryCounts['completed'] ?? $summaryCounts['delivered'] ?? 0),
+            'delivered' => (int) ($summaryCounts['delivered'] ?? 0),
+            'cancelled' => (int) ($summaryCounts['cancelled'] ?? 0),
+            'exchange' => (int) $this->orderService->buildFilteredQuery(new Request())->reorder()->whereHas('exchangeAsOriginal')->count(),
+        ];
+        $resourceResult = OrderResource::collection($orders["result"]["orders"])->response()->getData(true);
+        $resourceResult['summary'] = $summaryData;
+
             return [
                 'success'   => true,
                 'status'    => 200,
                 'message'   => '',
-                'result'    => OrderResource::collection($orders["result"]["orders"])->response()->getData(true)
+                'result'    => $resourceResult
             ];
     }
 
@@ -176,6 +196,7 @@ class OrderController extends Controller
 
                 return [
                     'id' => $item->id,
+                    'product_variation_id' => $item->product_variation_id,
                     'product_name' => $item->productVariation->product->name ?? 'N/A',
                     'variant' => $variantName,
                     'product_image' => $item->productVariation->product->thumbnail_image ? uploadedAsset($item->productVariation->product->thumbnail_image) : null,

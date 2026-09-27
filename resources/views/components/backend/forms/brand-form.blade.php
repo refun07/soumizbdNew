@@ -20,7 +20,8 @@
             ])
         @endif
 
-        <x-backend.inputs.file label="Thumbnail Image" name="thumbnail_image" value="{{ $brand?->thumbnail_image }}" />
+        <x-backend.inputs.file label="Thumbnail Image" name="thumbnail_image" value="{{ $brand?->thumbnail_image }}"
+            filesHint="This image will be used as thumbnail of the brand. Recommended size: 300*300" />
 
         <x-backend.inputs.file label="Banner Image" name="banner_image" value="{{ $brand?->banner_image }}" />
 

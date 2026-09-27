@@ -104,11 +104,27 @@ class OrderService
         }
 
         if ($request->has('search') && $request->query('search') !== '') {
-            $searchKey = $request->query('search');
-            $orders = $orders->whereHas('user', function ($q) use ($searchKey) {
-                $q->where('name', 'like', '%'.$searchKey.'%')
-                    ->orWhere('phone', 'like', '%'.$searchKey.'%');
-            })->orWhere('order_code', 'like', '%'.$searchKey.'%');
+            $searchKey = trim((string) $request->query('search'));
+            $orders->where(function ($query) use ($searchKey) {
+                $query->where('order_code', 'like', '%'.$searchKey.'%')
+                    ->orWhereHas('orderGroup', function ($q) use ($searchKey) {
+                        $q->where('code', 'like', '%'.$searchKey.'%')
+                            ->orWhere('name', 'like', '%'.$searchKey.'%')
+                            ->orWhere('phone', 'like', '%'.$searchKey.'%')
+                            ->orWhere('alternative_phone', 'like', '%'.$searchKey.'%')
+                            ->orWhere('email', 'like', '%'.$searchKey.'%')
+                            ->orWhere('shipping_address', 'like', '%'.$searchKey.'%');
+                    })
+                    ->orWhereHas('user', function ($q) use ($searchKey) {
+                        $q->where('name', 'like', '%'.$searchKey.'%')
+                            ->orWhere('phone', 'like', '%'.$searchKey.'%')
+                            ->orWhere('email', 'like', '%'.$searchKey.'%');
+                    })
+                    ->orWhereHas('orderItems.productVariation.product', function ($q) use ($searchKey) {
+                        $q->where('name', 'like', '%'.$searchKey.'%')
+                            ->orWhere('slug', 'like', '%'.$searchKey.'%');
+                    });
+            });
         }
 
         if ($request->date_range != null) {
@@ -152,6 +168,7 @@ class OrderService
 
         $limit = $request->limit ?? 15;
         $orders = $this->buildFilteredQuery($request)->paginate($limit);
+        $this->attachCustomerOrderLabels($orders->getCollection());
 
         return [
             'status' => 200,
@@ -161,6 +178,55 @@ class OrderService
                 'orders' => $orders,
             ],
         ];
+    }
+
+    private function attachCustomerOrderLabels($orders): void
+    {
+        if ($orders->isEmpty()) {
+            return;
+        }
+
+        $userIds = $orders->pluck('user_id')
+            ->filter(fn ($userId) => filled($userId) && (int) $userId > 0)
+            ->unique()
+            ->values();
+
+        $phones = $orders->map(fn ($order) => $order->orderGroup?->phone ?: $order->user?->phone)
+            ->filter()
+            ->map(fn ($phone) => trim((string) $phone))
+            ->filter()
+            ->unique()
+            ->values();
+
+        $firstOrderIdsByUser = $userIds->isNotEmpty()
+            ? Order::shopOrders()
+                ->whereIn('user_id', $userIds)
+                ->select('user_id', DB::raw('MIN(id) as first_order_id'))
+                ->groupBy('user_id')
+                ->pluck('first_order_id', 'user_id')
+            : collect();
+
+        $firstOrderIdsByPhone = $phones->isNotEmpty()
+            ? Order::shopOrders()
+                ->join('order_groups', 'orders.order_group_id', '=', 'order_groups.id')
+                ->whereIn('order_groups.phone', $phones)
+                ->select('order_groups.phone', DB::raw('MIN(orders.id) as first_order_id'))
+                ->groupBy('order_groups.phone')
+                ->pluck('first_order_id', 'order_groups.phone')
+            : collect();
+
+        $orders->each(function ($order) use ($firstOrderIdsByPhone, $firstOrderIdsByUser) {
+            $phone = trim((string) ($order->orderGroup?->phone ?: $order->user?->phone));
+            $firstOrderId = $phone !== '' ? $firstOrderIdsByPhone->get($phone) : null;
+
+            if (! $firstOrderId && filled($order->user_id)) {
+                $firstOrderId = $firstOrderIdsByUser->get($order->user_id);
+            }
+
+            $isFirstOrder = $firstOrderId && (int) $firstOrderId === (int) $order->id;
+
+            $order->setAttribute('customer_order_label', $isFirstOrder ? '1st Order' : 'Old customer');
+        });
     }
 
     // export orders as CSV
