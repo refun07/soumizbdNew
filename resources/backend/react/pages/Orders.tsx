@@ -184,6 +184,11 @@ const OrderPage: React.FC = () => {
     const tabs = [
         { id: 'all', label: 'All', filter: {} },
         {
+            id: 'new',
+            label: 'New Orders',
+            filter: { is_new: '1' },
+        },
+        {
             id: 'order_placed',
             label: 'Order Placed',
             filter: { delivery_status: 'order_placed' },

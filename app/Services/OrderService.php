@@ -42,6 +42,10 @@ class OrderService
         if ($request->has('delivery_status') && $request->query('delivery_status') !== '') {
             $orders->where('delivery_status', $request->delivery_status);
         }
+
+        if ($request->filled('is_new') && in_array((string) $request->query('is_new'), ['1', 'true'], true)) {
+            $orders->where('created_at', '>=', Carbon::now()->subDay());
+        }
         if (($request->has('from') && $request->query('from') !== '') && ($request->has('to') && $request->query('to') !== '')) {
             try {
                 $fromDate = trim($request->query('from'));
