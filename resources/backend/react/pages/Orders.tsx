@@ -75,10 +75,13 @@ interface Order {
     shippingChargeAmount: number;
     discountAmount: number;
     couponDiscountAmount: number;
+    adminDiscountAmount?: number;
     totalAmount: number;
     deliveryStatus?: string;
     deliveryStatusToShow?: string;
     paymentStatus: string;
+    paymentMethod?: string | null;
+    bkashPersonalStatus?: string | null;
     address?: string;
     shipping_address?: string;
     orderPrefix?: string;
@@ -121,6 +124,35 @@ interface Pagination {
     per_page: number;
 }
 
+const PAYMENT_METHOD_OPTIONS = [
+    { value: 'cash_on_delivery', label: 'Cash On Delivery' },
+    { value: 'card_on_delivery', label: 'Card On Delivery' },
+    { value: 'bkash_personal', label: 'bKash Personal' },
+    { value: 'bkash', label: 'bKash (Gateway)' },
+    { value: 'sslcommerz', label: 'SSLCommerz' },
+    { value: 'stripe', label: 'Stripe' },
+    { value: 'paypal', label: 'PayPal' },
+];
+
+const BKASH_STATUS_META: Record<string, { label: string; className: string }> = {
+    not_submitted: { label: 'bKash: Not submitted', className: 'bg-gray-100 text-gray-700' },
+    pending: { label: 'bKash: Verify', className: 'bg-amber-100 text-amber-700' },
+    verified: { label: 'bKash: Verified', className: 'bg-green-100 text-green-700' },
+    rejected: { label: 'bKash: Rejected', className: 'bg-red-100 text-red-700' },
+};
+
+const BkashStatusBadge: React.FC<{ status?: string | null }> = ({ status }) => {
+    if (!status || !BKASH_STATUS_META[status]) return null;
+    const meta = BKASH_STATUS_META[status];
+
+    return (
+        <span className={`mt-1 inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] font-semibold ${meta.className}`}>
+            <i className="fa-solid fa-mobile-screen"></i>
+            {meta.label}
+        </span>
+    );
+};
+
 const OrderPage: React.FC = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -132,6 +164,8 @@ const OrderPage: React.FC = () => {
         to: '',
         search: '',
         payment_status: '',
+        payment_method: '',
+        bkash_status: '',
         pos_order: '',
     });
 
@@ -149,6 +183,11 @@ const OrderPage: React.FC = () => {
     // Tab configuration
     const tabs = [
         { id: 'all', label: 'All', filter: {} },
+        {
+            id: 'new',
+            label: 'New Orders',
+            filter: { is_new: '1' },
+        },
         {
             id: 'order_placed',
             label: 'Order Placed',
@@ -266,6 +305,14 @@ const OrderPage: React.FC = () => {
         setFilters((prev) => ({ ...prev, payment_status: value }));
     };
 
+    const handlePaymentMethodChange = (value: string) => {
+        setFilters((prev) => ({
+            ...prev,
+            payment_method: value,
+            bkash_status: value === 'bkash_personal' ? prev.bkash_status : '',
+        }));
+    };
+
     const togglePosFilter = () => {
         setFilters((prev) => ({
             ...prev,
@@ -284,6 +331,8 @@ const OrderPage: React.FC = () => {
             to: '',
             search: '',
             payment_status: '',
+            payment_method: '',
+            bkash_status: '',
             pos_order: '',
         });
         setActiveTab('order_placed');
@@ -713,6 +762,64 @@ const OrderPage: React.FC = () => {
                             </select>
                         </div>
 
+                        {/* Payment Method Filter */}
+                        <div className="flex w-full flex-shrink-0 flex-col gap-1.5 sm:w-auto sm:flex-row sm:items-center sm:gap-2">
+                            <label className="text-sm font-medium text-muted whitespace-nowrap">
+                                Payment Method
+                            </label>
+                            <select
+                                className="min-h-[37px] w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500 sm:w-44"
+                                value={filters.payment_method}
+                                onChange={(e) =>
+                                    handlePaymentMethodChange(e.target.value)
+                                }
+                            >
+                                <option value="" className={nativeSelectOptionClass}>
+                                    All Methods
+                                </option>
+                                {PAYMENT_METHOD_OPTIONS.map((method) => (
+                                    <option
+                                        key={method.value}
+                                        value={method.value}
+                                        className={nativeSelectOptionClass}
+                                    >
+                                        {method.label}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {filters.payment_method === 'bkash_personal' && (
+                            <div className="flex w-full flex-shrink-0 flex-col gap-1.5 sm:w-auto sm:flex-row sm:items-center sm:gap-2">
+                                <label className="text-sm font-medium text-muted whitespace-nowrap">
+                                    bKash Status
+                                </label>
+                                <select
+                                    className="min-h-[37px] w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500 sm:w-48"
+                                    value={filters.bkash_status}
+                                    onChange={(e) =>
+                                        handleChange('bkash_status', e.target.value)
+                                    }
+                                >
+                                    <option value="" className={nativeSelectOptionClass}>
+                                        All
+                                    </option>
+                                    <option value="pending" className={nativeSelectOptionClass}>
+                                        Awaiting verification
+                                    </option>
+                                    <option value="not_submitted" className={nativeSelectOptionClass}>
+                                        Not submitted
+                                    </option>
+                                    <option value="verified" className={nativeSelectOptionClass}>
+                                        Verified
+                                    </option>
+                                    <option value="rejected" className={nativeSelectOptionClass}>
+                                        Rejected
+                                    </option>
+                                </select>
+                            </div>
+                        )}
+
                         {/* Search Input */}
                         <div className="search-form relative w-full flex-shrink-0 sm:w-72">
                             <input
@@ -916,9 +1023,12 @@ const OrderPage: React.FC = () => {
                                             </div>
                                         ) : (
                                             <div className="text-sm text-muted">
-                                                Cash On Delivery
+                                                {order.paymentMethod === 'bkash_personal'
+                                                    ? 'bKash Personal / Unpaid'
+                                                    : 'Cash On Delivery'}
                                             </div>
                                         )}
+                                        <BkashStatusBadge status={order.bkashPersonalStatus} />
                                     </div>
 
                                     <div>
@@ -1197,10 +1307,10 @@ const OrderPage: React.FC = () => {
                                             <span>Delivery</span>
                                             <span>{currencyFormatter(order.shippingChargeAmount)}</span>
                                         </div>
-                                        {(Number(order.discountAmount) + Number(order.couponDiscountAmount)) > 0 && (
+                                        {(Number(order.couponDiscountAmount || 0) + Number(order.adminDiscountAmount || 0)) > 0 && (
                                             <div className="mt-0.5 flex justify-between gap-3 text-red-500">
                                                 <span>Discount</span>
-                                                <span>-{currencyFormatter(Number(order.discountAmount) + Number(order.couponDiscountAmount))}</span>
+                                                <span>-{currencyFormatter(Number(order.couponDiscountAmount || 0) + Number(order.adminDiscountAmount || 0))}</span>
                                             </div>
                                         )}
                                         <div className="mt-1 flex justify-between gap-3 border-t border-border pt-1 text-sm font-bold text-foreground">
@@ -1208,8 +1318,13 @@ const OrderPage: React.FC = () => {
                                             <span>{currencyFormatter(order.totalAmount)}</span>
                                         </div>
                                         <div className={`mt-1 text-[11px] font-semibold ${order.paymentStatus === 'paid' ? 'text-green-600' : 'text-amber-600'}`}>
-                                            {order.paymentStatus === 'paid' ? 'Paid' : 'Cash on delivery / Unpaid'}
+                                            {order.paymentStatus === 'paid'
+                                                ? 'Paid'
+                                                : order.paymentMethod === 'bkash_personal'
+                                                  ? 'bKash Personal / Unpaid'
+                                                  : 'Cash on delivery / Unpaid'}
                                         </div>
+                                        <BkashStatusBadge status={order.bkashPersonalStatus} />
                                     </td>
                                     <td className="px-2 !py-4">
                                         <div>

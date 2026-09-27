@@ -1,5 +1,5 @@
 import { IGetsQueryParams, IResponse } from '../../../types';
-import { IBrandShort } from '../../../types/brand';
+import { IBrandGroup, IBrandShort } from '../../../types/brand';
 import { apiSlice } from './apiSlice';
 
 const brandApi = apiSlice
@@ -10,15 +10,22 @@ const brandApi = apiSlice
         endpoints: (builder) => ({
             getBrands: builder.query<
                 IResponse<IBrandShort[]>,
-                IGetsQueryParams
+                IGetsQueryParams & { group?: string | null }
             >({
                 query: (params) => ({
                     url: `/brands`,
                     params: {
                         ...params,
                         searchKey: params.query,
+                        group: params.group || undefined,
                     },
                 }),
+                providesTags: ['Brands'],
+            }),
+            getBrandGroups: builder.query<IBrandGroup[], void>({
+                query: () => `/brands/groups`,
+                transformResponse: (res: { result: IBrandGroup[] }) =>
+                    res.result,
                 providesTags: ['Brands'],
             }),
             getBrandDetails: builder.query<IBrandShort | null, string>({
@@ -31,4 +38,8 @@ const brandApi = apiSlice
         }),
     });
 
-export const { useGetBrandsQuery, useGetBrandDetailsQuery } = brandApi;
+export const {
+    useGetBrandsQuery,
+    useGetBrandGroupsQuery,
+    useGetBrandDetailsQuery,
+} = brandApi;

@@ -499,6 +499,53 @@
     }
     initSelect2();
 
+    // brand group select: pick a group or type a new name to create it on save
+    function initBrandGroupSelect() {
+        $('.brand-group-select').each(function() {
+            const $select = $(this);
+            if ($select.hasClass('select2-hidden-accessible')) {
+                return;
+            }
+
+            // inside a modal, anchor the dropdown to the field: the modal's will-change: transform
+            // breaks select2's offset math when the dropdown is attached to body or the container
+            const $parent = $select.closest('.modal__container').length ?
+                $select.closest('.theme-input-wrapper').css('position', 'relative') :
+                $(document.body);
+
+            $select.select2({
+                selectionCssClass: 'input-select2',
+                placeholder: $select.data('placeholder'),
+                allowClear: true,
+                tags: true,
+                dropdownParent: $parent,
+                createTag: function(params) {
+                    const term = $.trim(params.term);
+                    if (term === '') {
+                        return null;
+                    }
+
+                    const exists = $select.find('option').filter(function() {
+                        return $.trim($(this).text()).toLowerCase() === term.toLowerCase();
+                    }).length > 0;
+
+                    return exists ? null : {
+                        id: '{{ \App\Models\BrandGroup::NEW_GROUP_PREFIX }}' + term,
+                        text: term,
+                        newTag: true
+                    };
+                },
+                templateResult: function(data) {
+                    if (!data.newTag) {
+                        return data.text;
+                    }
+                    return $('<span></span>').text('{{ translate('Create group') }}: ' + data.text);
+                }
+            });
+        });
+    }
+    initBrandGroupSelect();
+
     function initOrderedProductPickers() {
         $('.ordered-product-picker').each(function() {
             const $picker = $(this);

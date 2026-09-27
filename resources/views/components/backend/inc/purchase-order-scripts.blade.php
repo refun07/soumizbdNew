@@ -123,8 +123,6 @@
             unit = '',
             defaultUnitPrice = 0,
             stock = 0,
-            discount = 0,
-            tax = 0,
             subtotal = 0;
 
         $('.purchase-orders-tbody .no-data')?.remove();
@@ -135,8 +133,6 @@
         unit = $($this).data('unit');
         stock = $($this).data('stock');
         defaultUnitPrice = $($this).data('price');
-        discount = $($this).data('discount');
-        tax = $($this).data('tax');
         subtotal = $($this).data('subtotal');
 
         let tr = `<tr class="bg-background border-b border-border transition duration-300 ease-in-out hover:bg-background-hover">
@@ -167,16 +163,6 @@
                                 name="expiryDates[]"
                                 placeholder="{{ translate('Expiry Date') }}" value="" />
                         </td>` : ''}
-                        <td class="text-sm text-foreground font-light px-6 py-4 whitespace-nowrap">
-                            <input type="hidden" name="discount[]" value="${discount}">
-                            <input type="hidden" name="discountPrice[]" value="${discount}">
-                            <span class="tr-discount">${parseFloat(discount).toFixed(3)}</span>
-                        </td>
-                        <td class="text-sm text-foreground font-light px-6 py-4 whitespace-nowrap">
-                            <input type="hidden" name="tax[]" value="${tax}">
-                            <input type="hidden" name="taxPrice[]" value="${tax}">
-                            <span class="tr-tax">${parseFloat(tax).toFixed(3)}</span>
-                        </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground"> 
                             <input type="hidden" name="subtotal[]" value="${subtotal}">
                             <span class="tr-subtotal">${parseFloat(subtotal).toFixed(3)}</span>
@@ -226,15 +212,7 @@
             unitPrice = parseFloat($(oldTr).find('input[name="unitPrice[]"]').val()) || 0,
             stockQty = parseFloat($(oldTr).find('input[name="stockQty[]"]').val()) || 0,
 
-            discount = parseFloat($(oldTr).find('input[name="discount[]"]').val()),
-            tax = parseFloat($(oldTr).find('input[name="tax[]"]').val()),
-            subtotal = (unitPrice * stockQty) + (tax * stockQty) - (discount * stockQty);
-
-        $(oldTr).find("input[name='discountPrice[]']").val(discount * stockQty);
-        $(oldTr).find('.tr-discount').html(parseFloat(discount * stockQty).toFixed(3));
-
-        $(oldTr).find("input[name='taxPrice[]']").val(tax * stockQty);
-        $(oldTr).find('.tr-tax').html(parseFloat(tax * stockQty).toFixed(3));
+            subtotal = unitPrice * stockQty;
 
         $(oldTr).find("input[name='subtotal[]']").val(subtotal);
         $(oldTr).find('.tr-subtotal').html(parseFloat(subtotal).toFixed(3));

@@ -14,6 +14,12 @@
         <x-backend.inputs.text label="Name" name="name" placeholder="Type brand name"
             value="{{ $brand?->collectTranslation('name', $langKey) }}" />
 
+        @if (!$brand || $langKey == config('app.default_language'))
+            @include('components.backend.inc.brand-group-select', [
+                'selectedBrandGroup' => $brand?->brand_group_id,
+            ])
+        @endif
+
         <x-backend.inputs.file label="Thumbnail Image" name="thumbnail_image" value="{{ $brand?->thumbnail_image }}" />
 
         <x-backend.inputs.file label="Banner Image" name="banner_image" value="{{ $brand?->banner_image }}" />

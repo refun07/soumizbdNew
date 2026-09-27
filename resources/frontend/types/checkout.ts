@@ -16,6 +16,7 @@ export interface OrderShort {
     shippingChargeAmount: number;
     discountAmount: number;
     couponDiscountAmount: number;
+    adminDiscountAmount: number;
     totalAmount: number;
     deliveryStatus: string;
     deliveryStatusToShow: string;
@@ -44,17 +45,53 @@ export interface IOrder {
     shippingChargeAmount: number;
     discountAmount: number;
     couponDiscountAmount: number;
+    adminDiscountAmount: number;
     totalAmount: number;
     deliveryStatus: string;
     deliveryStatusToShow: string;
     paymentStatus: 'unpaid' | 'paid';
     paymentMethod: string;
+    bkashPersonal?: {
+        orderGroupCode: string;
+        status: TBkashPersonalStatus;
+        needsSubmission: boolean;
+    } | null;
     deliveryAddress: IAddress;
     items: (Omit<ICartProduct, 'shop'> & {
         review: IReview | null;
     })[];
     shop: IShop;
     orderTimeline: OrderTimeline[];
+}
+
+export type TBkashPersonalStatus =
+    | 'not_submitted'
+    | 'pending'
+    | 'verified'
+    | 'rejected';
+
+export interface IBkashPersonalPayment {
+    orderCode: string;
+    amount: number;
+    receiverNumber: string;
+    instructions: string;
+    checkoutPhoneMasked: string;
+    hasCheckoutPhone: boolean;
+    needsSubmission: boolean;
+    submission: {
+        senderNumber: string;
+        trxId: string;
+        status: Exclude<TBkashPersonalStatus, 'not_submitted'>;
+        adminNote: string | null;
+        submittedAt: string | null;
+    } | null;
+}
+
+export interface IBkashPersonalPaymentPayload {
+    orderCode: string;
+    useCheckoutPhone: boolean;
+    senderNumber?: string;
+    trxId: string;
 }
 
 export interface IOrderSuccess {
@@ -68,6 +105,10 @@ export interface IOrderSuccess {
         email: string;
         paymentMethod: string;
         paymentMethodToShow: string;
+        bkashPersonal?: {
+            status: TBkashPersonalStatus;
+            needsSubmission: boolean;
+        } | null;
     };
     successPage: {
         customEnabled: boolean;

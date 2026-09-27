@@ -145,12 +145,12 @@ class CouponController extends Controller
             'status'    => 200,
             'message'   => translate('Coupon applied successfully'),
             'result'    => [
-                'shopId'            => $coupon->shop_id,
+                'shopId'            => (int) $coupon->shop_id,
                 'code'              => $coupon->code,
                 'discountType'      => $coupon->discount_type,
-                'discount'          => $coupon->discount_value,
-                'isFreeShipping'    => $coupon->is_free_shipping,
-                'maxDiscountAmount' => $coupon->max_discount_value,
+                'discount'          => (float) $coupon->discount_value,
+                'isFreeShipping'    => (int) $coupon->is_free_shipping,
+                'maxDiscountAmount' => $coupon->max_discount_value !== null ? (float) $coupon->max_discount_value : null,
             ]
         ];
     }

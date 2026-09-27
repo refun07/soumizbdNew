@@ -4,6 +4,7 @@ use App\Http\Controllers\Backend\Admin\Configurations\LanguageController;
 use App\Http\Controllers\Backend\Api\DeliveryPartner\CourierOrderController;
 use App\Http\Controllers\Backend\Api\Translation\TranslationController;
 use App\Http\Controllers\Frontend\Api\AuthController;
+use App\Http\Controllers\Frontend\Api\BkashPersonalPaymentController;
 use App\Http\Controllers\Frontend\Api\BlogController;
 use App\Http\Controllers\Frontend\Api\BrandController;
 use App\Http\Controllers\Frontend\Api\CampaignController;
@@ -182,6 +183,7 @@ Route::group(['prefix' => config('app.api_version')], function () {
     // brands
     Route::group(['prefix' => 'brands', 'middleware' => ['zone']], function () {
         Route::get('/', [BrandController::class, 'index']);
+        Route::get('/groups', [BrandController::class, 'groups']);
         Route::get('/details/{slug}', [BrandController::class, 'show'])->name('api.brands.show');
     });
 
@@ -266,6 +268,10 @@ Route::group(['prefix' => config('app.api_version')], function () {
 
     // customer protected routes
     Route::get('/orders/success/{code}', [OrderController::class, 'success'])->name('orders.success');
+
+    // bKash personal (manual send money) payment submission
+    Route::get('/orders/{code}/bkash-personal', [BkashPersonalPaymentController::class, 'show']);
+    Route::post('/orders/{code}/bkash-personal', [BkashPersonalPaymentController::class, 'store'])->middleware('throttle:10,1');
 
     Route::group(['middleware' => 'auth:sanctum'], function () {
 

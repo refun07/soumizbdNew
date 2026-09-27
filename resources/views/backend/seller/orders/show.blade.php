@@ -162,7 +162,7 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td class="font-medium">{{ formatPrice($item->unit_price) }}</td>
+                                <td class="font-medium">{{ formatPrice($item->qty > 0 ? (($item->unit_price * $item->qty) - $item->total_discount) / $item->qty : $item->unit_price) }}</td>
                                 <td class="font-medium">{{ $item->qty }}</td>
                                 <td class="font-medium">{{ formatPrice($item->total_tax) }}</td>
                                 <td class="font-medium text-right">{{ formatPrice($item->total_price) }}</td>
@@ -174,7 +174,7 @@
                 <div class="max-w-[300px] space-y-4 md:space-y-6 ml-auto pr-4 lg:pr-6 xl:pr-12">
                     <div class="flex justify-between uppercase">
                         <span>{{ translate('Subtotal') }}</span>
-                        <span>{{ formatPrice($order->amount) }}</span>
+                        <span>{{ formatPrice($order->amount - $order->discount_amount) }}</span>
                     </div>
 
                     <div class="flex justify-between uppercase">
@@ -185,14 +185,16 @@
                         <span>{{ translate('Delivery charge') }}</span>
                         <span>{{ formatPrice($order->shipping_charge_amount) }}</span>
                     </div>
-                    <div class="flex justify-between uppercase">
-                        <span>{{ translate('Discount') }}</span>
-                        <span>{{ formatPrice($order->discount_amount) }}</span>
-                    </div>
-                    @if ($order->coupon_id)
+                    @if ($order->coupon_discount_amount > 0)
                         <div class="flex justify-between uppercase">
                             <span>{{ translate('Coupon Discount') }}</span>
-                            <span>{{ formatPrice($order->coupon_discount_amount) }}</span>
+                            <span>-{{ formatPrice($order->coupon_discount_amount) }}</span>
+                        </div>
+                    @endif
+                    @if ($order->admin_discount_amount > 0)
+                        <div class="flex justify-between uppercase">
+                            <span>{{ translate('Admin Discount') }}</span>
+                            <span>-{{ formatPrice($order->admin_discount_amount) }}</span>
                         </div>
                     @endif
                     <div class="flex justify-between uppercase">

@@ -71,6 +71,10 @@ class OrderController extends Controller
                 'email'                 => $orderGroup->email ?? '',
                 'paymentMethod'         => $orderGroup->transaction?->payment_method ?? '',
                 'paymentMethodToShow'   => ucfirst(str_replace('_', ' ', $orderGroup->transaction?->payment_method ?? '')),
+                'bkashPersonal'         => $orderGroup->isBkashPersonal() ? [
+                    'status'          => $orderGroup->latestBkashPersonalPayment?->status ?? 'not_submitted',
+                    'needsSubmission' => $orderGroup->needsBkashPersonalSubmission(),
+                ] : null,
             ];
 
             $successPage = [

@@ -712,7 +712,7 @@
                             {{ translate('Discount') }}</td>
                         <td style="text-align: right; padding: 7px 12px; font-size: 16px; color: #1c1917; width: 50%;"
                             class="font-price">
-                            {!! $formatSummaryPrice($safeNumber($order?->discount_amount) + $safeNumber($order?->coupon_discount_amount)) !!}</td>
+                            {!! $formatSummaryPrice($safeNumber($order?->discount_amount) + $safeNumber($order?->coupon_discount_amount) + $safeNumber($order?->admin_discount_amount)) !!}</td>
                     </tr>
                     <tr style="background: #f5f5f4;">
                         <td

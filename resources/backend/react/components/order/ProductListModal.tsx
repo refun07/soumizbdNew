@@ -4,6 +4,7 @@ import PopupWrapper from '../popup/PopupWrapper';
 import axios from 'axios';
 import { LiaTimesSolid } from 'react-icons/lia';
 import { cn } from '../../utils/cn';
+import { currencyFormatter } from '../../../../frontend/utils/numberFormatter';
 
 interface OrderItem {
     id: number;
@@ -12,8 +13,18 @@ interface OrderItem {
     product_image: string | null;
     quantity: number;
     unit_price: number;
+    total_discount: number;
+    total_tax: number;
     total_price: number;
 }
+
+// Raisa Mart treats the product's discounted price as the real selling price,
+// so line prices are shown net of the product-level discount.
+const netLineTotal = (item: OrderItem) =>
+    (item.unit_price * item.quantity) - (item.total_discount || 0);
+
+const netUnitPrice = (item: OrderItem) =>
+    item.quantity > 0 ? netLineTotal(item) / item.quantity : item.unit_price;
 
 const ProductListModal = () => {
     const { popup, closePopup } = useAppContext();
@@ -181,7 +192,9 @@ const ProductListModal = () => {
                                                 </span>
                                             )}
                                             <div className="mt-1 text-xs text-muted">
-                                                Qty: {item.quantity} × ${item.unit_price.toFixed(2)}
+                                                Qty: {item.quantity} × {currencyFormatter(netUnitPrice(item))}
+                                                {' = '}
+                                                {currencyFormatter(netLineTotal(item))}
                                             </div>
                                         </div>
                                     </div>

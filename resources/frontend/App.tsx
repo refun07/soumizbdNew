@@ -60,6 +60,9 @@ const TicketDetail = lazy(() => import('./pages/support/TicketDetail'));
 const Checkout = lazy(() => import('./pages/order/Checkout'));
 const OrderSuccess = lazy(() => import('./pages/order/OrderSuccess'));
 const OrderFailed = lazy(() => import('./pages/order/OrderFailed'));
+const BkashPersonalPayment = lazy(
+    () => import('./pages/order/BkashPersonalPayment'),
+);
 
 const Cart = lazy(() => import('./pages/order/Cart'));
 const OrderTracking = lazy(() => import('./pages/order/OrderTracking'));
@@ -300,6 +303,10 @@ const App = () => {
                     element={<OrderSuccess />}
                 />
                 <Route path="/orders/failed" element={<OrderFailed />} />
+                <Route
+                    path="/orders/bkash-payment/:orderCode"
+                    element={<BkashPersonalPayment />}
+                />
                 <Route path="/payment" element={<PaymentGateway />} />
                 <Route element={<ProtectedLayout />}>
                     {/* <Route path="/checkout" element={<Checkout />} /> */}

@@ -48,14 +48,6 @@
                                 @endif
 
                                 <th class="p-4" data-breakpoints="xs sm">
-                                    {{ translate('Discount') }}
-                                </th>
-
-                                <th class="p-4" data-breakpoints="xs sm">
-                                    {{ translate('Tax') }}
-                                </th>
-
-                                <th class="p-4" data-breakpoints="xs sm">
                                     {{ translate('Subtotal') }}
                                 </th>
 
@@ -196,39 +188,6 @@
                                                 </td>
                                             @endif
 
-                                        <td class="text-sm text-foreground font-light p-4 whitespace-nowrap">
-                                            @if (!Route::is('admin.purchase-return.create'))
-                                                <input type="hidden" name="discount[]"
-                                                    value="{{ $order->discount / $order->qty }}">
-                                                <input type="hidden" name="discountPrice[]"
-                                                    value="{{ $order->discount }}">
-                                                <span
-                                                    class="tr-discount">{{ number_format($order->discount, 3) }}</span>
-                                            @else
-                                                <input type="hidden" name="discount[]"
-                                                    value="{{ $returnOrder ? $order->discount / ($order->returned_qty > 0 ? $order->returned_qty : 1) : $order->discount / $order->qty }}">
-                                                <input type="hidden" name="discountPrice[]"
-                                                    value="{{ $returnOrder ? $order->discount : 0 }}">
-                                                <span
-                                                    class="tr-discount">{{ number_format($returnOrder ? $order->discount : 0, 3) }}</span>
-                                            @endif
-                                        </td>
-
-                                        <td class="text-sm text-foreground font-light p-4 whitespace-nowrap">
-                                            @if (!Route::is('admin.purchase-return.create'))
-                                                <input type="hidden" name="tax[]"
-                                                    value="{{ $order->tax / $order->qty }}">
-                                                <input type="hidden" name="taxPrice[]" value="{{ $order->tax }}">
-                                                <span class="tr-tax">{{ number_format($order->tax, 3) }}</span>
-                                            @else
-                                                <input type="hidden" name="tax[]"
-                                                    value="{{ $returnOrder ? $order->tax / ($order->returned_qty > 0 ? $order->returned_qty : 1) : $order->tax / $order->qty }} }}">
-                                                <input type="hidden" name="taxPrice[]"
-                                                    value="{{ $returnOrder ? $order->tax : 0 }}">
-                                                <span
-                                                    class="tr-tax">{{ number_format($returnOrder ? $order->tax : 0, 3) }}</span>
-                                            @endif
-                                        </td>
                                         <td class="p-4 whitespace-nowrap text-sm font-medium text-foreground">
                                             @if (!Route::is('admin.purchase-return.create'))
                                                 <input type="hidden" name="subtotal[]"

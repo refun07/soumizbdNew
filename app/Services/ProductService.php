@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Badge;
 use App\Models\Brand;
+use App\Models\BrandGroup;
 use App\Models\CampaignProduct;
 use App\Models\Category;
 use App\Models\Language;
@@ -318,7 +319,7 @@ class ProductService
         $products = Product::shop()
             ->with([
                 'categories',
-                'brand',
+                'brand.brandGroup',
                 'unit',
                 'variations' => fn($query) => $query->withSum('productVariationStocks as stock_total', 'stock_qty'),
             ])
@@ -348,6 +349,10 @@ class ProductService
 
         if ($request->brandId != null) {
             $products = $products->where('brand_id', $request->brandId);
+        }
+
+        if ($request->brandGroupId != null) {
+            $products = $products->whereHas('brand', fn ($query) => $query->where('brand_group_id', $request->brandGroupId));
         }
 
         if ($request->hideOnEcom != null) {
@@ -461,8 +466,9 @@ class ProductService
             ->with('childrenCategories')
             ->get();
 
-        $brands   = Brand::isActive()->orderBy('name', 'ASC')->get();
-        $tags     = Tag::orderBy('name', 'ASC')->get();
+        $brands      = Brand::isActive()->orderBy('name', 'ASC')->get();
+        $brandGroups = BrandGroup::ordered()->get(['id', 'name']);
+        $tags        = Tag::orderBy('name', 'ASC')->get();
 
 
         $data = [
@@ -473,6 +479,7 @@ class ProductService
                 'isPublished'  => $isPublished,
                 'categories'   => $categories,
                 'brands'       => $brands,
+                'brandGroups'  => $brandGroups,
                 'tags'         => $tags,
                 'searchKey'    => $searchKey,
             ],

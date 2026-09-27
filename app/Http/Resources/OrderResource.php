@@ -30,11 +30,12 @@ class OrderResource extends JsonResource
             'createdTime' => date('h:i A', strtotime($this->created_at)),
             'updatedDate' => date('d M, Y', strtotime($this->updated_at)),
             'updatedTime' => date('h:i A', strtotime($this->updated_at)),
-            'subtotalAmount' => $this->amount,
+            'subtotalAmount' => $this->amount - $this->discount_amount,
             'taxAmount' => $this->tax_amount,
             'shippingChargeAmount' => $this->shipping_charge_amount,
             'discountAmount' => $this->discount_amount,
             'couponDiscountAmount' => $this->coupon_discount_amount,
+            'adminDiscountAmount' => $this->admin_discount_amount,
             'totalAmount' => $this->total_amount,
             'deliveryStatus' => $this->delivery_status,
             'deliveryStatusToShow' => ucfirst(str_replace('_', ' ', $this->delivery_status)),
@@ -60,6 +61,11 @@ class OrderResource extends JsonResource
 
             $additionalData = [
                 'paymentMethod' => ucfirst(str_replace('_', ' ', $orderGroup->transaction->payment_method)),
+                'bkashPersonal' => $orderGroup->isBkashPersonal() ? [
+                    'orderGroupCode' => (string) $orderGroup->code,
+                    'status' => $orderGroup->latestBkashPersonalPayment?->status ?? 'not_submitted',
+                    'needsSubmission' => $orderGroup->needsBkashPersonalSubmission(),
+                ] : null,
                 'deliveryAddress' => [
                     'type' => $orderGroup->shipping_address_type,
                     'address' => $orderGroup->shipping_address,
@@ -97,6 +103,10 @@ class OrderResource extends JsonResource
             $additionalData['orderPrefix'] = getSetting('orderCodePrefix');
             $additionalData['customerOrderCode'] = $orderGroup?->code ?? $this->order_code;
             $additionalData['customerOrderCodeToShow'] = getSetting('orderCodePrefix').($orderGroup?->code ?? $this->order_code);
+            $additionalData['paymentMethod'] = $orderGroup?->transaction?->payment_method ?? $this->payment_type;
+            $additionalData['bkashPersonalStatus'] = $orderGroup?->isBkashPersonal()
+                ? ($orderGroup->latestBkashPersonalPayment?->status ?? 'not_submitted')
+                : null;
             $additionalData['agentId'] = $this->agent_id;
             $additionalData['agentName'] = $this->agent?->name;
 

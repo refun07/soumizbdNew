@@ -21,6 +21,10 @@
                         <x-backend.inputs.text label="Name" name="name" placeholder="Type brand name"
                             value="" />
 
+                        @can('create_brands')
+                            @include('components.backend.inc.brand-group-select')
+                        @endcan
+
                         <x-backend.inputs.text label="Meta Title" name="meta_title" placeholder="Type meta title"
                             value="" :isRequired="false" />
 

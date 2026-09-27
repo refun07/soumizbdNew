@@ -1,5 +1,7 @@
 import { IGetsQueryParams, IResponse } from '../../../types';
 import {
+    IBkashPersonalPayment,
+    IBkashPersonalPaymentPayload,
     IOrder,
     IOrderPayload,
     IManualOrderPayload,
@@ -83,6 +85,26 @@ const orderApi = apiSlice
                 query: (orderId) => `/orders/success/${orderId}`,
                 transformResponse: (res: any) => res.result,
             }),
+
+            getBkashPersonalPayment: builder.query<
+                IBkashPersonalPayment,
+                string
+            >({
+                query: (orderCode) => `/orders/${orderCode}/bkash-personal`,
+                transformResponse: (res: any) => res.result,
+            }),
+
+            submitBkashPersonalPayment: builder.mutation<
+                { message: string; result: IBkashPersonalPayment },
+                IBkashPersonalPaymentPayload
+            >({
+                query: ({ orderCode, ...body }) => ({
+                    url: `/orders/${orderCode}/bkash-personal`,
+                    method: 'POST',
+                    body,
+                }),
+                invalidatesTags: ['Order'],
+            }),
         }),
     });
 
@@ -92,4 +114,6 @@ export const {
     useCreateManualOrderMutation,
     useGetOrderByCodeQuery,
     useGetOrderSuccessDataQuery,
+    useGetBkashPersonalPaymentQuery,
+    useSubmitBkashPersonalPaymentMutation,
 } = orderApi;

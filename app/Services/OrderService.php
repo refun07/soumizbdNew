@@ -22,6 +22,8 @@ class OrderService
     {
         $orders = Order::shopOrders()->with([
             'orderGroup.shippingAddress',
+            'orderGroup.transaction',
+            'orderGroup.latestBkashPersonalPayment',
             'orderItems.productVariation.product',
             'user',
             'agent',
@@ -39,6 +41,10 @@ class OrderService
 
         if ($request->has('delivery_status') && $request->query('delivery_status') !== '') {
             $orders->where('delivery_status', $request->delivery_status);
+        }
+
+        if ($request->filled('is_new') && in_array((string) $request->query('is_new'), ['1', 'true'], true)) {
+            $orders->where('created_at', '>=', Carbon::now()->subDay());
         }
         if (($request->has('from') && $request->query('from') !== '') && ($request->has('to') && $request->query('to') !== '')) {
             try {
@@ -64,6 +70,26 @@ class OrderService
 
         if ($request->has('payment_status') && $request->query('payment_status') !== '') {
             $orders->where('payment_status', $request->query('payment_status'));
+        }
+
+        if ($request->filled('payment_method')) {
+            $orders->whereHas('orderGroup.transaction', function ($q) use ($request) {
+                $q->where('payment_method', $request->query('payment_method'));
+            });
+        }
+
+        // bKash personal verification state (based on the latest submission of the order group)
+        if ($request->filled('bkash_status')) {
+            $bkashStatus = $request->query('bkash_status');
+            $orders->whereHas('orderGroup', function ($q) use ($bkashStatus) {
+                $q->whereHas('transaction', fn ($t) => $t->where('payment_method', 'bkash_personal'));
+
+                if ($bkashStatus === 'not_submitted') {
+                    $q->whereDoesntHave('bkashPersonalPayments');
+                } elseif (in_array($bkashStatus, ['pending', 'verified', 'rejected'], true)) {
+                    $q->whereHas('latestBkashPersonalPayment', fn ($p) => $p->where('status', $bkashStatus));
+                }
+            });
         }
 
         if ($request->has('pos_order') && $request->query('pos_order') !== '') {
@@ -266,12 +292,12 @@ class OrderService
     }
 
     // update order
-    public function updateOrder($request, $code)
+    public function updateOrder($request, $orderId)
     {
         DB::beginTransaction();
 
         try {
-            $order = Order::shopOrders()->whereOrderCode($code)->first();
+            $order = Order::shopOrders()->where('id', $orderId)->first();
 
             if (is_null($order)) {
                 return [
@@ -284,35 +310,39 @@ class OrderService
             $orderGroup = $order->orderGroup;
 
             // Update customer information
-            if ($request->has('customer_name')) {
-                $orderGroup->name = $request->customer_name;
-            }
-            if ($request->has('customer_phone')) {
-                $orderGroup->phone = $request->customer_phone;
-            }
-            if ($request->has('customer_email')) {
-                $orderGroup->email = $request->customer_email;
-            }
+            if ($orderGroup) {
+                if ($request->has('customer_name')) {
+                    $orderGroup->name = $request->customer_name;
+                }
+                if ($request->has('customer_phone')) {
+                    $orderGroup->phone = $request->customer_phone;
+                }
+                if ($request->has('customer_email')) {
+                    $orderGroup->email = $request->customer_email;
+                }
 
-            // Update addresses
-            if ($request->has('billing_address')) {
-                $orderGroup->billing_address = $request->billing_address;
-            }
-            if ($request->has('shipping_address')) {
-                $orderGroup->shipping_address = $request->shipping_address;
-            }
-            if ($request->has('direction')) {
-                $orderGroup->direction = $request->direction;
-            }
+                // Update addresses
+                if ($request->has('billing_address')) {
+                    $orderGroup->billing_address = $request->billing_address;
+                }
+                if ($request->has('shipping_address')) {
+                    $orderGroup->shipping_address = $request->shipping_address;
+                }
+                if ($request->has('direction')) {
+                    $orderGroup->direction = $request->direction;
+                }
 
-            // Update payment method
-            if ($request->has('payment_method')) {
-                $transaction = $orderGroup->transaction;
-                $transaction->payment_method = $request->payment_method;
-                $transaction->save();
-            }
+                // Update payment method
+                if ($request->has('payment_method')) {
+                    $transaction = $orderGroup->transaction;
+                    if ($transaction) {
+                        $transaction->payment_method = $request->payment_method;
+                        $transaction->save();
+                    }
+                }
 
-            $orderGroup->save();
+                $orderGroup->save();
+            }
 
             // Update order tracking
             if ($request->has('courier_name')) {
@@ -339,10 +369,14 @@ class OrderService
                         $orderItem->unit_price = $itemData['unit_price'] ?? 0;
 
                         // Handle discount and tax
-                        $discount = $itemData['discount'] ?? 0; // Total discount for the line
+                        if (array_key_exists('discount', $itemData)) {
+                            $discount = (float) $itemData['discount'];
+                            $orderItem->total_discount = $discount;
+                        } else {
+                            $orderItem->setLineDiscount($orderItem->product_variation_id, $orderItem->qty);
+                            $discount = $orderItem->getLineDiscount();
+                        }
                         $taxPercentage = $itemData['tax_percentage'] ?? 0;
-
-                        $orderItem->total_discount = $discount;
 
                         // Calculate totals
                         $itemSubtotal = ($orderItem->unit_price * $orderItem->qty) - $discount;
@@ -388,10 +422,14 @@ class OrderService
                             $orderItem->unit_price = $itemData['unit_price'] ?? $orderItem->unit_price;
 
                             // Handle discount and tax
-                            $discount = $itemData['discount'] ?? 0; // Total discount for the line
+                            if (array_key_exists('discount', $itemData)) {
+                                $discount = (float) $itemData['discount'];
+                                $orderItem->total_discount = $discount;
+                            } else {
+                                $orderItem->setLineDiscount($orderItem->product_variation_id, $newQty);
+                                $discount = $orderItem->getLineDiscount();
+                            }
                             $taxPercentage = $itemData['tax_percentage'] ?? 0;
-
-                            $orderItem->total_discount = $discount;
 
                             // Recalculate totals
                             $itemSubtotal = ($orderItem->unit_price * $orderItem->qty) - $discount;
@@ -426,7 +464,7 @@ class OrderService
             $totalTax = 0;
             $orderItems = $order->orderItems()->get();
             foreach ($orderItems as $item) {
-                $subtotal += $item->total_price;
+                $subtotal += $item->unit_price * $item->qty;
                 $totalTax += $item->total_tax;
             }
 
@@ -438,13 +476,13 @@ class OrderService
                 $order->shipping_charge_amount = $request->shipping_charge;
             }
 
-            // Update discount
-            if ($request->has('discount_amount')) {
-                $order->discount_amount = $request->discount_amount;
+            $order->discount_amount = $orderItems->sum('total_discount');
+
+            if ($request->has('admin_discount_amount')) {
+                $order->admin_discount_amount = min(max(0, (float) $request->admin_discount_amount), (float) $subtotal);
             }
 
-            // Calculate final total
-            $order->total_amount = $order->amount + $order->tax_amount + $order->shipping_charge_amount - $order->discount_amount - $order->coupon_discount_amount;
+            $order->total_amount = $order->amount + $order->tax_amount + $order->shipping_charge_amount - $order->discount_amount - $order->coupon_discount_amount - $order->admin_discount_amount;
 
             // Update order status
             if ($request->has('payment_status')) {

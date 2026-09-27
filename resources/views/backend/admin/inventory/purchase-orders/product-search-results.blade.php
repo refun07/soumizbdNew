@@ -26,10 +26,9 @@
                 $stockQty = $stock->stock_qty;
             }
 
-            $tax = variationPrice($product, $variation) - variationPrice($product, $variation, false);
-            $discount =
-                variationPrice($product, $variation, false) - variationDiscountedPrice($product, $variation, false);
-            $subtotal = $variation->price + $tax - $discount;
+            $tax = 0;
+            $discount = 0;
+            $subtotal = $variation->price;
             $selectedVariationIds = $selectedVariationIds ?? [];
         @endphp
 

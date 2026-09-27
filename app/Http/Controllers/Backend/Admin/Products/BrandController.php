@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Backend\Admin\Products;
 
 use App\Http\Controllers\Controller;
 use App\Models\Brand;
+use App\Models\BrandGroup;
 use App\Models\Language;
 use App\Models\Product;
 use App\Models\BrandTranslation;
@@ -28,7 +29,7 @@ class BrandController extends Controller
         $searchKey = null;
         $limit     = $request->limit ?? 15;
 
-        $brands = Brand::latest();
+        $brands = Brand::with('brandGroup')->latest();
         if ($request->search != null) {
             $brands = $brands->where('name', 'like', '%' . $request->search . '%');
             $searchKey = $request->search;
@@ -55,6 +56,7 @@ class BrandController extends Controller
         $brand->meta_description = $request->meta_description;
         $brand->meta_keywords    = $request->meta_keywords;
         $brand->meta_image       = $request->meta_image;
+        $brand->brand_group_id   = BrandGroup::resolveId($request->brand_group_id);
 
         $brand->slug = preg_replace('/[^A-Za-z0-9\-]/', '', str_replace(' ', '-', $request->name));
 
@@ -116,6 +118,7 @@ class BrandController extends Controller
             $brand->meta_description = $request->meta_description;
             $brand->meta_keywords    = $request->meta_keywords;
             $brand->meta_image       = $request->meta_image;
+            $brand->brand_group_id   = BrandGroup::resolveId($request->brand_group_id);
             $brand->slug             = (!is_null($request->slug)) ? Str::slug($request->slug, '-') : Str::slug($request->name, '-');
         }
 

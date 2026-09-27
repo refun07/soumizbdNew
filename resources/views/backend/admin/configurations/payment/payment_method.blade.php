@@ -298,7 +298,32 @@
             </div>
         </div>
 
-        
+        {{-- bkash personal (manual send money) --}}
+        <div class="card">
+            <h4 class="card__title">{{ translate('bKash Personal (Send Money)') }}</h4>
+
+            <div class="card__content">
+                <form action="{{ route('admin.payment-method.update') }}" method="post" class="space-y-3">
+                    @csrf
+                    <input type="hidden" name="payment_method" value="bkash_personal">
+
+                    <x-backend.inputs.text label="bKash Personal Number" name="settings[bkash_personal_number]"
+                        value="{{ getSetting('bkash_personal_number') }}" placeholder="01XXXXXXXXX" />
+
+                    <x-backend.inputs.textarea label="Payment Instructions" name="settings[bkash_personal_instructions]"
+                        value="{{ e(getSetting('bkash_personal_instructions')) }}" rows="5" :isRequired="false"
+                        placeholder="Shown to customers on the bKash payment page. Leave empty to use the default steps." />
+
+                    <x-backend.inputs.checkbox toggler="true" label="bKash Personal Activation" value="1"
+                        name="bkash_personal_activation" isChecked="{{ getSetting('bkash_personal_activation') == 1 }}" />
+
+                    <div class="flex justify-end pt-2">
+                        <x-backend.inputs.button type="submit" buttonText="{{ translate('Save Changes') }}" />
+                    </div>
+                </form>
+            </div>
+        </div>
+
         {{-- CoinGate --}}
         <div class="card">
             <h4 class="card__title">{{ translate('CoinGate Credential') }}</h4>

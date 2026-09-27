@@ -11,8 +11,11 @@ interface OrderItem {
     product_image?: string;
     quantity: number;
     unit_price: number;
+    total_discount: number;
+    total_tax: number;
     total_price: number;
     product_variation_id?: number;
+    is_new?: boolean;
 }
 
 interface OrderDetails {
@@ -30,6 +33,8 @@ interface OrderDetails {
     taxAmount: number;
     shippingChargeAmount: number;
     discountAmount: number;
+    couponDiscountAmount: number;
+    adminDiscountAmount: number;
     totalAmount: number;
     courier_name?: string;
     tracking_number?: string;
@@ -37,6 +42,35 @@ interface OrderDetails {
 
 const normalizeAddress = (address?: string) =>
     (address || '').replace(/\s+/g, ' ').trim();
+
+const toNumber = (value: unknown, fallback = 0) => {
+    const numberValue = Number(value);
+    return Number.isFinite(numberValue) ? numberValue : fallback;
+};
+
+const normalizeOrderItem = (item: any): OrderItem => {
+    const quantity = Math.max(1, Math.trunc(toNumber(item.quantity, 1)));
+    const unitPrice = toNumber(item.unit_price);
+    const totalDiscount = toNumber(item.total_discount);
+    const totalTax = toNumber(item.total_tax);
+
+    return {
+        ...item,
+        quantity,
+        unit_price: unitPrice,
+        total_discount: totalDiscount,
+        total_tax: totalTax,
+        total_price: toNumber(item.total_price, (unitPrice * quantity) + totalTax - totalDiscount),
+    };
+};
+
+// Raisa Mart treats the product's discounted price as the real selling price,
+// so lines are shown net of the product-level discount (tax excluded).
+const netLineTotal = (item: OrderItem) =>
+    (toNumber(item.unit_price) * item.quantity) - toNumber(item.total_discount);
+
+const netUnitPrice = (item: OrderItem) =>
+    item.quantity > 0 ? netLineTotal(item) / item.quantity : toNumber(item.unit_price);
 
 const EditOrderModal: React.FC = () => {
     const { popup, closePopup } = useAppContext();
@@ -56,7 +90,7 @@ const EditOrderModal: React.FC = () => {
         billing_address: '',
         payment_method: '',
         shipping_charge: 0,
-        discount_amount: 0,
+        admin_discount_amount: 0,
     });
 
     // Product search state
@@ -83,7 +117,7 @@ const EditOrderModal: React.FC = () => {
 
             if (data.success) {
                 setOrderDetails(data.result.order);
-                setOrderItems(data.result.items || []);
+                setOrderItems((data.result.items || []).map(normalizeOrderItem));
 
                 // Initialize form data
                 setFormData({
@@ -93,8 +127,8 @@ const EditOrderModal: React.FC = () => {
                     shipping_address: data.result.order.shipping_address || '',
                     billing_address: data.result.order.billing_address || '',
                     payment_method: data.result.order.paymentType || '',
-                    shipping_charge: data.result.order.shippingChargeAmount || 0,
-                    discount_amount: data.result.order.discountAmount || 0,
+                    shipping_charge: toNumber(data.result.order.shippingChargeAmount),
+                    admin_discount_amount: toNumber(data.result.order.adminDiscountAmount),
                 });
             } else {
                 setError(data.message || 'Failed to fetch order details');
@@ -124,14 +158,20 @@ const EditOrderModal: React.FC = () => {
     };
 
     const handleAddProduct = (product: any, variation: any) => {
+        const unitPrice = toNumber(variation.price);
+        const discountedPrice = toNumber(variation.discounted_price, unitPrice);
+        // Preview only: the server recomputes the line discount for new items.
+        const totalDiscount = Math.max(0, unitPrice - discountedPrice);
         const newItem: OrderItem = {
             id: Date.now(), // Temporary negative ID for new items
             product_name: product.name,
             variant: variation.name,
             product_image: product.image,
             quantity: 1,
-            unit_price: variation.price,
-            total_price: variation.price,
+            unit_price: unitPrice,
+            total_discount: totalDiscount,
+            total_tax: 0,
+            total_price: unitPrice - totalDiscount,
             product_variation_id: variation.id,
             is_new: true,
         };
@@ -146,13 +186,21 @@ const EditOrderModal: React.FC = () => {
     };
 
     const handleQuantityChange = (itemId: number, quantity: number) => {
-        if (quantity < 1) return;
+        const nextQuantity = Math.max(1, Math.trunc(toNumber(quantity, 1)));
         setOrderItems(orderItems.map(item => {
             if (item.id === itemId) {
+                const unitPrice = toNumber(item.unit_price);
+                const perUnitDiscount = item.quantity > 0 ? toNumber(item.total_discount) / item.quantity : 0;
+                const perUnitTax = item.quantity > 0 ? toNumber(item.total_tax) / item.quantity : 0;
+                const totalDiscount = perUnitDiscount * nextQuantity;
+                const totalTax = perUnitTax * nextQuantity;
                 return {
                     ...item,
-                    quantity,
-                    total_price: quantity * item.unit_price,
+                    quantity: nextQuantity,
+                    unit_price: unitPrice,
+                    total_discount: totalDiscount,
+                    total_tax: totalTax,
+                    total_price: (unitPrice * nextQuantity) + totalTax - totalDiscount,
                 };
             }
             return item;
@@ -173,14 +221,26 @@ const EditOrderModal: React.FC = () => {
         setError(null);
 
         try {
-            const items = orderItems.map(item => ({
-                id: item.id > 0 ? item.id : undefined,
-                product_variation_id: item.product_variation_id,
-                qty: item.quantity,
-                unit_price: item.unit_price,
-                total_price: item.total_price,
-                is_new: item.is_new || false,
-            }));
+            const items = orderItems.map(item => {
+                const quantity = Math.max(1, Math.trunc(toNumber(item.quantity, 1)));
+                const unitPrice = toNumber(item.unit_price);
+                const totalDiscount = toNumber(item.total_discount);
+                const lineNet = (unitPrice * quantity) - totalDiscount;
+                const taxPercentage = lineNet > 0 ? (toNumber(item.total_tax) / lineNet) * 100 : 0;
+
+                const base = {
+                    id: item.id > 0 ? item.id : undefined,
+                    product_variation_id: item.product_variation_id,
+                    qty: quantity,
+                    unit_price: unitPrice,
+                    total_price: toNumber(item.total_price),
+                    tax_percentage: taxPercentage,
+                    is_new: item.is_new || false,
+                };
+                return item.is_new
+                    ? base
+                    : { ...base, discount: totalDiscount };
+            });
 
             const response = await axios.put(`/admin/api/orders/${orderId}`, {
                 ...formData,
@@ -205,11 +265,18 @@ const EditOrderModal: React.FC = () => {
 
     if (popup.name !== 'edit-order') return null;
 
-    const calculateTotal = () => {
-        const subtotal = orderItems.reduce((sum, item) => sum + item.total_price, 0);
-        const tax = subtotal * 0.15; // Simplified tax calculation
-        return subtotal + tax + (formData.shipping_charge || 0) - (formData.discount_amount || 0);
-    };
+    const itemsSubtotal = orderItems.reduce((sum, item) => sum + netLineTotal(item), 0);
+    const itemsTax = orderItems.reduce((sum, item) => sum + toNumber(item.total_tax), 0);
+    const couponDiscount = toNumber(orderDetails?.couponDiscountAmount);
+
+    // Mirrors the server-side recalculation in OrderService::updateOrder so the
+    // preview matches what gets saved.
+    const calculateTotal = () =>
+        itemsSubtotal
+        + itemsTax
+        + toNumber(formData.shipping_charge)
+        - couponDiscount
+        - toNumber(formData.admin_discount_amount);
 
     const hasSharedCustomerAddress =
         normalizeAddress(formData.shipping_address) ===
@@ -360,12 +427,13 @@ const EditOrderModal: React.FC = () => {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-foreground mb-1">
-                                        Discount Amount
+                                        Admin Discount
                                     </label>
                                     <input
                                         type="number"
-                                        value={formData.discount_amount}
-                                        onChange={(e) => setFormData({ ...formData, discount_amount: parseFloat(e.target.value) || 0 })}
+                                        min="0"
+                                        value={formData.admin_discount_amount}
+                                        onChange={(e) => setFormData({ ...formData, admin_discount_amount: parseFloat(e.target.value) || 0 })}
                                         className="theme-input w-full"
                                     />
                                 </div>
@@ -373,16 +441,30 @@ const EditOrderModal: React.FC = () => {
                                 <div className="mt-4 rounded-md border border-border bg-background p-4">
                                     <div className="flex justify-between text-sm text-muted">
                                         <span>Subtotal:</span>
-                                        <span>{currencyFormatter(orderItems.reduce((sum, item) => sum + item.total_price, 0))}</span>
+                                        <span>{currencyFormatter(itemsSubtotal)}</span>
                                     </div>
+                                    {itemsTax > 0 && (
+                                        <div className="flex justify-between text-sm text-muted mt-2">
+                                            <span>Tax:</span>
+                                            <span>{currencyFormatter(itemsTax)}</span>
+                                        </div>
+                                    )}
                                     <div className="flex justify-between text-sm text-muted mt-2">
                                         <span>Shipping:</span>
                                         <span>{currencyFormatter(formData.shipping_charge || 0)}</span>
                                     </div>
-                                    <div className="flex justify-between text-sm text-muted mt-2">
-                                        <span>Discount:</span>
-                                        <span>-{currencyFormatter(formData.discount_amount || 0)}</span>
-                                    </div>
+                                    {couponDiscount > 0 && (
+                                        <div className="flex justify-between text-sm text-green-600 mt-2">
+                                            <span>Coupon Discount:</span>
+                                            <span>-{currencyFormatter(couponDiscount)}</span>
+                                        </div>
+                                    )}
+                                    {toNumber(formData.admin_discount_amount) > 0 && (
+                                        <div className="flex justify-between text-sm text-green-600 mt-2">
+                                            <span>Admin Discount:</span>
+                                            <span>-{currencyFormatter(formData.admin_discount_amount)}</span>
+                                        </div>
+                                    )}
                                     <div className="flex justify-between font-semibold text-foreground mt-2 pt-2 border-t border-border">
                                         <span>Estimated Total:</span>
                                         <span>{currencyFormatter(calculateTotal())}</span>
@@ -433,7 +515,7 @@ const EditOrderModal: React.FC = () => {
                                                                     onClick={() => handleAddProduct(product, variation)}
                                                                     className="w-full text-left px-2 py-1 text-sm text-muted hover:bg-muted/20 hover:text-foreground"
                                                                 >
-                                                                    {variation.name} - {currencyFormatter(variation.price)} (Stock: {variation.stock})
+                                                                    {variation.name} - {currencyFormatter(toNumber(variation.discounted_price, toNumber(variation.price)))} (Stock: {variation.stock})
                                                                 </button>
                                                             ))}
                                                         </div>
@@ -460,7 +542,7 @@ const EditOrderModal: React.FC = () => {
                                                     <div className="text-sm text-muted">{item.variant}</div>
                                                 )}
                                                 <div className="text-sm text-muted">
-                                                    {currencyFormatter(item.unit_price)} × {item.quantity} = {currencyFormatter(item.total_price)}
+                                                    {currencyFormatter(netUnitPrice(item))} × {item.quantity} = {currencyFormatter(netLineTotal(item))}
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-2">

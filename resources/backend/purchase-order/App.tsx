@@ -196,26 +196,7 @@ const App: React.FC<AppProps> = ({
                             name="stockQty[]"
                             value={variation.quantity}
                         />
-                        <input
-                            type="hidden"
-                            name="discount[]"
-                            value={variation.discount}
-                        />
-                        <input
-                            type="hidden"
-                            name="discountPrice[]"
-                            value={variation.discount * variation.quantity}
-                        />
-                        <input
-                            type="hidden"
-                            name="tax[]"
-                            value={variation.tax}
-                        />
-                        <input
-                            type="hidden"
-                            name="taxPrice[]"
-                            value={variation.tax * variation.quantity}
-                        />
+
                         <input
                             type="hidden"
                             name="subtotal[]"

@@ -189,7 +189,7 @@ class ProductResource extends JsonResource
                 'images'                    => $images,
                 'videoLink'                 => $videoLinkEnabled ? ($this->video_link ?: '') : '',
                 'shipping_class_id'         => $this->shipping_class_id,
-                'brand'                     => $this->brand ? new BrandResource($this->brand) : null,
+                'brand'                     => $this->brand ? new BrandResource($this->brand->loadMissing('brandGroup')) : null,
                 'variations'                => ProductVariationResource::collection($this->variations),
                 'variationCombinations'     => generateVariationCombinations($this->variationCombinations, $this),
                 'relatedProducts'           => RelatedProductResource::collection($relatedProducts),
