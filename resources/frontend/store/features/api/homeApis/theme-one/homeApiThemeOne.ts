@@ -72,6 +72,11 @@ const homeApi = apiSlice.injectEndpoints({
             query: () => `${urlPrefix}/bottom-image-banner`,
             transformResponse: (res: any) => res.result,
         }),
+
+        getReviews: builder.query<{ reviews: IClientReview[]; showThemeOneReviewSection: boolean }, void>({
+            query: () => `${urlPrefix}/reviews`,
+            transformResponse: (res: any) => res.result,
+        }),
     }),
 });
 
@@ -87,4 +92,5 @@ export const {
     useGetFourImageBannersQuery,
     useGetCategoryProductsQuery,
     useGetBottomImageBannersQuery,
+    useGetReviewsQuery,
 } = homeApi;

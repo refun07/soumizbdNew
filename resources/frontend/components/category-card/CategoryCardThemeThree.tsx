@@ -9,6 +9,7 @@ const CategoryCardThemeThree = ({
     quantity,
     title,
     to,
+    showFullTitle,
 }: ICategoryCardProps) => {
     const shouldShowQuantity =
         quantity !== undefined && quantity !== null && quantity !== '';
@@ -31,7 +32,9 @@ const CategoryCardThemeThree = ({
             <Image src={image} alt={title} className="w-full h-full" />
 
             <div className="absolute bottom-5 left-5 right-5 z-[1]">
-                <h3 className="line-clamp-2 font-semibold text-white">
+                <h3
+                    className={`${showFullTitle ? 'whitespace-normal break-words text-sm leading-snug md:text-base' : 'line-clamp-2'} font-semibold text-white`}
+                >
                     {title}
                 </h3>
                 {shouldShowQuantity ? (

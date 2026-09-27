@@ -8,16 +8,24 @@ interface Props {
     rootCategories?: ICategoryShort[];
     selectedCategory?: ICategoryShort | null;
     categorySlug?: string;
+    brandSlug?: string;
 }
 
 const FilterCategoryCard = ({
     categorySlug,
     rootCategories,
     selectedCategory,
+    brandSlug,
 }: Props) => {
+    const categoryPath = (slug?: string) =>
+        brandSlug && slug
+            ? `/brands/${brandSlug}?categorySlug=${slug}`
+            : `/categories/${slug}`;
+    const allProductsPath = brandSlug ? `/brands/${brandSlug}` : '/products';
+
     const allCategoryDOM = (
         <Link
-            to={`/products`}
+            to={allProductsPath}
             className="flex items-center gap-2 text-black/70 py-2 hover:text-black"
         >
             <span>
@@ -28,7 +36,7 @@ const FilterCategoryCard = ({
     );
     const parent_categoryDOM = (
         <Link
-            to={`/categories/${selectedCategory?.parent_category?.slug}`}
+            to={categoryPath(selectedCategory?.parent_category?.slug)}
             className={`flex items-center gap-2 text-black/70 py-2 hover:text-black`}
         >
             <span>
@@ -39,7 +47,7 @@ const FilterCategoryCard = ({
     );
     const selectedCategoryDOM = (
         <Link
-            to={`/categories/${selectedCategory?.slug}`}
+            to={categoryPath(selectedCategory?.slug)}
             className={`flex items-center gap-2 text-black py-2 ${
                 !selectedCategory?.children_categories?.length && 'pl-3'
             }`}
@@ -62,6 +70,7 @@ const FilterCategoryCard = ({
                 <FilterCategory
                     category={item}
                     selected={item.slug === categorySlug}
+                    path={categoryPath(item.slug)}
                     key={item.id}
                 />
             </div>
@@ -96,6 +105,7 @@ const FilterCategoryCard = ({
                             <FilterCategory
                                 category={item}
                                 selected={item.slug === categorySlug}
+                                path={categoryPath(item.slug)}
                                 key={item.id}
                             />
                         ))

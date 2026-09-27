@@ -61,6 +61,31 @@ class ProductService
         $product->discount_end_date   = self::DISCOUNT_ACTIVE_END_TIMESTAMP;
     }
 
+    private static function requestHasDiscountValue($request): bool
+    {
+        if ($request->has('is_variant') && $request->has('variations')) {
+            foreach ($request->variations as $variation) {
+                if (self::normalizeDiscountValue($variation['discount_value'] ?? 0) > 0) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        return self::normalizeDiscountValue($request->discount_value ?? 0) > 0;
+    }
+
+    private static function normalizeDiscountValue($value): float
+    {
+        return is_numeric($value) ? max(0, (float) $value) : 0;
+    }
+
+    private static function normalizeDiscountType($type): string
+    {
+        return $type === 'percentage' ? 'percentage' : 'amount';
+    }
+
     private static function resolveMinPurchaseQtyValue($value = null): int
     {
         if (!self::productSettingEnabled('productSettingMinPurchaseQtyEnabled')) {
@@ -677,7 +702,10 @@ class ProductService
             }
 
             # discount
-            self::syncDiscountEnabled($product, $request->boolean('discount_schedule_enabled'));
+            self::syncDiscountEnabled(
+                $product,
+                $request->boolean('discount_schedule_enabled') || self::requestHasDiscountValue($request)
+            );
             // $product->discount_info   = $request->discount_info;
 
             # stock qty based on all variations / no variation 
@@ -758,8 +786,8 @@ class ProductService
                     $product_variation->price           = $variation['price'];
                     $product_variation->image           = $variation['image'];
                     $product_variation->sku             = $variation['sku'];
-                    $product_variation->discount_value  = $variation['discount_value'];
-                    $product_variation->discount_type   = $variation['discount_type'];
+                    $product_variation->discount_value  = self::normalizeDiscountValue($variation['discount_value'] ?? 0);
+                    $product_variation->discount_type   = self::normalizeDiscountType($variation['discount_type'] ?? null);
                     $product_variation->save();
 
                     foreach ($warehouses as $warehouse) {
@@ -797,8 +825,8 @@ class ProductService
                 $variation->price           = $request->price;
                 $variation->image           = $request->image;
                 $variation->sku             = $request->sku;
-                $variation->discount_value  = $request->discount_value ?? 0;
-                $variation->discount_type   = $request->discount_type;
+                $variation->discount_value  = self::normalizeDiscountValue($request->discount_value ?? 0);
+                $variation->discount_type   = self::normalizeDiscountType($request->discount_type);
                 $variation->save();
 
                 foreach ($warehouses as $warehouse) {
@@ -1224,7 +1252,10 @@ class ProductService
             }
 
             # discount 
-            self::syncDiscountEnabled($product, $request->boolean('discount_schedule_enabled'));
+            self::syncDiscountEnabled(
+                $product,
+                $request->boolean('discount_schedule_enabled') || self::requestHasDiscountValue($request)
+            );
             // $product->discount_info   = $request->discount_info;
 
             # stock qty based on all variations / no variation 
@@ -1367,8 +1398,8 @@ class ProductService
                     $pVariation->price           = $variation['price'];
                     $pVariation->image           = $variation['image'];
                     $pVariation->sku             = $variation['sku'];
-                    $pVariation->discount_value  = $variation['discount_value'];
-                    $pVariation->discount_type   = $variation['discount_type'];
+                    $pVariation->discount_value  = self::normalizeDiscountValue($variation['discount_value'] ?? 0);
+                    $pVariation->discount_type   = self::normalizeDiscountType($variation['discount_type'] ?? null);
                     $pVariation->save();
 
                     # update stock of this variation
@@ -1405,8 +1436,8 @@ class ProductService
                     $product_variation->price           = $variation['price'];
                     $product_variation->image           = $variation['image'];
                     $product_variation->sku             = $variation['sku'];
-                    $product_variation->discount_value  = $variation['discount_value'];
-                    $product_variation->discount_type   = $variation['discount_type'];
+                    $product_variation->discount_value  = self::normalizeDiscountValue($variation['discount_value'] ?? 0);
+                    $product_variation->discount_type   = self::normalizeDiscountType($variation['discount_type'] ?? null);
                     $product_variation->save();
 
                     foreach ($warehouses as $warehouse) {
@@ -1461,8 +1492,8 @@ class ProductService
                 $variation->price           = $request->price;
                 $variation->image           = $request->image;
                 $variation->sku             = $request->sku;
-                $variation->discount_value  = $request->discount_value ?? 0;
-                $variation->discount_type   = $request->discount_type;
+                $variation->discount_value  = self::normalizeDiscountValue($request->discount_value ?? 0);
+                $variation->discount_type   = self::normalizeDiscountType($request->discount_type);
                 $variation->save();
 
                 foreach ($warehouses as $warehouse) {

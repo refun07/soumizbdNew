@@ -442,7 +442,7 @@
                 product.variations.forEach(variation => {
                     html += `
                                 <div class="flex items-center justify-between p-3 border rounded hover:bg-gray-50 cursor-pointer" 
-                                     onclick="addProductToOrder(${variation.id}, '${product.name}', '${variation.name || ''}', ${variation.price}, '${product.image}')">
+                                     onclick="addProductToOrder(${variation.id}, '${product.name}', '${variation.name || ''}', ${variation.discounted_price ?? variation.price}, '${product.image}')">
                                     <div class="flex items-center gap-3">
                                         <img src="${product.image}" class="w-12 h-12 rounded object-cover" onerror="this.src='{{ asset('images/image-error.png') }}'">
                                         <div>
@@ -451,7 +451,8 @@
                                         </div>
                                     </div>
                                     <div class="text-right">
-                                        <div class="font-bold">${formatPrice(variation.price)}</div>
+                                        <div class="font-bold">${formatPrice(variation.discounted_price ?? variation.price)}</div>
+                                        ${variation.base_price > (variation.discounted_price ?? variation.price) ? `<div class="text-xs text-gray-400 line-through">${formatPrice(variation.base_price)}</div>` : ''}
                                         <div class="text-sm text-gray-500">Stock: ${variation.stock}</div>
                                     </div>
                                 </div>

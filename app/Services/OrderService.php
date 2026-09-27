@@ -10,6 +10,7 @@ use App\Models\Notification;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderUpdate;
+use App\Models\ProductVariation;
 use Carbon\Carbon;
 use Config;
 use Illuminate\Support\Facades\DB;
@@ -78,11 +79,27 @@ class OrderService
         }
 
         if ($request->has('search') && $request->query('search') !== '') {
-            $searchKey = $request->query('search');
-            $orders = $orders->whereHas('user', function ($q) use ($searchKey) {
-                $q->where('name', 'like', '%'.$searchKey.'%')
-                    ->orWhere('phone', 'like', '%'.$searchKey.'%');
-            })->orWhere('order_code', 'like', '%'.$searchKey.'%');
+            $searchKey = trim((string) $request->query('search'));
+            $orders->where(function ($query) use ($searchKey) {
+                $query->where('order_code', 'like', '%'.$searchKey.'%')
+                    ->orWhereHas('orderGroup', function ($q) use ($searchKey) {
+                        $q->where('code', 'like', '%'.$searchKey.'%')
+                            ->orWhere('name', 'like', '%'.$searchKey.'%')
+                            ->orWhere('phone', 'like', '%'.$searchKey.'%')
+                            ->orWhere('alternative_phone', 'like', '%'.$searchKey.'%')
+                            ->orWhere('email', 'like', '%'.$searchKey.'%')
+                            ->orWhere('shipping_address', 'like', '%'.$searchKey.'%');
+                    })
+                    ->orWhereHas('user', function ($q) use ($searchKey) {
+                        $q->where('name', 'like', '%'.$searchKey.'%')
+                            ->orWhere('phone', 'like', '%'.$searchKey.'%')
+                            ->orWhere('email', 'like', '%'.$searchKey.'%');
+                    })
+                    ->orWhereHas('orderItems.productVariation.product', function ($q) use ($searchKey) {
+                        $q->where('name', 'like', '%'.$searchKey.'%')
+                            ->orWhere('slug', 'like', '%'.$searchKey.'%');
+                    });
+            });
         }
 
         if ($request->date_range != null) {
@@ -126,6 +143,7 @@ class OrderService
 
         $limit = $request->limit ?? 15;
         $orders = $this->buildFilteredQuery($request)->paginate($limit);
+        $this->attachCustomerOrderLabels($orders->getCollection());
 
         return [
             'status' => 200,
@@ -135,6 +153,55 @@ class OrderService
                 'orders' => $orders,
             ],
         ];
+    }
+
+    private function attachCustomerOrderLabels($orders): void
+    {
+        if ($orders->isEmpty()) {
+            return;
+        }
+
+        $userIds = $orders->pluck('user_id')
+            ->filter(fn ($userId) => filled($userId) && (int) $userId > 0)
+            ->unique()
+            ->values();
+
+        $phones = $orders->map(fn ($order) => $order->orderGroup?->phone ?: $order->user?->phone)
+            ->filter()
+            ->map(fn ($phone) => trim((string) $phone))
+            ->filter()
+            ->unique()
+            ->values();
+
+        $firstOrderIdsByUser = $userIds->isNotEmpty()
+            ? Order::shopOrders()
+                ->whereIn('user_id', $userIds)
+                ->select('user_id', DB::raw('MIN(id) as first_order_id'))
+                ->groupBy('user_id')
+                ->pluck('first_order_id', 'user_id')
+            : collect();
+
+        $firstOrderIdsByPhone = $phones->isNotEmpty()
+            ? Order::shopOrders()
+                ->join('order_groups', 'orders.order_group_id', '=', 'order_groups.id')
+                ->whereIn('order_groups.phone', $phones)
+                ->select('order_groups.phone', DB::raw('MIN(orders.id) as first_order_id'))
+                ->groupBy('order_groups.phone')
+                ->pluck('first_order_id', 'order_groups.phone')
+            : collect();
+
+        $orders->each(function ($order) use ($firstOrderIdsByPhone, $firstOrderIdsByUser) {
+            $phone = trim((string) ($order->orderGroup?->phone ?: $order->user?->phone));
+            $firstOrderId = $phone !== '' ? $firstOrderIdsByPhone->get($phone) : null;
+
+            if (! $firstOrderId && filled($order->user_id)) {
+                $firstOrderId = $firstOrderIdsByUser->get($order->user_id);
+            }
+
+            $isFirstOrder = $firstOrderId && (int) $firstOrderId === (int) $order->id;
+
+            $order->setAttribute('customer_order_label', $isFirstOrder ? '1st Order' : 'Old customer');
+        });
     }
 
     // export orders as CSV
@@ -336,7 +403,12 @@ class OrderService
                         $orderItem->order_id = $order->id;
                         $orderItem->product_variation_id = $itemData['product_variation_id'];
                         $orderItem->qty = $itemData['qty'] ?? 1;
-                        $orderItem->unit_price = $itemData['unit_price'] ?? 0;
+                        $variation = ProductVariation::with('product')->find($itemData['product_variation_id']);
+                        if (!$variation || !$variation->product) {
+                            throw new \InvalidArgumentException('The selected product variation is not available.');
+                        }
+                        // Order edits must use the same customer-facing discounted price as checkout.
+                        $orderItem->unit_price = variationDiscountedPrice($variation->product, $variation, false);
 
                         // Handle discount and tax
                         $discount = $itemData['discount'] ?? 0; // Total discount for the line
@@ -388,7 +460,9 @@ class OrderService
                             $orderItem->unit_price = $itemData['unit_price'] ?? $orderItem->unit_price;
 
                             // Handle discount and tax
-                            $discount = $itemData['discount'] ?? 0; // Total discount for the line
+                            $discount = array_key_exists('discount', $itemData)
+                                ? $itemData['discount']
+                                : ($orderItem->total_discount ?? 0); // Preserve existing item discount unless explicitly changed.
                             $taxPercentage = $itemData['tax_percentage'] ?? 0;
 
                             $orderItem->total_discount = $discount;

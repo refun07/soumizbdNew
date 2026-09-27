@@ -13,6 +13,8 @@ const initialState: ICheckoutData = {
     shippingAddress: undefined,
     billingAddress: undefined,
     paymentMethod: '',
+    bkashAccountNumber: '',
+    bkashTransactionId: '',
     selectedShops: {},
     shippingCharge: 0,
     shippingZoneId: undefined,

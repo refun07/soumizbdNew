@@ -49,6 +49,8 @@ export interface IOrder {
     deliveryStatusToShow: string;
     paymentStatus: 'unpaid' | 'paid';
     paymentMethod: string;
+    bkashAccountNumber?: string;
+    bkashTransactionId?: string;
     deliveryAddress: IAddress;
     items: (Omit<ICartProduct, 'shop'> & {
         review: IReview | null;
@@ -208,6 +210,8 @@ export interface IOrderPayload extends ICheckoutCustomerDetails {
     couponCodes: string[];
     cartIds: number[];
     paymentMethod: string;
+    bkashAccountNumber?: string;
+    bkashTransactionId?: string;
 }
 export interface IManualOrderPayload extends ICheckoutCustomerDetails {
     shippingAddress: IAddress;
@@ -218,6 +222,8 @@ export interface IManualOrderPayload extends ICheckoutCustomerDetails {
     couponCodes: string[];
     cartIds: number[];
     paymentMethod: string;
+    bkashAccountNumber?: string;
+    bkashTransactionId?: string;
     password: string;
     eventId?: string;
 }
@@ -233,6 +239,8 @@ export interface ICheckoutData {
     shippingAddress?: IAddress;
     billingAddress?: IAddress;
     paymentMethod: string;
+    bkashAccountNumber?: string;
+    bkashTransactionId?: string;
 
     selectedShops: Record<string, boolean>;
     shippingCharge: number;

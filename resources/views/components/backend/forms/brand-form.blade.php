@@ -1,3 +1,5 @@
+@props(['brand' => null, 'langKey' => null, 'categories' => collect()])
+
 <form action="{{ $brand ? route('admin.brands.update', $brand->id) : route('admin.brands.store') }}" method="POST">
     @csrf
 
@@ -14,9 +16,39 @@
         <x-backend.inputs.text label="Name" name="name" placeholder="Type brand name"
             value="{{ $brand?->collectTranslation('name', $langKey) }}" />
 
-        <x-backend.inputs.file label="Thumbnail Image" name="thumbnail_image" value="{{ $brand?->thumbnail_image }}" />
+        <x-backend.inputs.file label="Thumbnail Image" name="thumbnail_image" value="{{ $brand?->thumbnail_image }}"
+            filesHint="This image will be used as thumbnail of the brand. Recommended size: 300*300" />
 
         <x-backend.inputs.file label="Banner Image" name="banner_image" value="{{ $brand?->banner_image }}" />
+
+        @if ($langKey == config('app.default_language'))
+            @php
+                $brandCategories = $brand ? $brand->categories()->pluck('categories.id') : collect();
+            @endphp
+
+            <x-backend.inputs.select label="Brand Categories" name="category_ids[]" multiple
+                class="brand-category-select" data-tags="true" data-no-add-new="1"
+                data-selection-css-class="multi-select2"
+                data-placeholder="{{ translate('Select categories for this brand') }}" :isRequired="false">
+                @foreach ($categories ?? [] as $category)
+                    @php
+                        $selected = $brandCategories->contains($category->id) ? $category->id : null;
+                    @endphp
+
+                    <x-backend.inputs.select-option name="{{ $category->collectTranslation('name', $langKey) }}"
+                        value="{{ $category->id }}" selected="{{ $selected }}" />
+
+                    @foreach ($category->childrenCategories as $childCategory)
+                        @include('backend.admin.categories.subCategory', [
+                            'subCategory' => $childCategory,
+                            'langKey' => $langKey,
+                            'category' => null,
+                            'selectedCategories' => $brandCategories->all(),
+                        ])
+                    @endforeach
+                @endforeach
+            </x-backend.inputs.select>
+        @endif
 
         <x-backend.inputs.text label="Meta Title" name="meta_title" placeholder="Type meta title"
             value="{{ $brand?->collectTranslation('meta_title', $langKey) }}" :isRequired="false" aiGenerate="true" />

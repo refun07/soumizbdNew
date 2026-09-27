@@ -22,6 +22,7 @@ interface Props {
     selectedCategory?: ICategoryShort | null;
     rootCategories?: ICategoryShort[] | undefined;
     categorySlug: string | undefined;
+    brandSlug?: string;
     priceFilter?: ISearchAndFilter['priceFilter'];
     brands: IBrandShort[] | undefined;
     filterAttributes: IFilterAttribute[] | undefined;
@@ -38,6 +39,7 @@ const FilterSidebar = ({
     selectedCategory,
     rootCategories,
     categorySlug,
+    brandSlug,
     priceFilter,
     brands,
     filterAttributes,
@@ -132,6 +134,7 @@ const FilterSidebar = ({
                         selectedCategory={selectedCategory}
                         rootCategories={rootCategories}
                         categorySlug={categorySlug}
+                        brandSlug={brandSlug}
                     />
 
                     <div className="border border-primary-14 py-3 md:pt-5 md:pb-7 px-4 md:px-8 rounded-card mt-2.5">
@@ -162,11 +165,13 @@ const FilterSidebar = ({
                         </div>
                     </div>
 
-                    <BrandFilterCard
-                        brands={brands!}
-                        filters={filters}
-                        onChange={handleCheckboxChange}
-                    />
+                    {!brandSlug && (
+                        <BrandFilterCard
+                            brands={brands!}
+                            filters={filters}
+                            onChange={handleCheckboxChange}
+                        />
+                    )}
 
                     <div className="border border-primary-14 py-3 md:pt-5 md:pb-7 px-4 md:px-8 rounded-card mt-2.5">
                         <h5 className="text-sm pb-2 border-b border-primary-14 text-zinc-900 uppercase">

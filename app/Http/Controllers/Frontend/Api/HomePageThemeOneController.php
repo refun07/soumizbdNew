@@ -15,6 +15,31 @@ use Illuminate\Http\Request;
 
 class HomePageThemeOneController extends Controller
 {
+    public function reviewSection(Request $request)
+    {
+        $avatars = json_decode(getSetting('themeOneReviewAvatars') ?: getSetting('themeTwoReviewAvatars') ?: '[]', true) ?: [];
+        $names = json_decode(getSetting('themeOneReviewNames') ?: getSetting('themeTwoReviewNames') ?: '[]', true) ?: [];
+        $designations = json_decode(getSetting('themeOneReviewDesignations') ?: getSetting('themeTwoReviewDesignations') ?: '[]', true) ?: [];
+        $texts = json_decode(getSetting('themeOneReviewTexts') ?: getSetting('themeTwoReviewTexts') ?: '[]', true) ?: [];
+        $ratings = json_decode(getSetting('themeOneReviewRatings') ?: getSetting('themeTwoReviewRatings') ?: '[]', true) ?: [];
+
+        return [
+            'success' => true,
+            'status' => 200,
+            'message' => '',
+            'result' => [
+                'reviews' => collect($avatars)->map(fn($avatar, $index) => [
+                    'avatar' => uploadedAsset($avatar),
+                    'name' => translate($names[$index] ?? ''),
+                    'designation' => translate($designations[$index] ?? ''),
+                    'text' => translate($texts[$index] ?? ''),
+                    'rating' => $ratings[$index] ?? null,
+                ])->values(),
+                'showThemeOneReviewSection' => getSetting('showThemeOneReviewSection') ?? getSetting('showThemeTwoReviewSection') ?? 0,
+            ],
+        ];
+    }
+
     # get banner image
     public function banner(Request $request)
     {

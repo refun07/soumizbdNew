@@ -85,7 +85,7 @@
                 <div class="card">
                     <h4 class="card__title">{{ translate('Add New Brand') }}</h4>
                     <div class="card__content">
-                        <x-backend.forms.brand-form />
+                        <x-backend.forms.brand-form :categories="$categories" />
                     </div>
                 </div>
             @endcan

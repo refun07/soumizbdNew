@@ -14,6 +14,10 @@
             $selected = Request::get('categoryId') ?? null;
         }
     }
+
+    if (isset($selectedCategories) && in_array($subCategory->id, $selectedCategories)) {
+        $selected = $subCategory->id;
+    }
 @endphp
 
 @if ($subCategory)
@@ -46,6 +50,9 @@
             }
             if (isset($homeCategories)) {
                 $data['homeCategories'] = $homeCategories;
+            }
+            if (isset($selectedCategories)) {
+                $data['selectedCategories'] = $selectedCategories;
             }
         @endphp
 

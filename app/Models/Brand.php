@@ -36,4 +36,9 @@ class Brand extends Model
     {
         return $this->hasMany(Product::class);
     }
+
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class, 'brand_categories', 'brand_id', 'category_id')->withTimestamps();
+    }
 }

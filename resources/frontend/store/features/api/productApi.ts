@@ -25,6 +25,7 @@ export interface ISearchAndFilter {
     };
     brands: IBrandShort[];
     rootCategories: ICategoryShort[];
+    brandCategories: ICategoryShort[];
     filterAttributes: IFilterAttribute[];
     selectedCategory: ICategoryShort | null;
     priceFilter: {

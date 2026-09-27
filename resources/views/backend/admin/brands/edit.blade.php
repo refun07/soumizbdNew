@@ -37,7 +37,7 @@
                     <div class="flex justify-end mb-3">
                         <x-backend.inputs.change-languages langKey="{{ $lang_key }}" />
                     </div>
-                    <x-backend.forms.brand-form :brand="$brand" langKey="{{ $lang_key }}" />
+                    <x-backend.forms.brand-form :brand="$brand" langKey="{{ $lang_key }}" :categories="$categories" />
                 </div>
             </div>
         </div>

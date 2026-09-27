@@ -60,6 +60,7 @@ interface Order {
     customerOrderCodeToShow?: string;
     customerName?: string;
     customerPhone?: string;
+    customerOrderLabel?: string;
     agentId?: number | null;
     agentName?: string | null;
     createdDate?: string;
@@ -121,16 +122,34 @@ interface Pagination {
     per_page: number;
 }
 
+interface OrderSummary {
+    all: number;
+    picked_up?: number;
+    on_hold?: number;
+    unbilled?: number;
+    completed?: number;
+    pre_order?: number;
+    order_placed: number;
+    confirmed: number;
+    processing: number;
+    shipped: number;
+    delivered: number;
+    cancelled: number;
+    exchange: number;
+}
+
 const OrderPage: React.FC = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { setPopup } = useAppContext();
+    const initialSearch = new URLSearchParams(window.location.search).get('search') || '';
     const [orders, setOrders] = useState<Order[]>([]);
+    const [orderSummary, setOrderSummary] = useState<OrderSummary | null>(null);
     const [selectedOrderIds, setSelectedOrderIds] = useState<number[]>([]);
     const [filters, setFilters] = useState({
         from: '',
         to: '',
-        search: '',
+        search: initialSearch,
         payment_status: '',
         pos_order: '',
     });
@@ -207,7 +226,7 @@ const OrderPage: React.FC = () => {
             });
 
             const data = response.data.result.data;
-            console.log(data);
+            setOrderSummary(response.data.result.summary || null);
             const paginationData = response.data.result.meta;
             setOrders(data);
             setPagination({
@@ -565,6 +584,38 @@ const OrderPage: React.FC = () => {
                 Orders Panel
             </h1>
 
+            {orderSummary && (
+                <div className="mb-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                    {[
+                        ['All Orders', orderSummary.all, 'layer-group', 'border-slate-400', 'bg-slate-600', 'all'],
+                        ['Processing', orderSummary.processing, 'gear', 'border-emerald-500', 'bg-emerald-500', 'processing'],
+                        ['Picked Up', orderSummary.picked_up ?? 0, 'box', 'border-sky-500', 'bg-sky-500', 'picked_up'],
+                        ['On Hold', orderSummary.on_hold ?? 0, 'pause', 'border-orange-500', 'bg-orange-500', 'on_hold'],
+                        ['Shipped', orderSummary.shipped, 'truck', 'border-yellow-500', 'bg-yellow-500', 'shipped'],
+                        ['Unbilled', orderSummary.unbilled ?? 0, 'file', 'border-pink-500', 'bg-pink-500', 'unbilled'],
+                        ['Completed', orderSummary.completed ?? orderSummary.delivered, 'box-open', 'border-emerald-600', 'bg-emerald-700', 'delivered'],
+                        ['Cancelled', orderSummary.cancelled, 'ban', 'border-red-500', 'bg-red-600', 'cancelled'],
+                        ['Exchange', orderSummary.exchange, 'rotate', 'border-purple-500', 'bg-purple-600', 'exchange'],
+                        ['Pre Order', orderSummary.pre_order ?? 0, 'clock', 'border-amber-600', 'bg-amber-700', 'pre_order'],
+                    ].map(([label, count, icon, borderColor, activeBg, tabId]) => (
+                        <button
+                            key={label}
+                            type="button"
+                            onClick={() => handleTabChange(tabId)}
+                            className={`flex items-center gap-3 rounded-lg border-l-4 px-4 py-3 text-left transition-all hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/30 ${activeTab === tabId ? `${activeBg} text-white shadow-md` : `bg-card ${borderColor} border`}`}
+                        >
+                            <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-sm ${activeTab === tabId ? 'bg-white/20 text-white' : 'bg-muted text-muted-foreground'}`}>
+                                <i className={`fa-solid fa-${icon}`} aria-hidden="true"></i>
+                            </span>
+                            <span className="min-w-0 text-left">
+                                <span className={`block truncate text-xs font-medium ${activeTab === tabId ? 'text-white/80' : 'text-muted-foreground'}`}>{label}</span>
+                                <span className={`block text-lg font-bold ${activeTab === tabId ? 'text-white' : 'text-foreground'}`}>{count}</span>
+                            </span>
+                        </button>
+                    ))}
+                </div>
+            )}
+
             <div className="card rounded-lg shadow-sm">
                 {/* Top Actions */}
                 <div className="border-b border-border p-3 sm:p-4">
@@ -820,8 +871,17 @@ const OrderPage: React.FC = () => {
                                         <div className="text-xs text-muted uppercase mb-1">
                                             Customer
                                         </div>
-                                        <div className="font-medium">
-                                            {order.customerName}
+                                        <div className="flex flex-wrap items-center gap-2 font-medium">
+                                            <span>{order.customerName}</span>
+                                            {order.customerOrderLabel && (
+                                                <span className={`inline-flex rounded px-1.5 py-0.5 text-[10px] font-semibold leading-none ${
+                                                    order.customerOrderLabel === '1st Order'
+                                                        ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
+                                                        : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+                                                }`}>
+                                                    {order.customerOrderLabel}
+                                                </span>
+                                            )}
                                         </div>
                                         <div className="text-sm text-muted">
                                             {order.customerPhone}
@@ -906,7 +966,14 @@ const OrderPage: React.FC = () => {
                                             )}
                                         </div>
                                         <div className="text-xs text-muted">
-                                            Subtotal {currencyFormatter(order.subtotalAmount)}
+                                            Subtotal {currencyFormatter(
+                                                Math.max(
+                                                    0,
+                                                    Number(order.subtotalAmount) -
+                                                        Number(order.discountAmount) -
+                                                        Number(order.couponDiscountAmount),
+                                                ),
+                                            )}
                                             {' · '}Delivery {currencyFormatter(order.shippingChargeAmount)}
                                         </div>
                                         {order.paymentStatus === 'paid' ? (
@@ -1134,8 +1201,17 @@ const OrderPage: React.FC = () => {
                                         </div>
                                     </td>
                                     <td className="px-2 !py-4">
-                                        <div className="font-semibold text-foreground">
-                                            {order.customerName || 'Guest customer'}
+                                        <div className="flex flex-wrap items-center gap-2 font-semibold text-foreground">
+                                            <span>{order.customerName || 'Guest customer'}</span>
+                                            {order.customerOrderLabel && (
+                                                <span className={`inline-flex rounded px-1.5 py-0.5 text-[10px] font-semibold leading-none ${
+                                                    order.customerOrderLabel === '1st Order'
+                                                        ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
+                                                        : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+                                                }`}>
+                                                    {order.customerOrderLabel}
+                                                </span>
+                                            )}
                                         </div>
                                         <button
                                             type="button"
@@ -1191,18 +1267,19 @@ const OrderPage: React.FC = () => {
                                     <td className="px-2 !py-4 text-xs">
                                         <div className="flex justify-between gap-3 text-muted">
                                             <span>Subtotal</span>
-                                            <span>{currencyFormatter(order.subtotalAmount)}</span>
+                                            <span>{currencyFormatter(
+                                                Math.max(
+                                                    0,
+                                                    Number(order.subtotalAmount) -
+                                                        Number(order.discountAmount) -
+                                                        Number(order.couponDiscountAmount),
+                                                ),
+                                            )}</span>
                                         </div>
                                         <div className="mt-0.5 flex justify-between gap-3 text-muted">
                                             <span>Delivery</span>
                                             <span>{currencyFormatter(order.shippingChargeAmount)}</span>
                                         </div>
-                                        {(Number(order.discountAmount) + Number(order.couponDiscountAmount)) > 0 && (
-                                            <div className="mt-0.5 flex justify-between gap-3 text-red-500">
-                                                <span>Discount</span>
-                                                <span>-{currencyFormatter(Number(order.discountAmount) + Number(order.couponDiscountAmount))}</span>
-                                            </div>
-                                        )}
                                         <div className="mt-1 flex justify-between gap-3 border-t border-border pt-1 text-sm font-bold text-foreground">
                                             <span>Total</span>
                                             <span>{currencyFormatter(order.totalAmount)}</span>

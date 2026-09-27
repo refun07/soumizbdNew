@@ -181,6 +181,15 @@
         };
 
         $orderItems = $order?->orderItems ?? collect();
+        // Product discounts are already reflected in each invoice item's unit price.
+        // Keep the summary Discount row reserved for an extra admin-applied discount.
+        $automaticItemDiscount = $orderItems->sum(fn($item) => $safeNumber($item?->total_discount));
+        $baseItemSubtotal = $orderItems->sum(fn($item) => $safeNumber($item?->unit_price) * max((int) ($item?->qty ?? 1), 1));
+        $orderAmountMatchesBaseItems = abs($safeNumber($order?->amount) - $baseItemSubtotal) < 0.01;
+        $manualDiscount = $orderAmountMatchesBaseItems
+            ? max($safeNumber($order?->discount_amount) - $automaticItemDiscount, 0)
+            : $safeNumber($order?->discount_amount);
+        $displayDiscount = $manualDiscount + $safeNumber($order?->coupon_discount_amount);
         $exchangeItems = $exchange?->items ?? collect();
         $customerName = $orderGroup?->name ?: $user?->name;
         $customerName = filled($customerName) ? $customerName : translate('Walk In Customer');
@@ -712,7 +721,7 @@
                             {{ translate('Discount') }}</td>
                         <td style="text-align: right; padding: 7px 12px; font-size: 16px; color: #1c1917; width: 50%;"
                             class="font-price">
-                            {!! $formatSummaryPrice($safeNumber($order?->discount_amount) + $safeNumber($order?->coupon_discount_amount)) !!}</td>
+                            {!! $formatSummaryPrice($displayDiscount) !!}</td>
                     </tr>
                     <tr style="background: #f5f5f4;">
                         <td

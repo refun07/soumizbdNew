@@ -30,7 +30,7 @@
         <div class="xl:col-span-6">
             <div class="card">
                 <div class="card__content">
-                    <x-backend.forms.brand-form />
+                    <x-backend.forms.brand-form :categories="$categories" />
                 </div>
             </div>
         </div>
