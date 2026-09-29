@@ -15,8 +15,8 @@
             value="{{ $brand?->collectTranslation('name', $langKey) }}" />
 
         @if (!$brand || $langKey == config('app.default_language'))
-            @include('components.backend.inc.brand-group-select', [
-                'selectedBrandGroup' => $brand?->brand_group_id,
+            @include('components.backend.inc.collection-select', [
+                'selectedCollections' => $brand?->collections->pluck('id')->all() ?? [],
             ])
         @endif
 

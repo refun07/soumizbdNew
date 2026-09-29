@@ -1033,13 +1033,13 @@ const ProductPreviewContent = ({
                             />
                             <span>{product.brand.name}</span>
                         </Link>
-                        {product.brand.brandGroup && (
+                        {product.collection && (
                             <Link
-                                to={`/brands?group=${product.brand.brandGroup.slug}`}
-                                title={translate('View all brands in this group')}
+                                to={`/brands/${product.brand.slug}?collection=${product.collection.slug}`}
+                                title={translate('View all products in this collection')}
                                 className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs text-primary transition hover:bg-primary hover:text-white"
                             >
-                                {product.brand.brandGroup.name}
+                                {product.collection.name}
                             </Link>
                         )}
                     </div>

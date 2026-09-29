@@ -22,7 +22,7 @@
                             value="" />
 
                         @can('create_brands')
-                            @include('components.backend.inc.brand-group-select')
+                            @include('components.backend.inc.collection-select')
                         @endcan
 
                         <x-backend.inputs.text label="Meta Title" name="meta_title" placeholder="Type meta title"

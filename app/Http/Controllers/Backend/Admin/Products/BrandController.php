@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Backend\Admin\Products;
 
 use App\Http\Controllers\Controller;
 use App\Models\Brand;
-use App\Models\BrandGroup;
+use App\Models\ProductCollection;
 use App\Models\Language;
 use App\Models\Product;
 use App\Models\BrandTranslation;
@@ -26,17 +26,33 @@ class BrandController extends Controller
     # Display a listing of the resource.
     public function index(Request $request)
     {
-        $searchKey = null;
+        $searchKey = $request->search;
         $limit     = $request->limit ?? 15;
+        $tab       = $request->tab === 'collections' ? 'collections' : 'brands';
 
-        $brands = Brand::with('brandGroup')->latest();
-        if ($request->search != null) {
-            $brands = $brands->where('name', 'like', '%' . $request->search . '%');
-            $searchKey = $request->search;
+        $brandsCount      = Brand::count();
+        $collectionsCount = ProductCollection::count();
+        $brands           = null;
+        $collections      = null;
+
+        # brands and collections share this page, one tab each
+        if ($tab === 'collections') {
+            $collections = ProductCollection::ordered()
+                ->with('brands')
+                ->withCount('products')
+                ->when($searchKey, fn ($q) => $q->where('name', 'like', '%' . $searchKey . '%'))
+                ->paginate($limit)
+                ->withQueryString();
+        } else {
+            $brands = Brand::with('collections')
+                ->withCount('products')
+                ->latest()
+                ->when($searchKey, fn ($q) => $q->where('name', 'like', '%' . $searchKey . '%'))
+                ->paginate($limit)
+                ->withQueryString();
         }
 
-        $brands = $brands->withCount('products')->paginate($limit);
-        return view('backend.admin.brands.index', compact('brands', 'searchKey'));
+        return view('backend.admin.brands.index', compact('tab', 'brands', 'collections', 'brandsCount', 'collectionsCount', 'searchKey'));
     }
 
     # Show the form for creating a new resource.
@@ -60,11 +76,11 @@ class BrandController extends Controller
         $brand->meta_description = $request->meta_description;
         $brand->meta_keywords    = $request->meta_keywords;
         $brand->meta_image       = $request->meta_image;
-        $brand->brand_group_id   = BrandGroup::resolveId($request->brand_group_id);
 
         $brand->slug = Str::slug($request->name, '-');
 
         $brand->save();
+        $this->syncCollections($brand, $request);
 
         $brandTranslation = BrandTranslation::firstOrNew(['lang_key' => config('app.default_language'), 'brand_id' => $brand->id]);
         $brandTranslation->name             = $brand->name;
@@ -77,7 +93,7 @@ class BrandController extends Controller
         $brandTranslation->save();
 
         if ($request->ajax()) {
-            $brands     = Brand::isActive()->orderBy('name', 'ASC')->get();
+            $brands     = Brand::isActive()->with('collections')->orderBy('name', 'ASC')->get();
             $product = null;
             $langKey = config('app.default_language');
             $selectedBrand = $brand->id;
@@ -122,7 +138,6 @@ class BrandController extends Controller
             $brand->meta_description = $request->meta_description;
             $brand->meta_keywords    = $request->meta_keywords;
             $brand->meta_image       = $request->meta_image;
-            $brand->brand_group_id   = BrandGroup::resolveId($request->brand_group_id);
             $brand->slug             = (!is_null($request->slug)) ? Str::slug($request->slug, '-') : Str::slug($request->name, '-');
         }
 
@@ -136,9 +151,25 @@ class BrandController extends Controller
         $brandTranslation->meta_image       = $request->meta_image;
 
         $brand->save();
+        if ($request->lang_key == config("app.default_language")) {
+            $this->syncCollections($brand, $request);
+        }
         $brandTranslation->save();
         flash(translate('Brand has been updated successfully'))->success();
         return back();
+    }
+
+    # attach the picked collections; products of this brand drop a collection the brand no longer has
+    private function syncCollections(Brand $brand, Request $request)
+    {
+        $collectionIds = ProductCollection::resolveIds($request->collection_ids);
+        $brand->collections()->sync($collectionIds);
+
+        Product::withTrashed()
+            ->where('brand_id', $brand->id)
+            ->whereNotNull('collection_id')
+            ->whereNotIn('collection_id', $collectionIds)
+            ->update(['collection_id' => null]);
     }
 
     # Remove the specified resource from storage.
@@ -148,7 +179,8 @@ class BrandController extends Controller
 
         try {
             Product::where('brand_id', $id)->update([
-                'brand_id' => NULL
+                'brand_id'      => NULL,
+                'collection_id' => NULL,
             ]);
         } catch (\Throwable $th) {
             //throw $th;

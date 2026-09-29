@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Models\Badge;
 use App\Models\Brand;
-use App\Models\BrandGroup;
+use App\Models\ProductCollection;
 use App\Models\CampaignProduct;
 use App\Models\Category;
 use App\Models\Language;
@@ -210,6 +210,18 @@ class ProductService
         return $modelClass::where($nameColumn, $value)->value('id');
     }
 
+    # a product's collection must be one of its brand's collections
+    private static function resolveCollectionId($brandId, $collectionId): ?int
+    {
+        if (!$brandId || !$collectionId) {
+            return null;
+        }
+
+        return ProductCollection::whereKey($collectionId)
+            ->whereHas('brands', fn ($query) => $query->where('brands.id', $brandId))
+            ->value('id');
+    }
+
     private static function resolveModelIds(string $modelClass, $value, string $nameColumn = 'name'): array
     {
         $ids = [];
@@ -329,7 +341,8 @@ class ProductService
         $products = Product::shop()
             ->with([
                 'categories',
-                'brand.brandGroup',
+                'brand',
+                'collection',
                 'unit',
                 'variations' => fn($query) => $query->withSum('productVariationStocks as stock_total', 'stock_qty'),
             ])
@@ -361,8 +374,8 @@ class ProductService
             $products = $products->where('brand_id', $request->brandId);
         }
 
-        if ($request->brandGroupId != null) {
-            $products = $products->whereHas('brand', fn ($query) => $query->where('brand_group_id', $request->brandGroupId));
+        if ($request->collectionId != null) {
+            $products = $products->where('collection_id', $request->collectionId);
         }
 
         if ($request->hideOnEcom != null) {
@@ -477,7 +490,7 @@ class ProductService
             ->get();
 
         $brands      = Brand::isActive()->orderBy('name', 'ASC')->get();
-        $brandGroups = BrandGroup::ordered()->get(['id', 'name']);
+        $collections = ProductCollection::ordered()->get(['id', 'name']);
         $tags        = Tag::orderBy('name', 'ASC')->get();
 
 
@@ -489,7 +502,7 @@ class ProductService
                 'isPublished'  => $isPublished,
                 'categories'   => $categories,
                 'brands'       => $brands,
-                'brandGroups'  => $brandGroups,
+                'collections'  => $collections,
                 'tags'         => $tags,
                 'searchKey'    => $searchKey,
             ],
@@ -506,7 +519,7 @@ class ProductService
             ->with('childrenCategories')
             ->get();
 
-        $brands              = Brand::isActive()->orderBy('name', 'ASC')->get();
+        $brands              = Brand::isActive()->with('collections')->orderBy('name', 'ASC')->get();
         $units               = Unit::isActive()->orderBy('name', 'ASC')->get();
         $variations          = Variation::isActive()->get();
         $taxes               = Tax::isActive()->orderBy('name', 'ASC')->get();
@@ -667,6 +680,7 @@ class ProductService
             $product->name              = $request->name;
             $product->slug              = Str::slug($request->name, '-');
             $product->brand_id          = $request->brand_id;
+            $product->collection_id     = self::resolveCollectionId($request->brand_id, $request->collection_id);
             $product->unit_id           = $request->unit_id;
 
             $product->thumbnail_image   = $request->thumbnail_image;
@@ -1139,7 +1153,7 @@ class ProductService
                 ->with('childrenCategories')
                 ->get();
 
-            $brands     = Brand::isActive()->orderBy('name', 'ASC')->get();
+            $brands     = Brand::isActive()->with('collections')->orderBy('name', 'ASC')->get();
             $units      = Unit::isActive()->orderBy('name', 'ASC')->get();
             $variations = Variation::isActive()->get();
             $taxes      = Tax::isActive()->orderBy('name', 'ASC')->get();
@@ -1212,6 +1226,7 @@ class ProductService
             $product->name              = $request->name;
             $product->slug              = (!is_null($request->slug)) ? Str::slug($request->slug, '-') : Str::slug($request->name, '-');
             $product->brand_id          = $request->brand_id;
+            $product->collection_id     = self::resolveCollectionId($request->brand_id, $request->collection_id);
             $product->unit_id           = $request->unit_id;
 
             $product->thumbnail_image   = $request->thumbnail_image;

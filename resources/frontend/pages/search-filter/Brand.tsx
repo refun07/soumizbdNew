@@ -1,13 +1,10 @@
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import Image from '../../components/Image';
 import SearchForm from '../../components/inputs/SearchForm';
 import SearchAndFilter from '../../components/search-filter/SearchAndFilter';
 import ShopHeaderSkeleton from '../../components/skeletons/shop/ShopHeaderSkeleton';
 import NotFound from '../NotFound';
-import {
-    useGetBrandDetailsQuery,
-    useGetBrandsQuery,
-} from '../../store/features/api/brandApi';
+import { useGetBrandDetailsQuery } from '../../store/features/api/brandApi';
 import { translate } from '../../utils/translate';
 
 const Brand = () => {
@@ -15,16 +12,25 @@ const Brand = () => {
     const brandSlug = params.brandSlug!;
     const { data: brand, isLoading, isFetching } =
         useGetBrandDetailsQuery(brandSlug);
+    const [searchParams] = useSearchParams();
+    const activeCollection = searchParams.get('collection') || '';
 
-    // other brands in the same group, for the "more in group" strip
-    const group = brand?.brandGroup;
-    const { data: groupBrandsData } = useGetBrandsQuery(
-        { group: group?.slug, limit: 13 },
-        { skip: !group?.slug }
-    );
-    const groupBrands = (groupBrandsData?.result?.data || [])
-        .filter((b) => b.slug !== brandSlug)
-        .slice(0, 12);
+    // keep the other filters when switching collections, reset the page
+    const collectionLink = (slug: string) => {
+        const params = new URLSearchParams(searchParams);
+        params.delete('page');
+        if (slug) params.set('collection', slug);
+        else params.delete('collection');
+        const qs = params.toString();
+        return `/brands/${brandSlug}${qs ? `?${qs}` : ''}`;
+    };
+
+    const collectionTabs = brand?.collections?.length
+        ? [
+              { slug: '', name: translate('All'), productsCount: brand.productsCount },
+              ...brand.collections,
+          ]
+        : [];
 
     if (isLoading) {
         return (
@@ -73,20 +79,9 @@ const Brand = () => {
                             </div>
 
                             <div className="min-w-0">
-                                <div className="flex items-center gap-2 min-w-0">
-                                    <h1 className="md:text-xl text-black truncate">
-                                        {brand?.name}
-                                    </h1>
-                                    {group && (
-                                        <Link
-                                            to={`/brands?group=${group.slug}`}
-                                            title={translate('View all brands in this group')}
-                                            className="shrink-0 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs text-primary transition hover:bg-primary hover:text-white"
-                                        >
-                                            {group.name}
-                                        </Link>
-                                    )}
-                                </div>
+                                <h1 className="md:text-xl text-black truncate">
+                                    {brand?.name}
+                                </h1>
                                 <p className="text-black/70 text-sm">
                                     {translate('Brand Products')}
                                     {typeof brand?.productsCount === 'number'
@@ -98,57 +93,46 @@ const Brand = () => {
                     </div>
                 </div>
 
-                {group && groupBrands.length > 0 && (
-                    <div className="flex items-center gap-3 border-b border-zinc-100 py-3 max-md:px-4">
-                        <span className="shrink-0 text-sm text-black/60">
-                            {translate('More in')}{' '}
-                            <Link
-                                to={`/brands?group=${group.slug}`}
-                                className="text-primary hover:underline"
-                            >
-                                {group.name}
-                            </Link>
-                        </span>
-
-                        <div className="flex min-w-0 gap-2 overflow-x-auto [scrollbar-width:none]">
-                            {groupBrands.map((item) => (
-                                <Link
-                                    key={item.id}
-                                    to={`/brands/${item.slug}`}
-                                    title={item.name}
-                                    className="flex shrink-0 items-center gap-2 rounded-full border border-zinc-200 bg-white py-1 pl-1 pr-3 text-sm text-black/70 transition hover:border-primary hover:text-primary"
-                                >
-                                    <span className="inline-flex size-7 items-center justify-center overflow-hidden rounded-full bg-gray-50">
-                                        <Image
-                                            src={item.thumbnailImage}
-                                            alt={item.name}
-                                            className="max-h-full max-w-full object-contain"
-                                        />
-                                    </span>
-                                    <span className="max-w-[120px] truncate">
-                                        {item.name}
-                                    </span>
-                                </Link>
-                            ))}
-                        </div>
-
-                        <Link
-                            to={`/brands?group=${group.slug}`}
-                            className="ml-auto shrink-0 text-sm text-primary hover:underline max-md:hidden"
-                        >
-                            {translate('View all')}
-                        </Link>
-                    </div>
-                )}
-
                 <div className="flex gap-3 max-md:flex-col items-center justify-between py-4 max-md:px-4">
-                    <ul className="max-md:w-full flex max-md:justify-between gap-5 md:gap-14">
-                        <li>
-                            <span className="border-b-2 pb-1 text-primary border-secondary">
-                                {translate('Products')}
-                            </span>
-                        </li>
-                    </ul>
+                    {collectionTabs.length ? (
+                        <div className="max-md:w-full flex min-w-0 gap-2 overflow-x-auto [scrollbar-width:none]">
+                            {collectionTabs.map((collection) => {
+                                const isActive = collection.slug === activeCollection;
+
+                                return (
+                                    <Link
+                                        key={collection.slug || 'all'}
+                                        to={collectionLink(collection.slug)}
+                                        aria-current={isActive ? 'page' : undefined}
+                                        className={`shrink-0 whitespace-nowrap rounded-full border px-4 py-1.5 text-sm transition ${
+                                            isActive
+                                                ? 'border-primary bg-primary text-white'
+                                                : 'border-zinc-200 bg-white text-black/70 hover:border-primary hover:text-primary'
+                                        }`}
+                                    >
+                                        {collection.name}
+                                        {typeof collection.productsCount === 'number' && (
+                                            <span
+                                                className={`ml-1.5 text-xs ${
+                                                    isActive ? 'text-white/80' : 'text-black/40'
+                                                }`}
+                                            >
+                                                {collection.productsCount}
+                                            </span>
+                                        )}
+                                    </Link>
+                                );
+                            })}
+                        </div>
+                    ) : (
+                        <ul className="max-md:w-full flex max-md:justify-between gap-5 md:gap-14">
+                            <li>
+                                <span className="border-b-2 pb-1 text-primary border-secondary">
+                                    {translate('Products')}
+                                </span>
+                            </li>
+                        </ul>
+                    )}
 
                     <div className="md:max-w-[310px] w-full">
                         <SearchForm

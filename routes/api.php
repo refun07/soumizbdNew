@@ -184,7 +184,6 @@ Route::group(['prefix' => config('app.api_version')], function () {
     // brands
     Route::group(['prefix' => 'brands', 'middleware' => ['zone']], function () {
         Route::get('/', [BrandController::class, 'index']);
-        Route::get('/groups', [BrandController::class, 'groups']);
         Route::get('/details/{slug}', [BrandController::class, 'show'])->name('api.brands.show');
     });
 

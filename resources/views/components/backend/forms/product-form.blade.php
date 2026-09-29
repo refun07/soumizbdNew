@@ -1018,6 +1018,17 @@
                             {{ translate('No brands found') }}
                         </p>
 
+                        {{-- options come from the checked brand's data-collections --}}
+                        <div class="theme-input-group mt-4 hidden" data-collection-field>
+                            <label class="theme-input-label">{{ translate('Collection') }}</label>
+                            <div class="theme-input-wrapper">
+                                <select name="collection_id" class="theme-input" data-collection-select
+                                    data-selected="{{ $product?->collection_id }}">
+                                    <option value="">{{ translate('No Collection') }}</option>
+                                </select>
+                            </div>
+                        </div>
+
                         @if (user()->user_type != 'seller')
                             @can('create_brands')
                                 <a href="javascript:void(0);" class="text-secondary-light !mt-4 brand-create-modal"
@@ -1886,6 +1897,43 @@
 
         brandSearchInput?.addEventListener('input', filterBrands);
         filterBrands();
+
+        // collection select lists only the checked brand's collections
+        const collectionField = document.querySelector('[data-collection-field]');
+        const collectionSelect = document.querySelector('[data-collection-select]');
+
+        const syncCollections = () => {
+            if (!collectionField || !collectionSelect || !brandList) {
+                return;
+            }
+
+            const checkedBrand = brandList.querySelector('input[name="brand_id"]:checked');
+            let collections = [];
+            try {
+                collections = JSON.parse(checkedBrand?.closest('[data-brand-item]')?.dataset.collections || '[]');
+            } catch (e) {}
+
+            const selected = collectionSelect.value || collectionSelect.dataset.selected || '';
+            collectionSelect.dataset.selected = '';
+            collectionSelect.querySelectorAll('option:not([value=""])').forEach((option) => option.remove());
+            collections.forEach((collection) => {
+                collectionSelect.add(new Option(collection.name, collection.id, false, String(collection.id) === String(selected)));
+            });
+
+            collectionField.classList.toggle('hidden', collections.length === 0);
+        };
+
+        // the brand list is re-rendered after adding a brand, so listen on the wrapper
+        brandList?.addEventListener('change', (e) => {
+            if (e.target.name === 'brand_id') {
+                collectionSelect.value = '';
+                syncCollections();
+            }
+        });
+        if (brandList) {
+            new MutationObserver(syncCollections).observe(brandList, { childList: true });
+        }
+        syncCollections();
 
         const preOrderToggle = document.getElementById('pre_order_is_active');
         const preOrderSection = document.getElementById('pre_order_section');

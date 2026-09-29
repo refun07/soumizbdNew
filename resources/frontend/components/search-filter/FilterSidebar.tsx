@@ -166,7 +166,6 @@ const FilterSidebar = ({
                         brands={brands!}
                         filters={filters}
                         onChange={handleCheckboxChange}
-                        onFilter={handleFilter}
                     />
 
                     <div className="border border-primary-14 py-3 md:pt-5 md:pb-7 px-4 md:px-8 rounded-card mt-2.5">

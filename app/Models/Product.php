@@ -86,6 +86,11 @@ class Product extends Model
         return $this->belongsTo(Brand::class);
     }
 
+    public function collection()
+    {
+        return $this->belongsTo(ProductCollection::class, 'collection_id');
+    }
+
     public function unit()
     {
         return $this->belongsTo(Unit::class);

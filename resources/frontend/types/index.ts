@@ -187,6 +187,7 @@ export interface IGetsQueryParams {
 export interface URLFilterParams extends IGetsQueryParams {
     categorySlug?: string | null;
     brandSlug?: string | null;
+    collection?: string | null;
     shopSlug?: string | null;
 
     sortBy?: string | null;

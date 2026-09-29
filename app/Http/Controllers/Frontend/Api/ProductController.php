@@ -102,6 +102,11 @@ class ProductController extends Controller
         if ($request->brandSlug != null) {
             $brand = Brand::isActive()->withCount('products')->where('slug', $request->brandSlug)->first();
             $products = $brand ? $products->where('brand_id', $brand->id) : $products->whereRaw('1 = 0');
+
+            // narrow down to one collection of the brand
+            if ($request->collection != null) {
+                $products = $products->whereHas('collection', fn ($q) => $q->where('slug', $request->collection));
+            }
         } else {
             // [TODO::Advance search -> if request has search keyword, split the text and find brands, take brand ids, make an array]
         }
@@ -191,7 +196,7 @@ class ProductController extends Controller
             'message'   => '',
             'result'    => [
                 'products'         => ProductResource::collection($products)->response()->getData(true),
-                'brands'           => BrandResource::collection(Brand::isActive()->with('brandGroup')->get()),
+                'brands'           => BrandResource::collection(Brand::isActive()->get()),
                 'selectedBrand'    => $request->brandSlug
                     ? ($brand ? BrandResource::make($brand) : null)
                     : null,

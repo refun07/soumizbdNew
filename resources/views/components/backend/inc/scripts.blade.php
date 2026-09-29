@@ -499,9 +499,9 @@
     }
     initSelect2();
 
-    // brand group select: pick a group or type a new name to create it on save
-    function initBrandGroupSelect() {
-        $('.brand-group-select').each(function() {
+    // collection select: pick collections or type a new name to create one on save
+    function initCollectionSelect() {
+        $('.collection-select').each(function() {
             const $select = $(this);
             if ($select.hasClass('select2-hidden-accessible')) {
                 return;
@@ -514,9 +514,8 @@
                 $(document.body);
 
             $select.select2({
-                selectionCssClass: 'input-select2',
+                selectionCssClass: 'multi-select2',
                 placeholder: $select.data('placeholder'),
-                allowClear: true,
                 tags: true,
                 dropdownParent: $parent,
                 createTag: function(params) {
@@ -530,7 +529,7 @@
                     }).length > 0;
 
                     return exists ? null : {
-                        id: '{{ \App\Models\BrandGroup::NEW_GROUP_PREFIX }}' + term,
+                        id: '{{ \App\Models\ProductCollection::NEW_COLLECTION_PREFIX }}' + term,
                         text: term,
                         newTag: true
                     };
@@ -539,12 +538,12 @@
                     if (!data.newTag) {
                         return data.text;
                     }
-                    return $('<span></span>').text('{{ translate('Create group') }}: ' + data.text);
+                    return $('<span></span>').text('{{ translate('Create collection') }}: ' + data.text);
                 }
             });
         });
     }
-    initBrandGroupSelect();
+    initCollectionSelect();
 
     function initOrderedProductPickers() {
         $('.ordered-product-picker').each(function() {

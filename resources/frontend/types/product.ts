@@ -1,5 +1,5 @@
 import { ICategory, ICategoryShort } from '.';
-import { IBrandShort } from './brand';
+import { IBrandShort, ICollection } from './brand';
 import { IShop } from './shop';
 import { IUser } from './state';
 
@@ -145,6 +145,7 @@ export interface IProduct extends IProductShort {
     videoLink: string;
     shop: IShop;
     brand: IBrandShort;
+    collection?: ICollection | null;
     promoCode?: IPromoCode;
     relatedProducts: IProductShort[];
     relatedProductsSidebarEnabled: boolean;

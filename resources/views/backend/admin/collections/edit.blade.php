@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title')
-    {{ translate('Update Brand Group') }} | {{ getSetting('systemName') }}
+    {{ translate('Update Collection') }} | {{ getSetting('systemName') }}
 @endsection
 
 @section('content')
@@ -12,7 +12,7 @@
                 <i class="fa-regular fa-folder"></i>
             </span>
             <span class="text-sm sm:text-base font-bold">
-                {{ translate('Update Brand Group') }}
+                {{ translate('Update Collection') }}
             </span>
         </div>
 
@@ -21,7 +21,7 @@
             <span class="text-primary dark:text-muted">
                 <i class="fa-solid fa-chevron-right"></i>
             </span>
-            <a href="{{ route('admin.brand-groups.index') }}" class="font-bold ">{{ translate('Brand Groups') }}</a>
+            <a href="{{ route('admin.brands.index', ['tab' => 'collections']) }}" class="font-bold ">{{ translate('Collections') }}</a>
             <span class="text-primary dark:text-muted">
                 <i class="fa-solid fa-chevron-right"></i>
             </span>
@@ -34,7 +34,7 @@
         <div class="xl:col-span-6">
             <div class="card">
                 <div class="card__content">
-                    <x-backend.forms.brand-group-form :brandGroup="$brandGroup" />
+                    <x-backend.forms.collection-form :collection="$collection" />
                 </div>
             </div>
         </div>

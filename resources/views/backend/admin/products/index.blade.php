@@ -102,14 +102,14 @@
                         @endforeach
                     </x-backend.inputs.select>
 
-                    @if ($brandGroups->count())
-                        <x-backend.inputs.select name="brandGroupId" class="filterSelect" :isRequired="false" groupClass="!mb-0 min-w-[150px]">
-                            <x-backend.inputs.select-option name="{{ translate('All Brand Groups') }}" value=""
-                                selected="{{ Request::get('brandGroupId') }}" />
-                            @foreach ($brandGroups as $brandGroup)
-                                <x-backend.inputs.select-option name="{{ $brandGroup->name }}"
-                                    value="{{ $brandGroup->id }}"
-                                    selected="{{ Request::get('brandGroupId') == $brandGroup->id ? $brandGroup->id : 0 }}" />
+                    @if ($collections->count())
+                        <x-backend.inputs.select name="collectionId" class="filterSelect" :isRequired="false" groupClass="!mb-0 min-w-[150px]">
+                            <x-backend.inputs.select-option name="{{ translate('All Collections') }}" value=""
+                                selected="{{ Request::get('collectionId') }}" />
+                            @foreach ($collections as $collection)
+                                <x-backend.inputs.select-option name="{{ $collection->name }}"
+                                    value="{{ $collection->id }}"
+                                    selected="{{ Request::get('collectionId') == $collection->id ? $collection->id : 0 }}" />
                             @endforeach
                         </x-backend.inputs.select>
                     @endif
@@ -224,8 +224,8 @@
                                                 <span class="min-w-0 max-w-full truncate" title="{{ translate('SKU') }}: {{ $firstVariation?->sku ?: translate('N/A') }}">{{ translate('SKU') }}: {{ $firstVariation?->sku ?: translate('N/A') }}</span>
                                                 <span class="min-w-0 max-w-full truncate" title="{{ translate('Unit') }}: {{ $product->unit?->collectTranslation('name') ?: translate('N/A') }}">{{ translate('Unit') }}: {{ $product->unit?->collectTranslation('name') ?: translate('N/A') }}</span>
                                                 <span class="min-w-0 max-w-full truncate" title="{{ translate('Brand') }}: {{ $product->brand?->collectTranslation('name') ?: translate('N/A') }}">{{ translate('Brand') }}: {{ $product->brand?->collectTranslation('name') ?: translate('N/A') }}</span>
-                                                @if ($product->brand?->brandGroup)
-                                                    <span class="min-w-0 max-w-full truncate">{{ translate('Brand Group') }}: {{ $product->brand->brandGroup->name }}</span>
+                                                @if ($product->collection)
+                                                    <span class="min-w-0 max-w-full truncate">{{ translate('Collection') }}: {{ $product->collection->name }}</span>
                                                 @endif
                                             </div>
                                         </div>

@@ -1,10 +1,10 @@
-export interface IBrandGroup {
+export interface ICollection {
     id: number;
     name: string;
     slug: string;
     image: string | null;
     sortOrder?: number;
-    brandsCount?: number;
+    productsCount?: number;
 }
 
 export interface IBrandShort {
@@ -15,5 +15,5 @@ export interface IBrandShort {
     bannerImage?: string;
     metaImage?: string;
     productsCount?: number;
-    brandGroup?: IBrandGroup | null;
+    collections?: ICollection[];
 }

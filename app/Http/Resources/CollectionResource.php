@@ -4,7 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class BrandGroupResource extends JsonResource
+class CollectionResource extends JsonResource
 {
     public function toArray($request)
     {
@@ -14,7 +14,7 @@ class BrandGroupResource extends JsonResource
             'slug'          => $this->slug,
             'image'         => $this->image ? uploadedAsset($this->image) : null,
             'sortOrder'     => (int) $this->sort_order,
-            'brandsCount'   => $this->whenCounted('brands'),
+            'productsCount' => $this->whenCounted('products'),
         ];
     }
 }

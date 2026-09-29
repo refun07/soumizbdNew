@@ -32,7 +32,7 @@ class SearchController extends Controller
         $products = $showProducts
             ? Product::fromPublishedShops()->isPublished()->hideOnEcom()->with('variations')
             : null;
-        $brands   = $showBrands ? Brand::isActive()->with('brandGroup') : null;
+        $brands   = $showBrands ? Brand::isActive() : null;
         $shops    = $showShops ? Shop::isApproved()->isPublished() : null;
 
         // by search keyword
@@ -41,11 +41,7 @@ class SearchController extends Controller
                 $products = $products->where('name', 'like', '%' . $request->searchKey . '%');
             }
             if ($showBrands) {
-                // match by brand name or brand group name
-                $brands = $brands->where(function ($q) use ($request) {
-                    $q->where('name', 'like', '%' . $request->searchKey . '%')
-                        ->orWhereHas('brandGroup', fn ($g) => $g->where('name', 'like', '%' . $request->searchKey . '%'));
-                })->orderByRaw('name like ? desc', ['%' . $request->searchKey . '%']);
+                $brands = $brands->where('name', 'like', '%' . $request->searchKey . '%');
             }
             if ($showShops) {
                 $shops = $shops->where('name', 'like', '%' . $request->searchKey . '%');

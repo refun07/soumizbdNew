@@ -6,13 +6,13 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
-class BrandGroupForm extends Component
+class CollectionForm extends Component
 {
     /**
      * Create a new component instance.
      */
     public function __construct(
-        public $brandGroup = null
+        public $collection = null
     ) {
         //
     }
@@ -22,6 +22,6 @@ class BrandGroupForm extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('components.backend.forms.brand-group-form');
+        return view('components.backend.forms.collection-form');
     }
 }

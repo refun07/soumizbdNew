@@ -367,17 +367,7 @@ const SearchForm = ({
                                                 alt={brand.name}
                                                 className="w-[30px] aspect-square rounded-full"
                                             />
-                                            <span className="min-w-0 truncate">
-                                                {highlightMatch(brand.name, query)}
-                                            </span>
-                                            {brand.brandGroup && (
-                                                <span className="ml-auto shrink-0 rounded-full bg-gray-100 px-2 text-xs leading-5 text-black/50">
-                                                    {highlightMatch(
-                                                        brand.brandGroup.name,
-                                                        query,
-                                                    )}
-                                                </span>
-                                            )}
+                                            {highlightMatch(brand.name, query)}
                                         </Link>
                                     ))}
                                 </div>
