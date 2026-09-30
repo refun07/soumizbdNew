@@ -114,7 +114,7 @@ class BrandController extends Controller
     # Show the form for editing the specified resource.
     public function edit(Request $request, $id)
     {
-        $lang_key = $request->lang_key;
+        $lang_key = $request->lang_key ?? config('app.default_language');
         $language = Language::isActive()->where('code', $lang_key)->first();
         if (!$language) {
             flash(translate('Language you are trying to translate is not available or not active'))->error();
@@ -129,8 +129,9 @@ class BrandController extends Controller
     public function update(Request $request, $id)
     {
         $brand = Brand::findOrFail($id);
+        $langKey = $request->lang_key ?? config('app.default_language');
 
-        if ($request->lang_key == config("app.default_language")) {
+        if ($langKey == config("app.default_language")) {
             $brand->name = $request->name;
             $brand->thumbnail_image  = $request->thumbnail_image;
             $brand->banner_image     = $request->banner_image;
@@ -141,7 +142,7 @@ class BrandController extends Controller
             $brand->slug             = (!is_null($request->slug)) ? Str::slug($request->slug, '-') : Str::slug($request->name, '-');
         }
 
-        $brandTranslation = BrandTranslation::firstOrNew(['lang_key' => $request->lang_key, 'brand_id' => $brand->id]);
+        $brandTranslation = BrandTranslation::firstOrNew(['lang_key' => $langKey, 'brand_id' => $brand->id]);
         $brandTranslation->name             = $request->name;
         $brandTranslation->thumbnail_image  = $request->thumbnail_image;
         $brandTranslation->banner_image     = $request->banner_image;
@@ -151,7 +152,7 @@ class BrandController extends Controller
         $brandTranslation->meta_image       = $request->meta_image;
 
         $brand->save();
-        if ($request->lang_key == config("app.default_language")) {
+        if ($langKey == config("app.default_language")) {
             $this->syncCollections($brand, $request);
         }
         $brandTranslation->save();

@@ -432,7 +432,7 @@ const HomeThemeOne = () => {
                                     )
                                 }
                                 containerClass="min-w-0"
-                                paginationContainerClass="absolute inset-x-0 bottom-4 z-20 mt-0"
+                                paginationContainerClass="mt-2 flex justify-center gap-2.5"
                             >
                                 {banner?.banners?.map((item, idx) => (
                                     <SwiperSlide key={idx}>
@@ -691,7 +691,7 @@ const HomeThemeOne = () => {
                                     rewind={mainSideBanners.length > 1}
                                     pagination={mainSideBanners.length > 1}
                                     containerClass="min-w-0"
-                                    paginationContainerClass="absolute inset-x-0 bottom-4 z-20 mt-0"
+                                    paginationContainerClass="mt-2 flex justify-center gap-2.5"
                                 >
                                     {mainSideBanners.map((item, idx) => {
                                         const image = (

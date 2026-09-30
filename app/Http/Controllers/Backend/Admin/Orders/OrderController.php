@@ -418,6 +418,8 @@ class OrderController extends Controller
             $orderData = [
                 'id' => $order->id,
                 'order_code' => $order->order_code,
+                'customerOrderCode' => $orderGroup?->code ?? $order->order_code,
+                'customerOrderCodeToShow' => getSetting('orderCodePrefix').($orderGroup?->code ?? $order->order_code),
                 'orderPrefix' => getSetting('orderCodePrefix'),
                 // Prefer order-specific snapshot values from order_group over current user profile values.
                 'customerName' => $orderGroup?->name ?? $order->user?->name,

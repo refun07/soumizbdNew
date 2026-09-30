@@ -1,5 +1,6 @@
 import { ChangeEvent } from 'react';
 import { LiaTimesSolid } from 'react-icons/lia';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
     IFilterAttribute,
     ISearchAndFilter,
@@ -22,6 +23,7 @@ interface Props {
     selectedCategory?: ICategoryShort | null;
     rootCategories?: ICategoryShort[] | undefined;
     categorySlug: string | undefined;
+    brandSlug?: string;
     priceFilter?: ISearchAndFilter['priceFilter'];
     brands: IBrandShort[] | undefined;
     filterAttributes: IFilterAttribute[] | undefined;
@@ -38,6 +40,7 @@ const FilterSidebar = ({
     selectedCategory,
     rootCategories,
     categorySlug,
+    brandSlug,
     priceFilter,
     brands,
     filterAttributes,
@@ -49,6 +52,17 @@ const FilterSidebar = ({
 }: Props) => {
     const dispatch = useAppDispatch();
     const { popup } = usePopup();
+    const [searchParams] = useSearchParams();
+    const collections = productsRes?.selectedBrand?.collections || [];
+    const activeCollection = searchParams.get('collection') || '';
+    const collectionPath = (slug: string) => {
+        const params = new URLSearchParams(searchParams);
+        params.delete('page');
+        if (slug) params.set('collection', slug);
+        else params.delete('collection');
+        const query = params.toString();
+        return `/brands/${brandSlug}${query ? `?${query}` : ''}`;
+    };
 
     return (
         <aside
@@ -128,11 +142,39 @@ const FilterSidebar = ({
                         </div>
                     </div>
 
-                    <FilterCategoryCard
-                        selectedCategory={selectedCategory}
-                        rootCategories={rootCategories}
-                        categorySlug={categorySlug}
-                    />
+                    {brandSlug ? (
+                        <div className="border border-primary-14 py-3 md:py-5 px-4 md:px-8 rounded-card">
+                            <h5 className="text-sm pb-2 border-b border-primary-14 text-zinc-900 uppercase">
+                                {translate('Collections')}
+                            </h5>
+                            <ul className="mt-4">
+                                {[
+                                    { id: 0, slug: '', name: translate('All Products') },
+                                    ...collections,
+                                ].map((collection) => (
+                                    <li key={collection.id}>
+                                        <Link
+                                            to={collectionPath(collection.slug)}
+                                            aria-current={activeCollection === collection.slug ? 'page' : undefined}
+                                            className={`block py-2 hover:text-primary ${
+                                                activeCollection === collection.slug
+                                                    ? 'text-primary font-medium'
+                                                    : 'text-black/70'
+                                            }`}
+                                        >
+                                            {collection.name}
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    ) : (
+                        <FilterCategoryCard
+                            selectedCategory={selectedCategory}
+                            rootCategories={rootCategories}
+                            categorySlug={categorySlug}
+                        />
+                    )}
 
                     <div className="border border-primary-14 py-3 md:pt-5 md:pb-7 px-4 md:px-8 rounded-card mt-2.5">
                         <h5 className="text-sm pb-2 border-b border-primary-14 text-zinc-900 uppercase">
@@ -162,11 +204,13 @@ const FilterSidebar = ({
                         </div>
                     </div>
 
-                    <BrandFilterCard
-                        brands={brands!}
-                        filters={filters}
-                        onChange={handleCheckboxChange}
-                    />
+                    {!brandSlug && (
+                        <BrandFilterCard
+                            brands={brands!}
+                            filters={filters}
+                            onChange={handleCheckboxChange}
+                        />
+                    )}
 
                     <div className="border border-primary-14 py-3 md:pt-5 md:pb-7 px-4 md:px-8 rounded-card mt-2.5">
                         <h5 className="text-sm pb-2 border-b border-primary-14 text-zinc-900 uppercase">

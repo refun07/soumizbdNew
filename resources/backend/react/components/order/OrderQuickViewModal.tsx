@@ -4,6 +4,7 @@ import { useAppContext } from '../../Context';
 import PopupWrapper from '../popup/PopupWrapper';
 import { currencyFormatter } from '../../../../frontend/utils/numberFormatter';
 import { route } from '../../utils/routeHelpers';
+import type { BkashPersonalInfo } from './BkashPersonalPaymentCard';
 
 interface OrderItem {
     id: number;
@@ -32,6 +33,7 @@ interface OrderDetail {
     deliveryStatusToShow: string;
     paymentStatus: string;
     paymentType: string | null;
+    bkashPersonal?: BkashPersonalInfo | null;
     shipping_address: string | null;
     shipping_city: string | null;
     shipping_country: string | null;
@@ -216,6 +218,22 @@ const OrderQuickViewModal: React.FC = () => {
                                 <div className="font-medium capitalize">{order.paymentStatus}</div>
                                 {order.paymentType && (
                                     <div className="text-sm text-muted mt-0.5">{order.paymentType}</div>
+                                )}
+                                {order.bkashPersonal && (
+                                    order.bkashPersonal.latest ? (
+                                        <div className="mt-2 space-y-1 text-sm break-words">
+                                            <div>
+                                                <span className="text-muted">Sender number:</span>{' '}
+                                                <span className="font-medium">{order.bkashPersonal.latest.senderNumber}</span>
+                                            </div>
+                                            <div>
+                                                <span className="text-muted">TrxID:</span>{' '}
+                                                <span className="font-medium uppercase">{order.bkashPersonal.latest.trxId}</span>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="mt-2 text-sm text-muted">bKash details not submitted yet.</div>
+                                    )
                                 )}
                             </div>
                             {(order.tracking_number || order.courier_partner) && (

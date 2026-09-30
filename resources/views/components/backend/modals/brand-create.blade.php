@@ -21,6 +21,9 @@
                         <x-backend.inputs.text label="Name" name="name" placeholder="Type brand name"
                             value="" />
 
+                        <x-backend.inputs.file label="Thumbnail Image" name="thumbnail_image"
+                            filesHint="This image will be used as thumbnail of the brand. Recommended size: 300*300" />
+
                         @can('create_brands')
                             @include('components.backend.inc.collection-select')
                         @endcan

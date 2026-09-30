@@ -202,6 +202,9 @@
     .cateogry-tree .category-search-match > label {
         @apply text-secondary;
     }
+    .brand-tree-data .brand-search-match label {
+        @apply text-secondary;
+    }
 
     /* sidebar */
     .sidebar {

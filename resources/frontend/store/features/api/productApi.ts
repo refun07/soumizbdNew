@@ -24,6 +24,7 @@ export interface ISearchAndFilter {
         meta: IPaginationMeta;
     };
     brands: IBrandShort[];
+    selectedBrand: IBrandShort | null;
     rootCategories: ICategoryShort[];
     filterAttributes: IFilterAttribute[];
     selectedCategory: ICategoryShort | null;

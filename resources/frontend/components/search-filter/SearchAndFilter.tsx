@@ -397,6 +397,7 @@ const SearchAndFilter = ({
                     selectedCategory={selectedCategory}
                     rootCategories={rootCategories}
                     categorySlug={categorySlug}
+                    brandSlug={brandSlug}
                     priceFilter={priceFilter}
                     brands={brands}
                     filterAttributes={filterAttributes}

@@ -101,6 +101,8 @@ class ProductController extends Controller
         $brand = null;
         if ($request->brandSlug != null) {
             $brand = Brand::isActive()->withCount('products')->where('slug', $request->brandSlug)->first();
+            $brand?->load(['collections' => fn ($query) => $query
+                ->whereHas('products', fn ($products) => $products->where('brand_id', $brand->id)->isPublished())]);
             $products = $brand ? $products->where('brand_id', $brand->id) : $products->whereRaw('1 = 0');
 
             // narrow down to one collection of the brand
@@ -121,6 +123,8 @@ class ProductController extends Controller
                     return $query->whereIn('category_id', $categoryIds);
                 });
                 $variations = $category->variations;
+            } else {
+                $products = $products->whereRaw('1 = 0');
             }
         } else {
             // [TODO::Advance search -> if request has search keyword, split the text and find categories, take category ids, make an array]
@@ -203,7 +207,9 @@ class ProductController extends Controller
                 'selectedCategory' => $request->categorySlug 
                     ? ($category ? CategoryResource::make($category) : null) 
                     : null,
-                'rootCategories'   => RootCategoryResource::collection(Category::isRoot()->get()),
+                'rootCategories'   => RootCategoryResource::collection(
+                    $request->brandSlug ? collect() : Category::isRoot()->get()
+                ),
                 'filterAttributes' => VariationResource::collection($variations),
                 'priceFilter'      => [
                     'minPrice' => (float) $products->min('min_price') ?? 0,

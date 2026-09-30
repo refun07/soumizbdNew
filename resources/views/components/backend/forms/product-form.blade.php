@@ -1887,6 +1887,7 @@
                 const isVisible = !query || brandName.includes(query);
 
                 brandItem.classList.toggle('hidden', !isVisible);
+                brandItem.classList.toggle('brand-search-match', Boolean(query) && isVisible);
                 if (isVisible) {
                     visibleBrands += 1;
                 }
