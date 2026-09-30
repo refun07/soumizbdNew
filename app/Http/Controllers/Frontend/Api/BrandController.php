@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 
 class BrandController extends Controller
 {
-    # get all resources with pagination
+    # get all resources, optionally with pagination
     public function index(Request $request)
     {
         $limit  = $request->limit ?? perPage(16);
@@ -21,13 +21,14 @@ class BrandController extends Controller
             $brands = $brands->where('name', 'like', '%' . $request->searchKey . '%'); // [TODO:: Search with translations also]
         }
 
-        $brands   = $brands->paginate($limit);
+        $brands = $limit === 'all' ? $brands->get() : $brands->paginate($limit);
+        $result = BrandResource::collection($brands)->response()->getData(true);
 
         return [
             'success'   => true,
             'status'    => 200,
             'message'   => '',
-            'result'    => BrandResource::collection($brands)->response()->getData(true)
+            'result'    => $limit === 'all' ? ['data' => $result] : $result
         ];
     }
 
