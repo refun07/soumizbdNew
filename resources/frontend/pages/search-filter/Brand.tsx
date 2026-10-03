@@ -94,8 +94,37 @@ const Brand = () => {
                 </div>
 
                 <div className="flex gap-3 max-md:flex-col items-center justify-between py-4 max-md:px-4">
-                    {collectionTabs.length ? (
-                        <div className="max-md:w-full flex min-w-0 gap-2 overflow-x-auto [scrollbar-width:none]">
+                    {!collectionTabs.length && (
+                        <ul className="max-md:w-full flex max-md:justify-between gap-5 md:gap-14">
+                            <li>
+                                <span className="border-b-2 pb-1 text-primary border-secondary">
+                                    {translate('Products')}
+                                </span>
+                            </li>
+                        </ul>
+                    )}
+
+                    <div className="md:ml-auto md:max-w-[310px] w-full">
+                        <SearchForm
+                            name="query"
+                            path={`/brands/${brandSlug}`}
+                            suggestions={false}
+                            placeholder={translate('Search Products')}
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <SearchAndFilter
+                breadcrumb={false}
+                brandSlug={brandSlug}
+                title={brand?.name || translate('Products')}
+                titleAside={
+                    collectionTabs.length ? (
+                        <nav
+                            aria-label={translate('Collections')}
+                            className="flex min-w-0 gap-2 overflow-x-auto [scrollbar-width:none]"
+                        >
                             {collectionTabs.map((collection) => {
                                 const isActive = collection.slug === activeCollection;
 
@@ -123,32 +152,9 @@ const Brand = () => {
                                     </Link>
                                 );
                             })}
-                        </div>
-                    ) : (
-                        <ul className="max-md:w-full flex max-md:justify-between gap-5 md:gap-14">
-                            <li>
-                                <span className="border-b-2 pb-1 text-primary border-secondary">
-                                    {translate('Products')}
-                                </span>
-                            </li>
-                        </ul>
-                    )}
-
-                    <div className="md:max-w-[310px] w-full">
-                        <SearchForm
-                            name="query"
-                            path={`/brands/${brandSlug}`}
-                            suggestions={false}
-                            placeholder={translate('Search Products')}
-                        />
-                    </div>
-                </div>
-            </div>
-
-            <SearchAndFilter
-                breadcrumb={false}
-                brandSlug={brandSlug}
-                title={brand?.name || translate('Products')}
+                        </nav>
+                    ) : undefined
+                }
             />
         </>
     );

@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { ReactNode } from 'react';
 import { cn } from '../../utils/cn';
 import { highlightOnTitle } from '../../utils/highlightOnTitle';
 import { translate } from '../../utils/translate';
@@ -8,6 +9,7 @@ import CountDown from '../CountDown';
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
     subTitle?: string;
     title: string;
+    titleAside?: ReactNode;
     highlightFirstWord?: boolean;
     highlightClassName?: string;
     text?: string;
@@ -32,6 +34,7 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
 
 const SectionTitle = ({
     title,
+    titleAside,
     highlightFirstWord,
     highlightClassName,
     subTitle,
@@ -63,7 +66,7 @@ const SectionTitle = ({
             )}
             {...rest}
         >
-            <div className="relative z-[1] sm:pr-4 grow">
+            <div className="relative z-[1] sm:pr-4 grow min-w-0">
                 {subTitle ? (
                     <motion.p
                         {...(animated ? animation : {})}
@@ -77,6 +80,7 @@ const SectionTitle = ({
                 <div
                     className={cn(
                         'flex items-center max-sm:justify-between sm:gap-10',
+                        titleAside && 'min-w-0 gap-4 sm:gap-6',
                         classNames?.titleContainer,
                     )}
                 >
@@ -85,6 +89,7 @@ const SectionTitle = ({
                         transition={{ duration: 0.5, delay: 0.2 }}
                         className={cn(
                             'ek-h2 capitalize font-light pb-4',
+                            titleAside && 'shrink-0',
                             classNames?.title,
                         )}
                         dangerouslySetInnerHTML={{
@@ -95,6 +100,12 @@ const SectionTitle = ({
                             }),
                         }}
                     ></motion.h2>
+
+                    {titleAside && (
+                        <div className="min-w-0 flex-1 pb-4">
+                            {titleAside}
+                        </div>
+                    )}
 
                     {countTo ? (
                         <CountDown

@@ -1,5 +1,5 @@
 import qs from 'qs';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { FaHome, FaSpinner } from 'react-icons/fa';
 import { MdFilterListAlt } from 'react-icons/md';
 import { useLocation, useSearchParams } from 'react-router-dom';
@@ -29,6 +29,7 @@ interface Props {
     onSaleProducts?: boolean;
     featuredProducts?: boolean;
     title?: string;
+    titleAside?: ReactNode;
 }
 
 const SearchAndFilter = ({
@@ -40,6 +41,7 @@ const SearchAndFilter = ({
     onSaleProducts = false,
     featuredProducts = false,
     title,
+    titleAside,
 }: Props) => {
     const dispatch = useAppDispatch();
     const location = useLocation();
@@ -412,8 +414,9 @@ const SearchAndFilter = ({
                     <div className="flex items-end gap-3.5">
                         <SectionTitle
                             title={`[${pageTitle}]`}
+                            titleAside={titleAside}
                             classNames={{
-                                container: 'grow mb-0',
+                                container: 'grow min-w-0 mb-0',
                                 title: 'ek-h3',
                             }}
                         />
