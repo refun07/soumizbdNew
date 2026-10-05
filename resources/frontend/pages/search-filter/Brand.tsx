@@ -123,7 +123,7 @@ const Brand = () => {
                     collectionTabs.length ? (
                         <nav
                             aria-label={translate('Collections')}
-                            className="flex min-w-0 gap-2 overflow-x-auto [scrollbar-width:none]"
+                            className="flex w-full min-w-0 gap-2 overflow-x-auto [scrollbar-width:none]"
                         >
                             {collectionTabs.map((collection) => {
                                 const isActive = collection.slug === activeCollection;

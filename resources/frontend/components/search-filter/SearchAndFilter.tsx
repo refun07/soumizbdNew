@@ -388,7 +388,7 @@ const SearchAndFilter = ({
             )}
 
             <div
-                className={`container grid lg:grid-cols-4 mb-20 ${
+                className={`container grid grid-cols-1 lg:grid-cols-4 mb-20 ${
                     breadcrumb && 'mt-6'
                 }`}
                 id="search-and-filter"
@@ -410,14 +410,15 @@ const SearchAndFilter = ({
                     handleFilter={handleFilter}
                 />
 
-                <div className="lg:col-span-3">
+                <div className="min-w-0 lg:col-span-3">
                     <div className="flex items-end gap-3.5">
                         <SectionTitle
                             title={`[${pageTitle}]`}
                             titleAside={titleAside}
                             classNames={{
                                 container: 'grow min-w-0 mb-0',
-                                title: 'ek-h3',
+                                title: 'ek-h3 max-lg:shrink max-lg:break-words',
+                                titleAside: 'max-lg:hidden',
                             }}
                         />
 
@@ -458,7 +459,7 @@ const SearchAndFilter = ({
                         <Button
                             arrow={false}
                             variant="outline"
-                            className="lg:hidden"
+                            className="shrink-0 lg:hidden"
                             onClick={() =>
                                 dispatch(togglePopup('product-filter'))
                             }
@@ -474,6 +475,12 @@ const SearchAndFilter = ({
                         </Button>
                     </div>
 
+                    {titleAside && (
+                        <div className="mt-3 min-w-0 lg:hidden">
+                            {titleAside}
+                        </div>
+                    )}
+
                     <div
                         className="grid grid-cols-2 xs:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-4 mt-3 sm:mt-6 gap-5"
                         id="filtered-products"
@@ -483,7 +490,7 @@ const SearchAndFilter = ({
                                 .fill(0)
                                 .map((_, i) => <ProductCardSkeleton key={i} />)
                         ) : !displayProducts?.length ? (
-                            <div className="col-span-4">
+                            <div className="col-span-full">
                                 <NoDataFound
                                     title="No Products Found"
                                     description="Seems like the product list is empty. Try browsing other categories"

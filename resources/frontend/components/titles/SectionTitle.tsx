@@ -21,6 +21,7 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
         container?: string;
         title?: string;
         titleContainer?: string;
+        titleAside?: string;
         subTitle?: string;
         text?: string;
         link?: string;
@@ -102,7 +103,7 @@ const SectionTitle = ({
                     ></motion.h2>
 
                     {titleAside && (
-                        <div className="min-w-0 flex-1 pb-4">
+                        <div className={cn('min-w-0 flex-1 pb-4', classNames?.titleAside)}>
                             {titleAside}
                         </div>
                     )}
