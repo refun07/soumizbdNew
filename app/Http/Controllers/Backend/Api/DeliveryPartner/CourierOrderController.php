@@ -167,7 +167,7 @@ class CourierOrderController extends Controller
                 item_weight: (float) $request->input('item_weight'),
                 item_description: $request->input('item_description') ?? '',
                 amount_to_collect: (int) $amountToCollect,
-                special_instruction: $request->input('instruction') ?? ''
+                special_instruction: $request->input('instructions') ?? ''
             ),
 
             'steadfast' => new SteadfastOrderData(
@@ -177,9 +177,9 @@ class CourierOrderController extends Controller
                 recipient_email: $order_group->email,
                 recipient_address: $order_group->shipping_address,
                 cod_amount: (float) $amountToCollect,
-                delivery_type: (int) ($request->input('delivery_type') ?? 1),
+                delivery_type: 0, // Home delivery only; point delivery not supported yet
                 total_lot: (int) $order_group->getTotalQuantity(),
-                note: $request->input('instruction') ?? ''
+                note: $request->input('instructions') ?? ''
             ),
 
             'redx' => new RedxOrderData(
@@ -191,7 +191,7 @@ class CourierOrderController extends Controller
                 cash_collection_amount: (string) $amountToCollect,
                 parcel_weight: (string) $request->input('weight'),
                 merchant_invoice_id: (string) $order_group->code,
-                instruction: $request->input('instruction') ?? '',
+                instruction: $request->input('instructions') ?? '',
                 type: $request->input('type') ?? 'delivery',
                 value: (string) $totalAmount
             ),
@@ -636,7 +636,7 @@ class CourierOrderController extends Controller
                 recipient_email: $order_group->email,
                 recipient_address: $order_group->shipping_address,
                 cod_amount: (float) $amountToCollect,
-                delivery_type: (int) ($config['delivery_type'] ?? 1),
+                delivery_type: 0, // Home delivery only; point delivery not supported yet
                 total_lot: (int) $order_group->getTotalQuantity(),
                 note: $config['instructions'] ?? ''
             ),

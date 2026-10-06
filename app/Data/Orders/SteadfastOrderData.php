@@ -13,7 +13,7 @@ class SteadfastOrderData
         // public ?string $recipient_city = null,
         // public ?string $recipient_area = null,
         public ?string $note = null,
-        public ?int $delivery_type,//0 = for home delivery, 1 = for Point Delivery/Steadfast Hub Pick Up
+        public ?int $delivery_type, // 0 = home delivery, 1 = point delivery
         public ?int $total_lot,
     ) {}
 }
