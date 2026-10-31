@@ -87,7 +87,7 @@ const ShopDetails = () => {
                     className="mb-9"
                 />
 
-                <div className="grid grid-cols-2 xs:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
+                <div className="bot-catalog-product-grid grid grid-cols-2 xs:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
                     {section.values.map((product) => (
                         <ProductCard product={product} key={product.id} />
                     ))}
@@ -139,7 +139,7 @@ const ShopDetails = () => {
                         }}
                     />
 
-                    <div className="grid grid-cols-2 xs:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
+                    <div className="bot-catalog-product-grid grid grid-cols-2 xs:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
                         {shopSectionsRes?.justForYouProducts.map((product) => (
                             <ProductCard product={product} key={product.id} />
                         ))}

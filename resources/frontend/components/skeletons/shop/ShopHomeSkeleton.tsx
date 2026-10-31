@@ -3,12 +3,12 @@ import ProductCardSkeleton from '../ProductCardSkeleton';
 const ShopHomeSkeleton = () => {
     return (
         <>
-            <div className="container no-style grid grid-cols-2">
+            <div className="container no-style grid grid-cols-1 sm:grid-cols-2">
                 <div className="skeleton h-[300px]"></div>
                 <div className="skeleton h-[300px]"></div>
             </div>
 
-            <div className="container grid grid-cols-5 mt-5 gap-5">
+            <div className="container grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 mt-5 gap-5">
                 {Array(5)
                     .fill(0)
                     .map((_, i) => (

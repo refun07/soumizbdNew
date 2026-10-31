@@ -28,13 +28,7 @@ class HomePageThemeOneController extends Controller
             'status' => 200,
             'message' => '',
             'result' => [
-                'reviews' => collect($avatars)->map(fn($avatar, $index) => [
-                    'avatar' => uploadedAsset($avatar),
-                    'name' => translate($names[$index] ?? ''),
-                    'designation' => translate($designations[$index] ?? ''),
-                    'text' => translate($texts[$index] ?? ''),
-                    'rating' => $ratings[$index] ?? null,
-                ])->values(),
+                'reviews' => \App\Services\StorefrontTestimonials::rows($avatars, $names, $designations, $texts, $ratings, fn ($avatar) => uploadedAsset($avatar)),
                 'showThemeOneReviewSection' => getSetting('showThemeOneReviewSection') ?? getSetting('showThemeTwoReviewSection') ?? 0,
             ],
         ];
@@ -219,6 +213,7 @@ class HomePageThemeOneController extends Controller
                 ->all();
         }
 
+        $featuredCategories = \App\Services\BotanicalHomeContent::content(false)['categories']['selection'];
         $categories = Category::whereIn('id', $featuredCategories)
             ->get()
             ->sortBy(fn ($category) => array_search((int) $category->id, $featuredCategories))

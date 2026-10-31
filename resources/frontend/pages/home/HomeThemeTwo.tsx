@@ -138,7 +138,7 @@ const RaisaProductCard = ({ product }: { product: IProductShort }) => {
         <article className="group relative flex h-full flex-col overflow-hidden rounded-[5px] border border-transparent bg-white transition duration-300 hover:border-[#bc2444] hover:shadow-[0_14px_35px_rgba(179,5,42,0.14)]">
             <div className="relative aspect-square overflow-hidden bg-white">
                 <Link
-                    to={`/products/${product.slug}`}
+                    to={`/product/${product.slug}`}
                     className="flex size-full items-center justify-center bg-[#f7f7f7]"
                 >
                     <img
@@ -200,7 +200,7 @@ const RaisaProductCard = ({ product }: { product: IProductShort }) => {
                     {categoryLabel}
                 </p>
                 <h3 className="mt-1 min-h-[24px] text-[15px] font-semibold leading-[1.45] text-[#111111] transition group-hover:text-[#bc2444]">
-                    <Link to={`/products/${product.slug}`} className="line-clamp-2">
+                    <Link to={`/product/${product.slug}`} className="line-clamp-2">
                         {product.name}
                     </Link>
                 </h3>
@@ -345,7 +345,7 @@ const HomeThemeTwo = () => {
             <section className="container pt-4">
                 <div className="grid gap-4 xl:grid-cols-[2fr_1fr]">
                     <Link
-                        to={banner?.themeTwoBannerOneLink || '/products'}
+                        to={banner?.themeTwoBannerOneLink || '/product'}
                         className="relative block min-h-[300px] overflow-hidden rounded-[10px] bg-[#220f10] md:min-h-[440px] xl:min-h-[520px]"
                     >
                         <img
@@ -356,7 +356,7 @@ const HomeThemeTwo = () => {
                     </Link>
 
                     <Link
-                        to={banner?.themeTwoBannerTwoLink || '/products'}
+                        to={banner?.themeTwoBannerTwoLink || '/product'}
                         className="relative block min-h-[300px] overflow-hidden rounded-[10px] bg-white md:min-h-[440px] xl:min-h-[520px]"
                     >
                         <img
@@ -401,7 +401,7 @@ const HomeThemeTwo = () => {
                 link={
                     flashSaleProduct?.flashSaleCampaign
                         ? `/campaigns/${flashSaleProduct.flashSaleCampaign.slug}`
-                        : '/products'
+                        : '/product'
                 }
                 limit={5}
             />
@@ -435,13 +435,13 @@ const HomeThemeTwo = () => {
                 products={featuredProducts}
                 title="Featured Products"
                 subtitle="Popular"
-                link="/products"
+                link="/product"
                 limit={5}
             />
 
             <section className="container py-10">
                 <Link
-                    to={threeImageBanner?.themeTwoThreeBannerOneLink || '/products'}
+                    to={threeImageBanner?.themeTwoThreeBannerOneLink || '/product'}
                     className="block overflow-hidden rounded-[5px] bg-white"
                 >
                     <img
@@ -466,7 +466,7 @@ const HomeThemeTwo = () => {
                             ASSETS.promoFour,
                     ].map((image, index) => (
                         <Link
-                            to="/products"
+                            to="/product"
                             className="group relative block overflow-hidden rounded-[8px] bg-[#9c0820]"
                             key={image}
                         >
@@ -494,7 +494,7 @@ const HomeThemeTwo = () => {
                 products={allCategoryProducts}
                 title="On Sale Products"
                 subtitle="Popular"
-                link="/products"
+                link="/product"
                 limit={20}
             />
 

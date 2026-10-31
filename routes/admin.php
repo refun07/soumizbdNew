@@ -491,6 +491,9 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin', 'unbanned',
     |----------------------------------------------------------------------------------------------------------------------
     */
     # pages routes
+    Route::get('/homepage/content', [\App\Http\Controllers\Backend\Admin\WebsiteSetup\BotanicalHomeController::class, 'edit'])->name('admin.botanical-home.edit');
+    Route::get('/homepage/reviews', [\App\Http\Controllers\Backend\Admin\WebsiteSetup\BotanicalHomeController::class, 'reviews'])->name('admin.botanical-home.reviews');
+    Route::post('/homepage/content', [\App\Http\Controllers\Backend\Admin\WebsiteSetup\BotanicalHomeController::class, 'update'])->name('admin.botanical-home.update');
     Route::get('/color-and-branding', [ColorBrandingController::class, 'colorBranding'])->name('admin.colorBranding.index');
     Route::get('/product-settings', [ProductSettingsController::class, 'index'])->name('admin.product-settings.index');
     Route::resource('/pages', PageController::class, ['names' => 'admin.pages']);

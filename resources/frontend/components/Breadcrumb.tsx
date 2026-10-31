@@ -6,6 +6,7 @@ import { cn } from '../utils/cn';
 
 interface Props {
     title?: string;
+    headingLevel?: 'h1' | 'p';
     className?: string;
     navigation: IBreadcrumbNavigation[];
     classNames?: {
@@ -16,22 +17,21 @@ interface Props {
     };
 }
 
-const Breadcrumb = ({ title, className, classNames, navigation }: Props) => {
+const Breadcrumb = ({ title, headingLevel = 'h1', className, classNames, navigation }: Props) => {
+    const Heading = headingLevel;
     return (
-        <div className={cn('bg-secondary/20 mb-5', className)}>
+        <div className={cn(`bot-page-heading ${title ? '' : 'bot-page-heading--trail'} bg-secondary/20 mb-5`, className)}>
             <div
                 className={cn(
-                    'container flex items-center justify-between h-14 md:h-[73px]',
+                    'bot-page-heading-inner container flex items-center justify-between',
                     classNames?.container,
                 )}
             >
-                <h4 className={cn('ek-h5 font-medium', classNames?.heading)}>
-                    {title}
-                </h4>
+                {title && <Heading className={cn('bot-page-title', classNames?.heading)}>{title}</Heading>}
 
-                <ul
+                <ul aria-label="Breadcrumb"
                     className={cn(
-                        'max-md:hidden flex items-center text-black/70 text-sm capitalize',
+                        'bot-breadcrumb-trail flex items-center text-black/70 text-sm capitalize',
                         classNames?.navigation,
                     )}
                 >
@@ -56,15 +56,13 @@ const Breadcrumb = ({ title, className, classNames, navigation }: Props) => {
                             )}
 
                             {index === navigation.length - 1 || !nav.link ? (
-                                <span
+                                <span aria-current={index === navigation.length - 1 ? 'page' : undefined}
                                     className={`${
                                         index === navigation.length - 1 &&
                                         'text-black'
                                     }`}
                                 >
-                                    {nav.name.length > 15
-                                        ? nav.name.slice(0, 15) + '...'
-                                        : nav.name}
+                                    {nav.name}
                                 </span>
                             ) : (
                                 <Link

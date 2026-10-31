@@ -1,14 +1,15 @@
+@php($inputId = $attributes->get('id') ?: (str_contains($name, '[') ? 'field-' . \Illuminate\Support\Str::uuid() : $name))
 <div class="{{ $labelInline ? 'theme-input-group' : '' }} w-full {{ !$label ? 'no-label' : '' }}">
     @if ($label)
-        <label for="{{ $name }}"
+        <label for="{{ $inputId }}"
             class="theme-input-label {{ $labelInline ? '' : 'pt-0' }} {{ $isRequired ? 'input-required' : '' }}">
             {{ translate($label) }}
         </label>
     @endif
 
     <div class="theme-input-wrapper flex gap-3">
-        <input type="text" id="{{ $name }}" name="{{ $name }}"
-            {{ $attributes->merge(['class' => 'theme-input']) }} placeholder="{{ translate($placeholder) }}"
+        <input type="text" id="{{ $inputId }}" name="{{ $name }}"
+            {{ $attributes->except('id')->merge(['class' => 'theme-input']) }} placeholder="{{ translate($placeholder) }}"
             value="{!! $value !!}" @required($isRequired) @disabled($isDisabled) />
 
         @if ($aiGenerate)

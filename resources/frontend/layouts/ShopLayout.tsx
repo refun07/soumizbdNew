@@ -81,20 +81,20 @@ const ShopLayout = () => {
         <>
             <div className="container no-style">
                 <div className="relative">
-                    <img
-                        src={shop?.banner}
-                        alt=""
-                        className="h-[150px] lg:h-[300px] bg-gray-500 w-full"
-                    />
+                    {shop.banner ? (
+                        <img src={shop.banner} alt="" className="h-[150px] lg:h-[300px] w-full object-cover" />
+                    ) : (
+                        <div aria-hidden="true" className="h-[150px] lg:h-[300px] w-full bg-gradient-to-br from-gray-100 via-white to-gray-200" />
+                    )}
 
                     <div className="bg-gray-50 pl-4 lg:pl-28 py-4 md:h-20 flex max-md:flex-col gap-4 md:items-center justify-between">
-                        <div className="flex items-center gap-4 md:gap-8 h-10 md:h-20">
-                            <div className="h-[100px] lg:h-[158px] aspect-square self-end inline-flex items-center justify-center p-2 bg-white border border-zinc-100 md:mb-5">
-                                <Image src={shop?.logo} alt="" />
+                        <div className="flex min-w-0 items-center gap-4 md:gap-8 h-10 md:h-20">
+                            <div className="h-[100px] lg:h-[158px] aspect-square shrink-0 self-end inline-flex items-center justify-center p-2 bg-white border border-zinc-100 md:mb-5">
+                                <Image src={shop.logo || (window.config.generalSettings.appMode === 'singleVendor' ? window.config.generalSettings.logo : '')} alt={shop.name} className="max-h-full max-w-full object-contain" />
                             </div>
 
                             <div>
-                                <h1 className="md:text-xl text-black">
+                                <h1 className="md:text-xl text-black break-words">
                                     {shop?.name}
                                 </h1>
                                 <p className="text-black/70 text-sm">
@@ -103,7 +103,7 @@ const ShopLayout = () => {
                             </div>
                         </div>
 
-                        <div className="flex items-center justify-between max-md:w-full">
+                        <div className="flex flex-wrap items-center justify-between gap-3 max-md:w-full">
                             <div className="flex items-center">
                                 <span className="text-black/70">
                                     {translate('rating')}
@@ -119,7 +119,7 @@ const ShopLayout = () => {
                             </div>
 
                             <Button
-                                className="h-9 ml-6"
+                                className="h-11 shrink-0 whitespace-nowrap px-3 text-xs md:ml-6 md:text-sm"
                                 onClick={handleChat}
                                 arrow={false}
                             >
@@ -133,7 +133,7 @@ const ShopLayout = () => {
                 </div>
 
                 <div className="flex gap-3 max-md:flex-col items-center justify-between py-4 max-md:px-4">
-                    <ul className="max-md:w-full flex max-md:justify-between gap-5 md:gap-14">
+                    <ul className="max-md:w-full flex overflow-x-auto whitespace-nowrap gap-5 md:gap-14 py-2">
                         <li>
                             <NavLink
                                 end

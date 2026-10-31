@@ -13,6 +13,7 @@ import { IProductShort, IReview } from '../../types/product';
 import { cn } from '../../utils/cn';
 import { currencyFormatter } from '../../utils/numberFormatter';
 import { translate } from '../../utils/translate';
+import { dateFormatter } from '../../utils/dateFormatter';
 
 interface Props {
     reviewActive?: boolean;
@@ -90,7 +91,7 @@ const OrderDetailsView = ({ reviewActive = true }: Props) => {
                             {order.deliveryStatusToShow}
                         </p>
                         <p className="mt-2 mb-1">
-                            {translate('Delivery Time')}: {order.createdDate}
+                            {translate('Order Date')}: {dateFormatter(order.createdDate)}
                         </p>
                     </div>
                 </div>

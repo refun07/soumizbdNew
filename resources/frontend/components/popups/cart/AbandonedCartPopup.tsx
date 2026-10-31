@@ -1,3 +1,4 @@
+import { safeSessionStorage } from '../../../utils/safeStorage';
 import { Link } from 'react-router-dom';
 import { LiaTimesSolid } from 'react-icons/lia';
 import { PiShoppingCartSimpleLight } from 'react-icons/pi';
@@ -23,7 +24,7 @@ const CartItem = ({ item }: { item: ICartProduct }) => {
     return (
         <div className="flex items-center gap-3 py-3">
             <Link
-                to={`/products/${item.product.slug}`}
+                to={`/product/${item.product.slug}`}
                 className="rounded-card border border-primary-14 p-1 shrink-0"
             >
                 <Image
@@ -35,7 +36,7 @@ const CartItem = ({ item }: { item: ICartProduct }) => {
 
             <div className="grow min-w-0">
                 <Link
-                    to={`/products/${item.product.slug}`}
+                    to={`/product/${item.product.slug}`}
                     className="font-medium text-sm line-clamp-2 hover:text-primary"
                 >
                     {item.product.name}
@@ -68,7 +69,7 @@ const AbandonedCartPopup = () => {
 
     useEffect(() => {
         if (isActive) {
-            sessionStorage.setItem(ABANDONED_CART_POPUP_SHOWN, 'true');
+            safeSessionStorage.setItem(ABANDONED_CART_POPUP_SHOWN, 'true');
         }
     }, [isActive]);
 

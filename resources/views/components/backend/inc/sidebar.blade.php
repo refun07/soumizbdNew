@@ -1,7 +1,8 @@
-<aside class="sidebar h-full hover-scrollbar">
+<aside id="admin-sidebar" aria-label="Admin navigation" class="sidebar h-full hover-scrollbar">
+    <button type="button" class="admin-sidebar-close" aria-label="Close navigation"><i class="fa-regular fa-xmark" aria-hidden="true"></i></button>
     <ul class="sidebar__list flex-grow">
         <li class="sidebar__logo hidden pl-[57px] py-10">
-            <img src="{{ uploadedAsset(getSetting('websiteHeaderLogo')) }}" alt="" class="max-w-[200px]" />
+            <img src="{{ uploadedAsset(getSetting('websiteHeaderLogo')) }}" alt="" class="admin-brand-image max-w-[200px]" />
         </li>
 
         <li class="sidebar__li {{ areActiveRoutes(['admin.dashboard']) }}">
@@ -27,9 +28,9 @@
                     </span>
                     <span class="sidebar__item--text">{{ translate('Business Analytics') }}</span>
 
-                    <button class="sidebar__list--toggler">
+                    <span class="sidebar__list--toggler" aria-hidden="true">
                         <i class="fa-regular fa-chevron-down"></i>
-                    </button>
+                    </span>
                 </a>
 
                 <ul class="text-foreground divide-y divide-border bg-primary/5">
@@ -98,9 +99,9 @@
                     </span>
                     <span class="sidebar__item--text">{{ translate('CRM') }}</span>
 
-                    <button class="sidebar__list--toggler">
+                    <span class="sidebar__list--toggler" aria-hidden="true">
                         <i class="fa-regular fa-chevron-down"></i>
-                    </button>
+                    </span>
                 </a>
 
                 <ul class="text-foreground divide-y divide-border bg-primary/5">
@@ -149,9 +150,9 @@
                     </span>
                     <span class="sidebar__item--text">{{ translate('Orders') }}</span>
 
-                    <button class="sidebar__list--toggler">
+                    <span class="sidebar__list--toggler" aria-hidden="true">
                         <i class="fa-regular fa-chevron-down"></i>
-                    </button>
+                    </span>
                 </a>
 
                 <ul class="text-foreground divide-y divide-border bg-primary/5">
@@ -237,16 +238,18 @@
                     'admin.damageStocks.*',
                 ];
             @endphp
-            <li class="sidebar__li has-submenu {{ areActiveRoutes($productsActiveRoutes, 'active expanded') }}">
-                <a href="javascript:void(0);" class="sidebar__item">
+            <li class="sidebar__li {{ user()->can('view_products') ? 'expanded' : 'has-submenu' }} {{ areActiveRoutes($productsActiveRoutes, 'active expanded') }}">
+                <a href="{{ user()->can('view_products') ? route('admin.products.index') : 'javascript:void(0);' }}" class="sidebar__item">
                     <span class="sidebar__item--icon">
                         <i class="fa-regular fa-cart-plus"></i>
                     </span>
                     <span class="sidebar__item--text">{{ translate('Products') }}</span>
 
-                    <button class="sidebar__list--toggler">
+                    @cannot('view_products')
+                    <span class="sidebar__list--toggler" aria-hidden="true">
                         <i class="fa-regular fa-chevron-down"></i>
-                    </button>
+                    </span>
+                    @endcannot
                 </a>
 
                 <ul class="text-foreground divide-y divide-border bg-primary/5">
@@ -357,9 +360,9 @@
                         </span>
                         <span class="sidebar__item--text">{{ translate('Inventory') }}</span>
 
-                        <button class="sidebar__list--toggler">
+                        <span class="sidebar__list--toggler" aria-hidden="true">
                             <i class="fa-regular fa-chevron-down"></i>
-                        </button>
+                        </span>
                     </a>
 
                     <ul class="text-foreground divide-y divide-border bg-primary/5">
@@ -454,9 +457,9 @@
                         </span>
                         <span class="sidebar__item--text">{{ translate('Seller Management') }}</span>
 
-                        <button class="sidebar__list--toggler">
+                        <span class="sidebar__list--toggler" aria-hidden="true">
                             <i class="fa-regular fa-chevron-down"></i>
-                        </button>
+                        </span>
                     </a>
 
                     <ul class="text-foreground divide-y divide-border bg-primary/5">
@@ -507,9 +510,9 @@
                     </span>
                     <span class="sidebar__item--text">{{ translate('Resources') }}</span>
 
-                    <button class="sidebar__list--toggler">
+                    <span class="sidebar__list--toggler" aria-hidden="true">
                         <i class="fa-regular fa-chevron-down"></i>
-                    </button>
+                    </span>
                 </a>
 
                 <ul class="text-foreground divide-y divide-border bg-primary/5">
@@ -539,9 +542,9 @@
                     </span>
                     <span class="sidebar__item--text">{{ translate('Promotions') }}</span>
 
-                    <button class="sidebar__list--toggler">
+                    <span class="sidebar__list--toggler" aria-hidden="true">
                         <i class="fa-regular fa-chevron-down"></i>
-                    </button>
+                    </span>
                 </a>
 
                 <ul class="text-foreground divide-y divide-border bg-primary/5">
@@ -601,9 +604,9 @@
                     </span>
                     <span class="sidebar__item--text">{{ translate('Shipping & Delivery') }}</span>
 
-                    <button class="sidebar__list--toggler">
+                    <span class="sidebar__list--toggler" aria-hidden="true">
                         <i class="fa-regular fa-chevron-down"></i>
-                    </button>
+                    </span>
                 </a>
 
                 {{-- country, state, city, area, zone, warehouses --}}
@@ -709,9 +712,9 @@
                     </span>
                     <span class="sidebar__item--text">{{ translate('Shop Settings') }}</span>
 
-                    <button class="sidebar__list--toggler">
+                    <span class="sidebar__list--toggler" aria-hidden="true">
                         <i class="fa-regular fa-chevron-down"></i>
-                    </button>
+                    </span>
                 </a>
 
                 <ul class="text-foreground divide-y divide-border bg-primary/5">
@@ -746,9 +749,9 @@
                     </span>
                     <span class="sidebar__item--text">{{ translate('Blog System') }}</span>
 
-                    <button class="sidebar__list--toggler">
+                    <span class="sidebar__list--toggler" aria-hidden="true">
                         <i class="fa-regular fa-chevron-down"></i>
-                    </button>
+                    </span>
                 </a>
 
                 <ul class="text-foreground divide-y divide-border bg-primary/5">
@@ -795,9 +798,9 @@
                     </span>
                     <span class="sidebar__item--text">{{ translate('Staff Management') }}</span>
 
-                    <button class="sidebar__list--toggler">
+                    <span class="sidebar__list--toggler" aria-hidden="true">
                         <i class="fa-regular fa-chevron-down"></i>
-                    </button>
+                    </span>
                 </a>
 
                 <ul class="text-foreground divide-y divide-border bg-primary/5">
@@ -834,9 +837,9 @@
                     </span>
                     <span class="sidebar__item--text">{{ translate('Website Setup') }}</span>
 
-                    <button class="sidebar__list--toggler">
+                    <span class="sidebar__list--toggler" aria-hidden="true">
                         <i class="fa-regular fa-chevron-down"></i>
-                    </button>
+                    </span>
                 </a>
 
                 <ul class="text-foreground divide-y divide-border bg-primary/5">
@@ -848,11 +851,11 @@
                         </li>
                     @endcan
                     @can('homepage')
-                        <li class="{{ areActiveRoutes(['admin.homepage.configure']) }}">
+                        <li class="{{ areActiveRoutes(['admin.homepage.configure', 'admin.botanical-home.*']) }}">
                             @php
                                 $homepageId = 1;
                             @endphp
-                            <a href="{{ route('admin.homepage.configure', ['id' => $homepageId, 'lang_key' => config('app.default_language')]) }}&translate"
+                            <a href="{{ route('admin.botanical-home.edit') }}"
                                 class="py-3 w-full transition-all">
                                 <span class="sub-item--text">{{ translate('Home Page') }}</span>
                             </a>
@@ -930,9 +933,9 @@
                     </span>
                     <span class="sidebar__item--text">{{ translate('System Setup') }}</span>
 
-                    <button class="sidebar__list--toggler">
+                    <span class="sidebar__list--toggler" aria-hidden="true">
                         <i class="fa-regular fa-chevron-down"></i>
-                    </button>
+                    </span>
                 </a>
 
                 <ul class="text-foreground divide-y divide-border bg-primary/5">

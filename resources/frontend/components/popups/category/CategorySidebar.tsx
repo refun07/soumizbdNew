@@ -68,7 +68,7 @@ const CategorySidebar = () => {
                 {!isLoading ? (
                     <nav className="mt-3 border-t border-zinc-100 py-3">
                         <Link
-                            to="/products"
+                            to="/product"
                             className="flex min-h-11 items-center px-9 text-primary hover:bg-primary/5"
                             onClick={() => dispatch(closePopup())}
                         >

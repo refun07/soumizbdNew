@@ -1,3 +1,4 @@
+import { safeLocalStorage } from '../../../utils/safeStorage';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import toast from 'react-hot-toast';
 import { STORAGE_KEYS } from '../../../types';
@@ -33,7 +34,7 @@ export const signinUser = createAsyncThunk<AuthResponse, IAuthPayload>(
 export const getUser = createAsyncThunk<AuthResponse>(
     'auth/getUser',
     async () => {
-        const accessToken = localStorage.getItem(STORAGE_KEYS.AUTH_KEY);
+        const accessToken = safeLocalStorage.getItem(STORAGE_KEYS.AUTH_KEY);
 
         if (!accessToken) {
             return {};

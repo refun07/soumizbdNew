@@ -258,7 +258,7 @@ class ThemeSelectionController extends Controller
             ],
             [
                 'title' => 'Delivery Charges',
-                'description' => "Delivery charges are as follows:\nInside Dhaka: 90TK\nOutside Dhaka: 150TK"
+                'description' => "Delivery charges are as follows:\nInside Dhaka: 70TK\nOutside Dhaka: 150TK"
             ],
             [
                 'title' => 'Delivery Time',
@@ -628,7 +628,7 @@ class ThemeSelectionController extends Controller
                 'important_links' => json_decode(getSetting('homeFooterImportantLinks'), true) ?? [
                     ['title' => 'Home', 'link' => '/', 'is_enabled' => true],
                     ['title' => 'Shop', 'link' => '/shops', 'is_enabled' => true],
-                    ['title' => 'All Products', 'link' => '/products', 'is_enabled' => true],
+                    ['title' => 'All Products', 'link' => '/product', 'is_enabled' => true],
                     ['title' => 'About Us', 'link' => '/pages/about-us', 'is_enabled' => true],
                     ['title' => 'All Brands', 'link' => '/brands', 'is_enabled' => true]
                 ],

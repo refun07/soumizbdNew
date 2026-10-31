@@ -29,6 +29,12 @@ class ProductController extends Controller
 
         $products = Product::fromPublishedShops()->isPublished()->hideOnEcom()->with('variations');
 
+        if ($request->filled('concernSlug')) {
+            $concern = \App\Services\StorefrontConcerns::find($request->string('concernSlug')->toString());
+            abort_unless($concern, 404);
+            $products->whereIn('slug', $concern['products']);
+        }
+
         // discounted products
         if ($request->discounted) {
             $date = strtotime(date('d-m-Y H:i:s'));
@@ -295,17 +301,10 @@ class ProductController extends Controller
 
     private function themeOneOnSaleProductIds(): array
     {
-        $products = getSetting('themeOneOnSaleProducts');
-        if ($products == null) {
-            return [];
+        if (getSetting('defaultTheme', 'theme-one') === 'theme-one') {
+            return \App\Services\BotanicalHomeContent::saleProductIds();
         }
-
-        $products = json_decode($products, true);
-        if (!is_array($products)) {
-            return [];
-        }
-
-        return array_values(array_unique(array_filter(array_map('intval', $products))));
+        return array_values(array_unique(array_filter(array_map('intval', json_decode(getSetting('themeOneOnSaleProducts', '[]'), true) ?: []))));
     }
 
     private function themeOneFeaturedProductIds(): array

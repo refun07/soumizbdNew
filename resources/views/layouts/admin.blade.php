@@ -47,7 +47,8 @@
 
 </head>
 
-<body>
+<body class="admin-panel">
+    <a class="admin-skip-link" href="#admin-main">Skip to main content</a>
     <div class="flex flex-col">
         <!-- start::navbar -->
         <x-backend.inc.navbar />
@@ -61,9 +62,9 @@
             </div>
 
             <!-- start::main content -->
-            <div class="flex-grow overflow-y-auto px-4 md:px-8 xl:px-12 pb-[100px] lg:pb-10 @yield('p-class')">
+            <main id="admin-main" class="admin-main flex-grow min-w-0 overflow-y-auto px-4 md:px-8 xl:px-12 pb-[100px] lg:pb-10 @yield('p-class')">
                 @yield('content')
-            </div>
+            </main>
             <!-- end::main content -->
 
             <!-- start::modals -->
@@ -99,7 +100,7 @@
     </div>
 
     <!-- start::mobile search box -->
-    <div class="mobile-search-box">
+    <div id="admin-mobile-search" class="mobile-search-box" role="dialog" aria-label="Search admin" aria-modal="true">
         <x-backend.inputs.search-input name="search" placeholder="Search for anything" class="navbar-search-input" />
 
         <div class="navbar-search">

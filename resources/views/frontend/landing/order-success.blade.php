@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Order Successful - {{ $summary['orderCode'] }}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    @vite('resources/frontend/index.css')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     {{-- Facebook Pixel - Purchase Event --}}
@@ -32,7 +32,25 @@
     @endif
     {{-- End Facebook Pixel Code --}}
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-50 bot-order-confirmation">
+    <style>
+        .bot-order-confirmation { font-family: Arial, sans-serif; color: #202839; font-size: 17px; line-height: 1.6; background: #f4f8f3; }
+        .bot-order-confirmation .max-w-2xl { border-radius: 20px; border: 1px solid #dce7df; box-shadow: none; }
+        .bot-order-confirmation .bg-green-600 { background: #087c3e; }
+        .bot-order-confirmation .text-green-600 { color: #087c3e; }
+        .bot-order-confirmation h1 { font-size: clamp(26px, 5vw, 32px); line-height: 1.3; padding-inline: 16px; }
+        .bot-order-confirmation h3 { font-size: 20px; }
+        .bot-order-confirmation p { overflow-wrap: anywhere; }
+        .bot-order-confirmation a { min-height: 46px; border-radius: 999px; }
+        .bot-order-confirmation a[href="/"] { background: #087c3e; color: white; }
+        .bot-order-confirmation a:focus-visible { outline: 3px solid #b78335; outline-offset: 3px; }
+        @media (max-width: 480px) {
+            .bot-order-confirmation .p-8 { padding: 24px 16px; }
+            .bot-order-confirmation .py-12 { padding-block: 24px; }
+            .bot-order-confirmation .text-sm { font-size: 15px; }
+            .bot-order-confirmation .flex.justify-between { gap: 12px; flex-wrap: wrap; }
+        }
+    </style>
     <div class="min-h-screen flex items-center justify-center py-12 px-4">
         <div class="max-w-2xl w-full bg-white rounded-lg shadow-lg overflow-hidden">
             <!-- Success Header -->

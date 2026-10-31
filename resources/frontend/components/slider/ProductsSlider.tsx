@@ -26,14 +26,14 @@ const ProductsSlider = ({
     const defaultBreakpoints = {
         320: {
             slidesPerView: 2,
-            spaceBetween: 16,
+            spaceBetween: 12,
         },
-        640: {
+        768: {
             slidesPerView: 3,
             spaceBetween: 16,
         },
         1280: {
-            slidesPerView: 5,
+            slidesPerView: 4,
             spaceBetween: 20,
         },
     };
@@ -41,7 +41,7 @@ const ProductsSlider = ({
     return (
         <ThemeSlider
             containerClass={className}
-            slidesPerView={slidesPerView || 1}
+            slidesPerView={slidesPerView || 2}
             spaceBetween={spaceBetween || 20}
             breakpoints={
                 withDefaultBreakpoints

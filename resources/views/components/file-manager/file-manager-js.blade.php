@@ -648,7 +648,10 @@
             uppy.on("complete", async function(result) {
                 const uploadedFiles = result.successful.map(item => {
                     return item.response.body
-                })
+                }).filter(file => file && file.id)
+
+                // Keep the uploader open with its error and retry controls after a failed upload.
+                if (!uploadedFiles.length) return;
 
                 if (mediaManager.data.multiple) {
                     mediaManager.data.selectedFiles = [

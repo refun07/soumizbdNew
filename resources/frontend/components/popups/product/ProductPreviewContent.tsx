@@ -3,9 +3,9 @@ import { useFacebookPixelEvents } from 'hooks/useFacebookPixelEvents';
 import useGTMEventsNew from 'hooks/useGTMEventNew';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
-import { FaHeart, FaPhone, FaRuler } from 'react-icons/fa6';
-import { FaFacebookMessenger, FaWhatsapp } from 'react-icons/fa';
+import { FaRuler } from 'react-icons/fa6';
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { LuHeart, LuShoppingCart } from 'react-icons/lu';
 import { LiaTimesSolid } from 'react-icons/lia';
 import { SideBySideMagnifier } from 'react-image-magnifiers';
 import { useDispatch } from 'react-redux';
@@ -32,6 +32,7 @@ import { translate } from '../../../utils/translate';
 import { createMetaEventId } from '../../../utils/gtmCustomerData';
 import CountDown from '../../CountDown';
 import Image from '../../Image';
+import ContactPaymentOptions from '../../ContactPaymentOptions';
 import Button from '../../buttons/Button';
 import IconButton from '../../buttons/IconButton';
 import ThemeLabel from '../../card/ThemeLabel';
@@ -156,18 +157,21 @@ const ProductPreviewContent = ({
             : [];
     }, [product]);
 
-    // if window size is less then 1024px (max-lg)
-    // add 136px padding to the bottom of the page to adjust the fixed buy now button
+    // Reserve space only for the detail page's mobile purchase bar.
     useEffect(() => {
-        if (window.innerWidth > 1024) return;
-
-        const body = document.body;
-        body.style.paddingBottom = '136px';
-
-        return () => {
-            body.style.paddingBottom = '';
+        if (!stickyButtons) return;
+        const query = window.matchMedia('(max-width: 1023px)');
+        const previousPadding = document.body.style.paddingBottom;
+        const update = () => {
+            document.body.style.paddingBottom = query.matches ? 'calc(88px + env(safe-area-inset-bottom))' : previousPadding;
         };
-    }, []);
+        update();
+        query.addEventListener('change', update);
+        return () => {
+            query.removeEventListener('change', update);
+            document.body.style.paddingBottom = previousPadding;
+        };
+    }, [stickyButtons]);
 
     // initialize variation selections without preselecting values for variant products
     useEffect(() => {
@@ -551,54 +555,6 @@ const ProductPreviewContent = ({
             toast.error(err.data.message);
         }
     };
-
-    // Handle Call Now - use system phone from topbarHotline
-    const handleCallNow = () => {
-        const phone = window.config.topbarHotline?.replace(/\D/g, '') || '';
-        if (phone) {
-            window.location.href = `tel:${phone}`;
-        } else {
-            toast.error(translate('Phone number not available'));
-        }
-    };
-
-    // Handle WhatsApp - use floating chat config
-    const getWhatsAppContacts = () => {
-        const config = (window as any).config?.floatingChat || {};
-        return (config.whatsapp_enabled
-            ? [
-                { phone: config.whatsapp_number, label: 'WhatsApp' },
-                { phone: config.secondary_whatsapp_number, label: 'WhatsApp 2' },
-            ]
-            : []
-        )
-            .map((contact: { phone?: string; label: string }) => ({
-                ...contact,
-                phone: contact.phone?.replace(/\D/g, '') || '',
-            }))
-            .filter((contact: { phone: string; label: string }) => contact.phone);
-    };
-
-    const handleWhatsApp = (phone: string) => {
-        if (phone) {
-            window.open(`https://wa.me/${phone}`, '_blank');
-        } else {
-            toast.error(translate('WhatsApp number not available'));
-        }
-    };
-
-    // Handle Messenger - open Messenger link like floating chat
-    const handleMessenger = () => {
-        const config = (window as any).config?.floatingChat || {};
-        const messengerUrl = config.messenger_url || '';
-        if (messengerUrl) {
-            window.open(messengerUrl, '_blank');
-        } else {
-            toast.error(translate('Messenger link not available'));
-        }
-    };
-
-    const whatsappContacts = getWhatsAppContacts();
 
     const handleSelectVariation = ({
         variationId,
@@ -1045,18 +1001,16 @@ const ProductPreviewContent = ({
                     </div>
                 ) : null}
 
-                <div className="flex items-center gap-2 mb-4">
-                    <span className="min-w-[73px] uppercase font-medium">
-                        {translate('Tags')}
-                    </span>
-                    <div className="flex flex-wrap gap-1.5 text-black/70">
-                        {product.tags.map((item, index) => (
-                            <Link key={index} to={`/products?tag=${item.name}`}>
-                                #{item.name}
-                            </Link>
-                        ))}
+                {product.tags.length > 0 && (
+                    <div className="flex flex-wrap items-center gap-2 mb-4">
+                        <span className="min-w-[73px] uppercase font-medium">{translate('Tags')}</span>
+                        <div className="flex flex-wrap gap-1.5 text-black/70">
+                            {product.tags.map((item, index) => (
+                                <Link key={index} to={`/product?tag=${encodeURIComponent(item.name)}`}>#{item.name}</Link>
+                            ))}
+                        </div>
                     </div>
-                </div>
+                )}
                 {isCurrentPreOrder &&
                 currentPreOrderData?.['is_active'] !== false &&
                 (currentPreOrderData as any)?.['enabled'] !== false ? (
@@ -1082,29 +1036,30 @@ const ProductPreviewContent = ({
                     </div>
                 ) : null}
                 <hr
-                    className={cn('mt-7 mb-10', {
+                    className={cn('mt-6 mb-6', {
                         'max-lg:hidden': stickyButtons,
                     })}
                 />
                 <div
-                    className={cn('flex gap-2', {
-                        'max-lg:fixed bottom-[58px] left-0 right-0 max-lg:px-5 max-lg:pt-3 max-lg:pb-6 z-[2] max-lg:bg-white':
-                            stickyButtons,
-                    })}
+                    className={cn('bot-purchase-actions', { 'bot-purchase-actions--sticky': stickyButtons })}
                 >
                     <Button
                         size="lg"
                         onClick={handleAddToCart}
-                        className="border border-black bg-gradient-to-r from-black from-[50%] to-white to-[50%] bg-left bg-[200%_auto] text-white hover:bg-right hover:text-black"
+                        className="bot-purchase-button bot-purchase-button--primary"
                         isLoading={addingToCart && !isBuyNowLoading}
                         arrow={false}
                         disabled={shouldDisablePurchaseButtons}
                     >
-                        Add To Cart
+                        <span className="inline-flex items-center justify-center gap-2">
+                            <LuShoppingCart aria-hidden="true" />
+                            <span>{translate('Add To Cart')}</span>
+                        </span>
                     </Button>
                     <Button
                         size="lg"
                         onClick={handleBuyNow}
+                        className="bot-purchase-button bot-purchase-button--secondary"
                         variant="outline"
                         isLoading={isBuyNowLoading}
                         arrow={false}
@@ -1113,64 +1068,16 @@ const ProductPreviewContent = ({
                         {translate(isCurrentPreOrder ? 'PRE-ORDER' : 'Buy Now')}
                     </Button>
                     <IconButton
-                        className={cn(
-                            'h-10 w-10 md:h-12 md:w-12 text-lg md:text-xl',
-                            {
-                                'text-theme-alert': product.inWishlist,
-                            },
-                        )}
+                        className={cn('bot-purchase-wishlist', { 'is-saved': product.inWishlist })}
+                        aria-label={product.inWishlist ? 'Remove from wishlist' : 'Save to wishlist'}
+                        aria-pressed={product.inWishlist}
                         onClick={handleToggleWishList}
                     >
-                        <FaHeart />
+                        <LuHeart aria-hidden="true" />
                     </IconButton>
                 </div>
 
-                {/* Contact Buttons Section */}
-                {(window.config?.floatingChat?.call_enabled ||
-                    whatsappContacts.length > 0 ||
-                    window.config?.floatingChat?.messenger_enabled) && (
-                    <div className="mt-3 space-y-2">
-                        {/* Call Now Button */}
-                        {window.config?.floatingChat?.call_enabled && (
-                            <button
-                                onClick={handleCallNow}
-                                className="w-full flex items-center justify-center gap-2 h-10 md:h-12 rounded-lg font-medium text-white bg-[#2563EB] hover:bg-[#1D4ED8] transition-colors duration-200"
-                            >
-                                <FaPhone className="text-lg" />
-                                <span>Call Now</span>
-                            </button>
-                        )}
-
-                        {/* WhatsApp and Messenger Buttons */}
-                        {(whatsappContacts.length > 0 ||
-                            window.config?.floatingChat?.messenger_enabled) && (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                {whatsappContacts.map((contact) => (
-                                    <button
-                                        key={contact.label}
-                                        onClick={() => handleWhatsApp(contact.phone)}
-                                        className="flex-1 flex items-center justify-center gap-2 h-10 md:h-12 px-4 rounded-lg border-2 border-[#25D366] text-[#25D366] bg-white hover:bg-[#25D366]/10 transition-colors duration-200 font-medium"
-                                    >
-                                        <FaWhatsapp className="text-lg" />
-                                        <span>{contact.label}</span>
-                                    </button>
-                                ))}
-
-                                {/* Messenger Button - Blue Outline */}
-                                {window.config?.floatingChat
-                                    ?.messenger_enabled && (
-                                    <button
-                                        onClick={handleMessenger}
-                                        className="flex-1 flex items-center justify-center gap-2 h-10 md:h-12 px-4 rounded-lg border-2 border-[#0084FF] text-[#0084FF] bg-white hover:bg-[#0084FF]/10 transition-colors duration-200 font-medium"
-                                    >
-                                        <FaFacebookMessenger className="text-lg" />
-                                        <span>Messenger</span>
-                                    </button>
-                                )}
-                            </div>
-                        )}
-                    </div>
-                )}
+                <ContactPaymentOptions />
             </div>
 
             {/* Size Chart Modal */}

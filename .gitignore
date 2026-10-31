@@ -26,3 +26,17 @@ AGENTS.md
 .opencode
 Fraud-Checker-BD-Courier-main
 .commandcode/taste/
+
+# Local catalog migration runtime and downloaded source-page cache
+/storage/local-mysql/
+/storage/app/catalog-imports/
+
+/storage/app/local-admin-credentials.txt
+
+/scripts/catalog/__pycache__/
+
+# Local deployment packages, reports, and private configuration
+/artifacts/
+/.env.*
+!/.env.example
+/database/imports/

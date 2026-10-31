@@ -1285,7 +1285,7 @@ const HomeThemeOne = () => {
                             title={translate('[Top] Products')}
                             highlightClassName="text-[#B3052A]"
                             subTitle={translate('For You')}
-                            link="/products"
+                            link="/product"
                         />
 
                         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 xl:gap-5">
@@ -1301,7 +1301,7 @@ const HomeThemeOne = () => {
                         </div>
 
                         <div className="mt-6 flex justify-end md:hidden">
-                            <Button as="link" to="/products" variant="outline">
+                            <Button as="link" to="/product" variant="outline">
                                 {translate('View More')}
                             </Button>
                         </div>

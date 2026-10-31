@@ -9,7 +9,7 @@ export interface IBlogShort {
     blogCategoryId: number;
     blogCategoryName: string;
     isPublished: number;
-    createdAt: string;
+    createdAt: string | null;
 }
 
 export interface IBlog extends IBlogShort {
@@ -26,7 +26,7 @@ export interface IBlog extends IBlogShort {
 export interface IBlogCategory {
     id: number;
     name: string;
-    createdAt: string;
+    createdAt: string | null;
 }
 
 export interface IBlogsResponse {

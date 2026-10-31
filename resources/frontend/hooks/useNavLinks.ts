@@ -54,7 +54,7 @@ export const useNavLinks = () => {
                     if (item.type === 'Category') {
                         return {
                             title: item.name,
-                            link: '/products',
+                            link: '/product',
                             subMenu: categoriesRes?.categories
                         };
                     } else if (item.type === 'Existing Page') {
@@ -78,7 +78,7 @@ export const useNavLinks = () => {
                 setNavLinks([
                     { title: 'Home', link: '/' },
                     { title: 'Shops', link: '/shops' },
-                    { title: 'Products', link: '/products' },
+                    { title: 'Products', link: '/product' },
                     {
                         title: 'Categories',
                         subMenu: categoriesRes?.categories,
@@ -95,7 +95,7 @@ export const useNavLinks = () => {
             setNavLinks([
                 { title: 'Home', link: '/' },
                 { title: 'Shops', link: '/shops' },
-                { title: 'Products', link: '/products' },
+                { title: 'Products', link: '/product' },
                 {
                     title: 'Categories',
                     subMenu: categoriesRes?.categories,

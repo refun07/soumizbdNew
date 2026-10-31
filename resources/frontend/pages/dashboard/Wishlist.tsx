@@ -24,13 +24,13 @@ const Wishlist = () => {
                 }}
             />
 
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+            <div className="bot-catalog-product-grid grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
                 {isLoading ? (
                     Array(8)
                         .fill(0)
                         .map((_, i) => <ProductCardSkeleton key={i} />)
                 ) : wishlist?.length === 0 ? (
-                    <div className="col-span-4 text-center text-black/70  ">
+                    <div className="col-span-full text-center text-black/70  ">
                         <p className="mb-2">
                             {translate('No items in your wishlist')}
                         </p>

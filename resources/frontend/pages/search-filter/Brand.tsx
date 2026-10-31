@@ -69,8 +69,8 @@ const Brand = () => {
                     </div>
 
                     <div className="bg-gray-50 pl-4 lg:pl-28 py-4 md:h-20 flex max-md:flex-col gap-4 md:items-center justify-between">
-                        <div className="flex items-center gap-4 md:gap-8 h-10 md:h-20 min-w-0">
-                            <div className="h-[100px] lg:h-[158px] aspect-square self-end inline-flex shrink-0 items-center justify-center p-2 bg-white border border-zinc-100 md:mb-5">
+                        <div className="flex items-center gap-3 md:gap-8 min-h-[80px] md:h-20 min-w-0">
+                            <div className="h-[80px] md:h-[100px] lg:h-[158px] aspect-square self-end inline-flex shrink-0 items-center justify-center p-2 bg-white border border-zinc-100 md:mb-5">
                                 <Image
                                     src={brand?.thumbnailImage}
                                     alt={brand?.name || ''}
@@ -79,7 +79,7 @@ const Brand = () => {
                             </div>
 
                             <div className="min-w-0">
-                                <h1 className="md:text-xl text-black truncate">
+                                <h1 className="md:text-xl text-black break-words">
                                     {brand?.name}
                                 </h1>
                                 <p className="text-black/70 text-sm">

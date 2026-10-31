@@ -65,7 +65,7 @@ const Button = (props: Props) => {
         'disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-200': props.variant === 'outline',
     });
 
-    const defaultClassName = `group font-semibold leading-none uppercase inline-flex justify-center items-center gap-2 rounded-button transition-all duration-[300ms] ease-in-out ${disabledClass}`;
+    const defaultClassName = `bot-ui-button bot-ui-button--${props.variant || 'primary'} group font-semibold leading-none uppercase inline-flex justify-center items-center gap-2 rounded-button transition-all duration-[300ms] ease-in-out ${disabledClass}`;
 
     if (props.as === 'link') {
         const {

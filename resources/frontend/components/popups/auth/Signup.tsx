@@ -105,9 +105,11 @@ const Signup = () => {
     });
 
     return (
-        <ModalWrapper isActive={isActive}>
+        <ModalWrapper isActive={isActive} ariaLabel="Create account">
             <button
-                className="absolute right-5 top-5 text-xl text-white sm:text-primary z-[1]"
+                type="button"
+                aria-label="Close create account"
+                className="absolute right-2 top-2 inline-flex size-11 items-center justify-center rounded-full bg-white text-xl text-primary z-[1]"
                 onClick={() => dispatch(closePopup())}
             >
                 <LiaTimesSolid />

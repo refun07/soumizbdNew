@@ -33,7 +33,7 @@ import { translate } from '../../utils/translate';
 const DEMO_ONE_LINKS = [
     { title: 'Home', url: '/' },
     { title: 'Shop', url: '/shops' },
-    { title: 'All Products', url: '/products' },
+    { title: 'All Products', url: '/product' },
     { title: 'About Us', url: '/pages/about-us' },
     { title: 'All Brands', url: '/brands' },
     { title: 'All Sellers', url: '/shops' },
@@ -93,7 +93,7 @@ const Footer = () => {
         },
         {
             title: translate('Delivery Charges'),
-            description: `${translate('Delivery charges are as follows:')}\n${translate('Inside Dhaka: 90TK')}\n${translate('Outside Dhaka: 150TK')}`,
+            description: `${translate('Delivery charges are as follows:')}\n${translate('Inside Dhaka: 70TK')}\n${translate('Outside Dhaka: 150TK')}`,
         },
         {
             title: translate('Delivery Time'),

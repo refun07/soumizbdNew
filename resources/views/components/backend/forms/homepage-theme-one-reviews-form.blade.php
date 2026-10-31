@@ -13,7 +13,7 @@
                 @endforeach
                 <div class="flex items-center justify-between mb-5">
                     <p>{{ translate('Show Review Section') }}</p>
-                    <x-backend.inputs.checkbox toggler="true" name="showThemeOneReviewSection" value="1"
+                    <x-backend.inputs.checkbox toggler="true" name="showThemeOneReviewSection" aria-label="Show Review Section" value="1"
                         isChecked="{{ getSetting('showThemeOneReviewSection') ?? false }}" />
                 </div>
                 @php
@@ -22,9 +22,13 @@
                     $titles = json_decode(getSetting('themeOneReviewDesignations') ?: '[]', true) ?: [];
                     $texts = json_decode(getSetting('themeOneReviewTexts') ?: '[]', true) ?: [];
                     $ratings = json_decode(getSetting('themeOneReviewRatings') ?: '[]', true) ?: [];
+                    $reviewRows = 0;
+                    for ($index = 0; $index < max(count($avatars), count($names), count($texts)); $index++) {
+                        if (!empty($avatars[$index]) || !empty($names[$index]) || !empty($texts[$index])) $reviewRows = $index + 1;
+                    }
                 @endphp
                 <div class="space-y-5">
-                    @for ($i = 0; $i < max(3, count($avatars)); $i++)
+                    @for ($i = 0; $i < max(3, $reviewRows) + 1; $i++)
                         <div class="rounded border border-border p-4 space-y-3">
                             <x-backend.inputs.file :labelInline="false" :trashBtn="true" label="Image"
                                 name="themeOneReviewAvatars[]" value="{{ $avatars[$i] ?? '' }}" />
@@ -32,10 +36,11 @@
                                 value="{{ $names[$i] ?? '' }}" :isRequired="false" />
                             <x-backend.inputs.text :labelInline="false" label="Title" name="themeOneReviewDesignations[]"
                                 value="{{ $titles[$i] ?? '' }}" :isRequired="false" />
-                            <x-backend.inputs.text :labelInline="false" label="Review" name="themeOneReviewTexts[]"
+                            <x-backend.inputs.textarea :rows="4" :labelInline="false" label="Review" name="themeOneReviewTexts[]"
                                 value="{{ $texts[$i] ?? '' }}" :isRequired="false" />
                             <x-backend.inputs.number min="1" max="5" :labelInline="false" label="Rating"
-                                name="themeOneReviewRatings[]" value="{{ $ratings[$i] ?? 5 }}" :isRequired="false" />
+                                name="themeOneReviewRatings[]" value="{{ $ratings[$i] ?? '' }}" :isRequired="false" />
+                            <p class="text-xs text-muted">Leave rating blank if the customer did not give a star rating. A name and review are required to display an entry. Clear both to remove it. Save to add another blank entry.</p>
                         </div>
                     @endfor
                 </div>

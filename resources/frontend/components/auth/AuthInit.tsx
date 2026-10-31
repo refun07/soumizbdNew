@@ -1,3 +1,4 @@
+import { safeLocalStorage } from '../../utils/safeStorage';
 import { ReactNode, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { useSearchParams } from 'react-router-dom';
@@ -20,7 +21,7 @@ const AuthInit = ({ children }: { children: ReactNode | ReactNode[] }) => {
     const { user } = useAuth();
     const [getCartProducts] = useLazyGetCartProductsQuery();
 
-    const localAccessToken = localStorage.getItem(STORAGE_KEYS.AUTH_KEY);
+    const localAccessToken = safeLocalStorage.getItem(STORAGE_KEYS.AUTH_KEY);
 
     const getUserAndCart = async () => {
         if (localAccessToken) {

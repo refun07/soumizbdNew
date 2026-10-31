@@ -1,0 +1,697 @@
+{
+  "hero": {
+    "label": "Hero banner",
+    "fields": {
+      "enabled": {
+        "label": "Enabled",
+        "type": "boolean",
+        "default": true
+      },
+      "kicker": {
+        "label": "Kicker",
+        "type": "text",
+        "default": "A LITTLE CLOSER TO NATURE"
+      },
+      "title": {
+        "label": "Title",
+        "type": "text",
+        "default": "NEW SEASON 2026"
+      },
+      "script": {
+        "label": "Script",
+        "type": "text",
+        "default": "Skin Care"
+      },
+      "description": {
+        "label": "Description",
+        "type": "textarea",
+        "default": "Little rituals. Beautiful results. Find your everyday favourites for skin that feels as good as it looks."
+      },
+      "image": {
+        "label": "Image",
+        "type": "image",
+        "default": "/images/storefront/bangladesh-skincare-hero.jpg"
+      },
+      "image_alt": {
+        "label": "Image alt",
+        "type": "text",
+        "default": "Bangladeshi woman enjoying her botanical skincare routine"
+      },
+      "button_label": {
+        "label": "Button label",
+        "type": "text",
+        "default": "Shop now"
+      },
+      "link": {
+        "label": "Link",
+        "type": "link",
+        "default": "/product"
+      },
+      "secondary_label": {
+        "label": "Secondary label",
+        "type": "text",
+        "default": "View all products"
+      },
+      "secondary_link": {
+        "label": "Secondary link",
+        "type": "link",
+        "default": "/product"
+      },
+      "delivery_label": {
+        "label": "Delivery label",
+        "type": "text",
+        "default": "Delivered with care"
+      },
+      "payment_label": {
+        "label": "Payment label",
+        "type": "text",
+        "default": "Secure payments"
+      },
+      "stamp_line_one": {
+        "label": "Stamp line one",
+        "type": "text",
+        "default": "INSPIRED BY NATURE"
+      },
+      "stamp_line_two": {
+        "label": "Stamp line two",
+        "type": "text",
+        "default": "MADE FOR YOUR RITUAL"
+      }
+    }
+  },
+  "benefits": {
+    "label": "Benefits strip",
+    "fields": {
+      "enabled": {
+        "label": "Enabled",
+        "type": "boolean",
+        "default": true
+      }
+    }
+  },
+  "benefit1": {
+    "label": "Benefit 1",
+    "fields": {
+      "title": {
+        "label": "Title",
+        "type": "text",
+        "default": "Nationwide delivery"
+      },
+      "text": {
+        "label": "Text",
+        "type": "textarea",
+        "default": "Choose your area to see delivery charges."
+      }
+    }
+  },
+  "benefit2": {
+    "label": "Benefit 2",
+    "fields": {
+      "title": {
+        "label": "Title",
+        "type": "text",
+        "default": "Cash on delivery"
+      },
+      "text": {
+        "label": "Text",
+        "type": "textarea",
+        "default": "Pay when your order arrives."
+      }
+    }
+  },
+  "benefit3": {
+    "label": "Benefit 3",
+    "fields": {
+      "title": {
+        "label": "Title",
+        "type": "text",
+        "default": "Everyday essentials"
+      },
+      "text": {
+        "label": "Text",
+        "type": "textarea",
+        "default": "Explore skin, hair and body care."
+      }
+    }
+  },
+  "categories": {
+    "label": "Featured categories",
+    "fields": {
+      "enabled": {
+        "label": "Enabled",
+        "type": "boolean",
+        "default": true
+      },
+      "eyebrow": {
+        "label": "Eyebrow",
+        "type": "text",
+        "default": "Our categories"
+      },
+      "title": {
+        "label": "Title",
+        "type": "text",
+        "default": "Shop by categories"
+      },
+      "link_label": {
+        "label": "Link label",
+        "type": "text",
+        "default": "See all"
+      },
+      "link": {
+        "label": "Link",
+        "type": "link",
+        "default": "/categories"
+      },
+      "limit": {
+        "label": "Limit",
+        "type": "number",
+        "default": 6,
+        "max": 24
+      },
+      "selection": {
+        "label": "Selection",
+        "type": "categories",
+        "default": []
+      }
+    }
+  },
+  "flash": {
+    "label": "Flash sale",
+    "fields": {
+      "enabled": {
+        "label": "Enabled",
+        "type": "boolean",
+        "default": true
+      },
+      "eyebrow": {
+        "label": "Eyebrow",
+        "type": "text",
+        "default": "A little more to love"
+      },
+      "title": {
+        "label": "Title",
+        "type": "text",
+        "default": "Flash sale"
+      },
+      "description": {
+        "label": "Description",
+        "type": "textarea",
+        "default": "Discover your daily-care favourites."
+      },
+      "button_label": {
+        "label": "Button label",
+        "type": "text",
+        "default": "View more"
+      },
+      "link": {
+        "label": "Link",
+        "type": "link",
+        "default": "/on-sale-products"
+      },
+      "background": {
+        "label": "Background",
+        "type": "color",
+        "default": "#b3052a"
+      },
+      "ends_at": {
+        "label": "Sale ends at (Dhaka time, UTC+6)",
+        "type": "datetime",
+        "default": ""
+      },
+      "limit": {
+        "label": "Limit",
+        "type": "number",
+        "default": 8,
+        "max": 24
+      },
+      "selection": {
+        "label": "Selection",
+        "type": "products",
+        "default": []
+      }
+    }
+  },
+  "best": {
+    "label": "Bestselling products",
+    "fields": {
+      "enabled": {
+        "label": "Enabled",
+        "type": "boolean",
+        "default": true
+      },
+      "eyebrow": {
+        "label": "Eyebrow",
+        "type": "text",
+        "default": "Your daily ritual"
+      },
+      "title": {
+        "label": "Title",
+        "type": "text",
+        "default": "Bestselling essentials"
+      },
+      "description": {
+        "label": "Description",
+        "type": "textarea",
+        "default": "Discover care for your skin, hair, and everyday routine."
+      },
+      "link_label": {
+        "label": "Link label",
+        "type": "text",
+        "default": "Shop all products"
+      },
+      "link": {
+        "label": "Link",
+        "type": "link",
+        "default": "/product"
+      },
+      "limit": {
+        "label": "Limit",
+        "type": "number",
+        "default": 4,
+        "max": 24
+      },
+      "selection": {
+        "label": "Selection",
+        "type": "products",
+        "default": []
+      }
+    }
+  },
+  "promotions": {
+    "label": "Promotional banners",
+    "fields": {
+      "enabled": {
+        "label": "Enabled",
+        "type": "boolean",
+        "default": true
+      }
+    }
+  },
+  "promo_left": {
+    "label": "Everyday edit banner",
+    "fields": {
+      "enabled": {
+        "label": "Enabled",
+        "type": "boolean",
+        "default": true
+      },
+      "kicker": {
+        "label": "Kicker",
+        "type": "text",
+        "default": "THE EVERYDAY EDIT"
+      },
+      "title": {
+        "label": "Title",
+        "type": "text",
+        "default": "A little care."
+      },
+      "accent": {
+        "label": "Accent",
+        "type": "text",
+        "default": "Every day."
+      },
+      "description": {
+        "label": "Description",
+        "type": "textarea",
+        "default": "Skin, hair, and a moment for yourself. Find your daily essentials."
+      },
+      "button_label": {
+        "label": "Button label",
+        "type": "text",
+        "default": "Shop essentials"
+      },
+      "link": {
+        "label": "Link",
+        "type": "link",
+        "default": "/product"
+      },
+      "image": {
+        "label": "Image",
+        "type": "image",
+        "default": "/images/storefront/daily-care-still-life.png"
+      },
+      "image_alt": {
+        "label": "Image alt",
+        "type": "text",
+        "default": "Soumi’s Green Tea Face Wash, Faire Serum, night cream and Grow Hair care"
+      }
+    }
+  },
+  "promo_right": {
+    "label": "Combo banner",
+    "fields": {
+      "enabled": {
+        "label": "Enabled",
+        "type": "boolean",
+        "default": true
+      },
+      "kicker": {
+        "label": "Kicker",
+        "type": "text",
+        "default": "THE COMBO COLLECTION"
+      },
+      "title": {
+        "label": "Title",
+        "type": "text",
+        "default": "Good alone."
+      },
+      "accent": {
+        "label": "Accent",
+        "type": "text",
+        "default": "Better together."
+      },
+      "description": {
+        "label": "Description",
+        "type": "textarea",
+        "default": "Discover skincare and hair care sets for your everyday routine."
+      },
+      "button_label": {
+        "label": "Button label",
+        "type": "text",
+        "default": "Explore combos"
+      },
+      "link": {
+        "label": "Link",
+        "type": "link",
+        "default": "/categories/combos-dp99y"
+      },
+      "note": {
+        "label": "Note",
+        "type": "text",
+        "default": "YOUR RITUAL, BEAUTIFULLY PAIRED"
+      }
+    }
+  },
+  "arrivals": {
+    "label": "Hana Beauty products",
+    "fields": {
+      "enabled": {
+        "label": "Enabled",
+        "type": "boolean",
+        "default": true
+      },
+      "eyebrow": {
+        "label": "Eyebrow",
+        "type": "text",
+        "default": "Fresh finds, just for you"
+      },
+      "title": {
+        "label": "Title",
+        "type": "text",
+        "default": "Soumi’s Hana Beauty"
+      },
+      "link_label": {
+        "label": "Link label",
+        "type": "text",
+        "default": "See all"
+      },
+      "link": {
+        "label": "Link",
+        "type": "link",
+        "default": "/brands/soumis-hana-beauty"
+      },
+      "limit": {
+        "label": "Limit",
+        "type": "number",
+        "default": 4,
+        "max": 24
+      },
+      "selection": {
+        "label": "Selection",
+        "type": "products",
+        "default": []
+      },
+      "brand_slug": {
+        "label": "Brand slug (leave blank for all brands)",
+        "type": "text",
+        "default": "soumis-hana-beauty"
+      }
+    }
+  },
+  "offer": {
+    "label": "New arrivals side banner",
+    "fields": {
+      "enabled": {
+        "label": "Enabled",
+        "type": "boolean",
+        "default": true
+      },
+      "kicker": {
+        "label": "Kicker",
+        "type": "text",
+        "default": "A LITTLE SELF-CARE"
+      },
+      "title": {
+        "label": "Title",
+        "type": "text",
+        "default": "Your next glow-up."
+      },
+      "description": {
+        "label": "Description",
+        "type": "textarea",
+        "default": "Good things. Lovely little prices."
+      },
+      "button_label": {
+        "label": "Button label",
+        "type": "text",
+        "default": "Shop offers"
+      },
+      "link": {
+        "label": "Link",
+        "type": "link",
+        "default": "/on-sale-products"
+      },
+      "image": {
+        "label": "Image",
+        "type": "image",
+        "default": "/images/storefront/botanical-hero.webp"
+      },
+      "image_alt": {
+        "label": "Image alt",
+        "type": "text",
+        "default": "Discover our beauty offers"
+      }
+    }
+  },
+  "reviews": {
+    "label": "Customer reviews",
+    "fields": {
+      "enabled": {
+        "label": "Enabled",
+        "type": "boolean",
+        "default": true
+      },
+      "eyebrow": {
+        "label": "Eyebrow",
+        "type": "text",
+        "default": "A little love from our community"
+      },
+      "title": {
+        "label": "Title",
+        "type": "text",
+        "default": "What our customers say"
+      },
+      "link_label": {
+        "label": "Link label",
+        "type": "text",
+        "default": "See all"
+      },
+      "link": {
+        "label": "Link",
+        "type": "link",
+        "default": "/#customer-reviews"
+      },
+      "limit": {
+        "label": "Limit",
+        "type": "number",
+        "default": 2,
+        "max": 20
+      },
+      "accent": {
+        "label": "Highlighted heading text",
+        "type": "text",
+        "default": ""
+      }
+    }
+  },
+  "footer": {
+    "label": "Footer headings and navigation",
+    "fields": {
+      "services_enabled": {
+        "label": "Services enabled",
+        "type": "boolean",
+        "default": true
+      },
+      "account_heading": {
+        "label": "Account heading",
+        "type": "text",
+        "default": "My account"
+      },
+      "explore_heading": {
+        "label": "Explore heading",
+        "type": "text",
+        "default": "Explore"
+      }
+    }
+  },
+  "account1": {
+    "label": "Account link 1",
+    "fields": {
+      "enabled": {
+        "label": "Enabled",
+        "type": "boolean",
+        "default": true
+      },
+      "label": {
+        "label": "Label",
+        "type": "text",
+        "default": "My account"
+      },
+      "link": {
+        "label": "Link",
+        "type": "link",
+        "default": "/dashboard"
+      }
+    }
+  },
+  "account2": {
+    "label": "Account link 2",
+    "fields": {
+      "enabled": {
+        "label": "Enabled",
+        "type": "boolean",
+        "default": true
+      },
+      "label": {
+        "label": "Label",
+        "type": "text",
+        "default": "Track your order"
+      },
+      "link": {
+        "label": "Link",
+        "type": "link",
+        "default": "/orders/track"
+      }
+    }
+  },
+  "account3": {
+    "label": "Account link 3",
+    "fields": {
+      "enabled": {
+        "label": "Enabled",
+        "type": "boolean",
+        "default": true
+      },
+      "label": {
+        "label": "Label",
+        "type": "text",
+        "default": "Your wishlist"
+      },
+      "link": {
+        "label": "Link",
+        "type": "link",
+        "default": "/wishlist"
+      }
+    }
+  },
+  "account4": {
+    "label": "Account link 4",
+    "fields": {
+      "enabled": {
+        "label": "Enabled",
+        "type": "boolean",
+        "default": true
+      },
+      "label": {
+        "label": "Label",
+        "type": "text",
+        "default": "Get in touch"
+      },
+      "link": {
+        "label": "Link",
+        "type": "link",
+        "default": "/support/ticket/create"
+      }
+    }
+  },
+  "explore1": {
+    "label": "Explore link 1",
+    "fields": {
+      "enabled": {
+        "label": "Enabled",
+        "type": "boolean",
+        "default": true
+      },
+      "label": {
+        "label": "Label",
+        "type": "text",
+        "default": "All products"
+      },
+      "link": {
+        "label": "Link",
+        "type": "link",
+        "default": "/product"
+      }
+    }
+  },
+  "explore2": {
+    "label": "Explore link 2",
+    "fields": {
+      "enabled": {
+        "label": "Enabled",
+        "type": "boolean",
+        "default": true
+      },
+      "label": {
+        "label": "Label",
+        "type": "text",
+        "default": "Our brands"
+      },
+      "link": {
+        "label": "Link",
+        "type": "link",
+        "default": "/brands"
+      }
+    }
+  },
+  "explore3": {
+    "label": "Explore link 3",
+    "fields": {
+      "enabled": {
+        "label": "Enabled",
+        "type": "boolean",
+        "default": true
+      },
+      "label": {
+        "label": "Label",
+        "type": "text",
+        "default": "Special offers"
+      },
+      "link": {
+        "label": "Link",
+        "type": "link",
+        "default": "/on-sale-products"
+      }
+    }
+  },
+  "explore4": {
+    "label": "Explore link 4",
+    "fields": {
+      "enabled": {
+        "label": "Enabled",
+        "type": "boolean",
+        "default": true
+      },
+      "label": {
+        "label": "Label",
+        "type": "text",
+        "default": "The beauty journal"
+      },
+      "link": {
+        "label": "Link",
+        "type": "link",
+        "default": "/blogs"
+      }
+    }
+  }
+}

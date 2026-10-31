@@ -84,7 +84,7 @@ const ProductCardThemeOne = (props: Props) => {
 
             <div className="overflow-hidden relative">
                 <Link
-                    to={`/products/${product.slug}`}
+                    to={`/product/${product.slug}`}
                     className="aspect-square bg-white flex items-center justify-center"
                 >
                     <Image
@@ -126,7 +126,7 @@ const ProductCardThemeOne = (props: Props) => {
                 />
                 <h3 className="font-medium mb-1.5">
                     <Link
-                        to={`/products/${product.slug}`}
+                        to={`/product/${product.slug}`}
                         className="line-clamp-2"
                     >
                         {product.name}

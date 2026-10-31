@@ -1,3 +1,4 @@
+import { safeLocalStorage, safeSessionStorage } from '../../../utils/safeStorage';
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { useSelector } from 'react-redux';
 import { STORAGE_KEYS } from '../../../types';
@@ -32,7 +33,7 @@ const authSlice = createSlice({
     reducers: {
         userLoggedIn: (state, action: PayloadAction<Partial<AuthState>>) => {
             if (action.payload.accessToken) {
-                localStorage.setItem(
+                safeLocalStorage.setItem(
                     STORAGE_KEYS.AUTH_KEY,
                     action.payload.accessToken,
                 );
@@ -48,8 +49,8 @@ const authSlice = createSlice({
         },
         userLoggedOut: () => {
             // clear local storage, and session storage
-            sessionStorage.clear();
-            localStorage.clear();
+            safeSessionStorage.clear();
+            safeLocalStorage.clear();
 
             return {
                 ...initialState,
@@ -82,7 +83,7 @@ const authSlice = createSlice({
                 state.countries = action.payload.countries;
                 state.accessToken = action.payload.access_token;
 
-                localStorage.setItem(
+                safeLocalStorage.setItem(
                     STORAGE_KEYS.AUTH_KEY,
                     action.payload.access_token,
                 );
@@ -102,7 +103,7 @@ const authSlice = createSlice({
                 state.guestUserId = null;
                 state.carts = action.payload.carts;
                 state.countries = action.payload.countries;
-                state.accessToken = localStorage.getItem(STORAGE_KEYS.AUTH_KEY);
+                state.accessToken = safeLocalStorage.getItem(STORAGE_KEYS.AUTH_KEY);
             })
             .addCase(getUser.rejected, (state) => {
                 state.isLoading = false;
@@ -125,7 +126,7 @@ const authSlice = createSlice({
                 state.countries = action.payload.countries;
                 state.accessToken = action.payload.access_token;
 
-                localStorage.setItem(
+                safeLocalStorage.setItem(
                     STORAGE_KEYS.AUTH_KEY,
                     action.payload.access_token,
                 );
@@ -147,7 +148,7 @@ const authSlice = createSlice({
                 state.countries = action.payload.countries;
                 state.accessToken = action.payload.access_token;
 
-                localStorage.setItem(
+                safeLocalStorage.setItem(
                     STORAGE_KEYS.AUTH_KEY,
                     action.payload.access_token,
                 );

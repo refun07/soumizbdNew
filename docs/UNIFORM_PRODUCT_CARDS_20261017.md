@@ -1,0 +1,9 @@
+# Uniform storefront product cards
+
+The shared BotanicalProductCard now keeps the same cart button plus circular quick-view action at all widths. Removed the narrow-card rule that changed quick view into a second text row. Card borders, padding, square contained images, typography and pricing retain one shared style; metadata and actions align at the bottom. Native button types and loading semantics are explicit.
+
+Catalog, wishlist, campaign and shop grids use a shared responsive card grid so narrow columns do not force alternate designs. Product-detail sidebar recommendations use a single column on narrow phones. Shared recommendation sliders and flash sale use fewer, wider cards while preserving the same card component. Home bestseller/new-arrival static grids remain in place. Cart/order line items retain their transactional layouts.
+
+Verification: 24 local route/viewport checks across homepage, catalog, health category, Soumis brand, offers and product detail at 320/375/768/1440px passed with no overflow or action-layout differences. Sampled shared card styling was identical: 18px border radius, 10px padding, 18px titles, 24px prices, contained images and 44px circular preview controls. Quick view opened and closed successfully. Twelve live checks across the same six routes at 375/1440px passed. Wishlist/campaign/shop wiring was inspected in source; populated authenticated wishlist and every specialized shop/campaign were not exercised. No cart additions, order submissions or product-data changes were made.
+
+Build and git diff --check passed. TypeScript retains the existing 87 diagnostics with zero new error signatures. Deployed shomiz-uniform-cards-20261017.zip through cPanel, retaining earlier release archives. Evidence and source manifest: artifacts/uniform-product-cards/.

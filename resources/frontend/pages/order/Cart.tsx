@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { FaHome, FaTimes } from 'react-icons/fa';
+import { LuShoppingBag } from 'react-icons/lu';
 import { Link, useNavigate } from 'react-router-dom';
 import Breadcrumb from '../../components/Breadcrumb';
 import Button from '../../components/buttons/Button';
@@ -118,6 +119,20 @@ const Cart = () => {
         );
     }
 
+    if (!carts.length) {
+        return (
+            <>
+                <Breadcrumb title={translate('Your Cart')} navigation={[{ name: translate('Home'), link: '/' }, { name: translate('Cart') }]} />
+                <section className="bot-empty-cart container mb-12">
+                    <LuShoppingBag aria-hidden="true" />
+                    <h2>{translate('Your cart is empty')}</h2>
+                    <p>Find your everyday essentials and add them to your bag.</p>
+                    <Link className="bot-button" to="/product">{translate('Continue shopping')}</Link>
+                </section>
+            </>
+        );
+    }
+
     const handleApplyCoupon = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
@@ -197,8 +212,8 @@ const Cart = () => {
                 ]}
             />
 
-            <div className="container no-style grid grid-cols-1 md:grid-cols-3 mb-12">
-                <div className="md:col-span-2 bg-white rounded-card p-3 sm:p-6 md:p-9">
+            <div className="bot-cart-page container no-style grid grid-cols-1 gap-6 lg:grid-cols-3 mb-12">
+                <div className="lg:col-span-2 bg-white rounded-card p-3 sm:p-6 md:p-9">
                     {window.config.generalSettings.appMode === 'multiVendor' && (
                     <Checkbox
                         label={`${translate('Select All')} (${
@@ -369,7 +384,7 @@ const Cart = () => {
                             <div className="flex gap-2">
                                 <Button
                                     as="link"
-                                    to="/products"
+                                    to="/product"
                                     className="grow"
                                     size="lg"
                                     arrow={false}

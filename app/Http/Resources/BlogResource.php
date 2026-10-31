@@ -32,7 +32,7 @@ class BlogResource extends JsonResource
         if (Route::currentRouteName() == 'api.blogs.show') { // todo:: && frontend listing route
             $additionalData = [
                 'shortDescription'  => $this->collectTranslation('short_description'),
-                'description'       => $this->collectTranslation('description'),
+                'description'       => \App\Services\StorefrontLinks::html($this->collectTranslation('description')),
                 'banner'            => uploadedAsset($this->banner),
                 'metaTitle'         => $this->meta_title,
                 'metaKeywords'      => $this->meta_keywords,

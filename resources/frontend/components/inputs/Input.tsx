@@ -26,7 +26,7 @@ const Input = ({
                 type={inputType}
                 name={name}
                 className={cn(
-                    `w-full border border-primary-14 rounded-card h-8 sm:h-10 px-[15px] focus:border-secondary placeholder:text-black/70`,
+                    `bot-ui-input w-full min-w-0 border border-primary-14 rounded-card h-11 sm:h-10 text-base sm:text-sm px-[15px] focus:border-secondary placeholder:text-black/70`,
                     className,
                 )}
                 {...rest}

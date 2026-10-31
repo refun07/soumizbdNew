@@ -162,6 +162,7 @@
             </div>
 
 
+            <div data-product-results>
             <table class="product-list-table footable w-full">
                 <thead class="uppercase text-left bg-primary/10">
                     <tr>
@@ -320,7 +321,7 @@
                                 <x-backend.inputs.action-dropdown label="{{ translate('Actions') }}" class="w-[105px] 2xl:w-[130px]">
                                     <ul>
                                         <li>
-                                            <a href="{{ url('/products\/') . $product->slug }}" target="_blank"
+                                            <a href="{{ route('product', $product->slug) }}" target="_blank"
                                                 class="ad-12b3e8cf__option">{{ translate('View Product') }}</a>
                                         </li>
 
@@ -370,6 +371,7 @@
 
             <div class="card__footer">
                 {{ $products->links() }}
+            </div>
             </div>
         </div>
     </div>

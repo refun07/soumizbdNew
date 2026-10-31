@@ -69,7 +69,7 @@ const ProductCardThemeFour = (props: Props) => {
 
             <div className="relative aspect-square overflow-hidden bg-white">
                 <Link
-                    to={`/products/${product.slug}`}
+                    to={`/product/${product.slug}`}
                     className="flex size-full items-center justify-center bg-[#f7f7f7]"
                 >
                     <Image
@@ -128,7 +128,7 @@ const ProductCardThemeFour = (props: Props) => {
                 </div>
                 <h3 className="mt-2 min-h-[41px] text-[14px] font-semibold leading-[1.45] text-[#111111] transition group-hover:text-[#B3052A]">
                     <Link
-                        to={`/products/${product.slug}`}
+                        to={`/product/${product.slug}`}
                         className="line-clamp-2"
                     >
                         {product.name}

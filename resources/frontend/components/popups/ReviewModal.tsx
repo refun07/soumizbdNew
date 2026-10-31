@@ -167,7 +167,7 @@ const ReviewModal = () => {
                 >
                     {product?.slug ? (
                         <Link
-                            to={`/products/${product.slug}`}
+                            to={`/product/${product.slug}`}
                             className="rounded-card border border-primary-14 p-1"
                         >
                             <Image
@@ -189,7 +189,7 @@ const ReviewModal = () => {
                     <h3 className="text-black sm:text-sm mb-2 max-w-[220px]">
                         {product?.slug ? (
                             <Link
-                                to={`/products/${product.slug}`}
+                                to={`/product/${product.slug}`}
                                 className="hover:text-primary max-w-[300px] line-clamp-2"
                             >
                                 {product.name}

@@ -4,19 +4,12 @@ namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Backend\Admin\Configurations\LanguageController;
 use App\Http\Controllers\Controller;
-use App\Models\Blog;
-use App\Models\Brand;
-use App\Models\Category;
 use App\Models\Country;
 use App\Models\Language;
-use App\Models\Page;
-use App\Models\Product;
-use App\Models\Shop;
 use App\Models\SystemSetting;
 use App\Models\Translation;
 use Cache;
 use Illuminate\Http\Request;
-use Route;
 
 class HomeController extends Controller
 {
@@ -164,6 +157,7 @@ class HomeController extends Controller
         ];
 
         $settings = [
+            'botanicalContent' => \App\Services\BotanicalHomeContent::content(),
             #theme settings
             'defaultTheme'          => getSetting('defaultTheme') ?? 'theme-one',
             'defaultHeader'         => $selectedHeader,
@@ -288,74 +282,14 @@ class HomeController extends Controller
 
         ];
 
-        $meta = [
-            'meta_title' => getSetting('meta_title'),
-            'meta_description' => getSetting('meta_description'),
-            'meta_image' => uploadedAsset(getSetting('meta_image')),
-            'meta_keywords' => getSetting('meta_keywords'),
-            'meta_url' => env('APP_URL'),
-
-
-        ];
-        $meta['meta_title'] = $meta['meta_title'] ? $meta['meta_title'] : config('app.name');
-
-        if (Route::currentRouteName() == 'product') {
-            $product = Product::fromPublishedShops()->isPublished()->hideOnEcom()->where('slug', $slug)->first();
-            if ($product) {
-                $meta['meta_title']         = $product->meta_title ? $product->meta_title : $product->name;
-                $meta['meta_description']   = $product->meta_description ? $product->meta_description : $meta['meta_description'];
-                $meta['meta_keywords']      = $product->meta_keywords ? $product->meta_keywords : $meta['meta_keywords'];
-                $meta['meta_image']         = $product->meta_image ? uploadedAsset($product->meta_image) : uploadedAsset($product->thumbnail_img);
-                $meta['meta_url']           = route('product', $slug);
-            }
-        } elseif (Route::currentRouteName() == 'category') {
-            $category = Category::where('slug', $slug)->first();
-            if ($category) {
-                $meta['meta_title']         = $category->meta_title ? $category->meta_title : $category->name;
-                $meta['meta_description']   = $category->meta_description ? $category->meta_description : $meta['meta_description'];
-                $meta['meta_keywords']      = $category->meta_keywords ? $category->meta_keywords : $meta['meta_keywords'];
-                $meta['meta_image']         = $category->meta_image ? uploadedAsset($category->meta_image) : uploadedAsset($category->thumbnail_img);
-                $meta['meta_url']           = route('product', $slug);
-            }
-        } elseif (Route::currentRouteName() == 'brand') {
-            $brand = Brand::where('slug', $slug)->first();
-            if ($brand) {
-                $meta['meta_title']         = $brand->meta_title ? $brand->meta_title : $brand->name;
-                $meta['meta_description']   = $brand->meta_description ? $brand->meta_description : $meta['meta_description'];
-                $meta['meta_keywords']      = $brand->meta_keywords ? $brand->meta_keywords : $meta['meta_keywords'];
-                $meta['meta_image']         = $brand->meta_image ? uploadedAsset($brand->meta_image) : uploadedAsset($brand->thumbnail_img);
-                $meta['meta_url']           = route('product', $slug);
-            }
-        } elseif (Route::currentRouteName() == 'shop') {
-            $shop = Shop::where('slug', $slug)->first();
-            if ($shop) {
-                $meta['meta_title']         = $shop->meta_title ? $shop->meta_title : $shop->name;
-                $meta['meta_description']   = $shop->meta_description ? $shop->meta_description : $meta['meta_description'];
-                $meta['meta_keywords']      = $shop->meta_keywords ? $shop->meta_keywords : $meta['meta_keywords'];
-                $meta['meta_image']         = $shop->meta_image ? uploadedAsset($shop->meta_image) : uploadedAsset($shop->logo);
-                $meta['meta_url']           = route('shop', $slug);
-            }
-        } elseif (Route::currentRouteName() == 'blog') {
-            $blog = Blog::where('slug', $slug)->first();
-            if ($blog) {
-                $meta['meta_title']         = $blog->meta_title ? $blog->meta_title : $blog->name;
-                $meta['meta_description']   = $blog->meta_description ? $blog->meta_description : $meta['meta_description'];
-                $meta['meta_keywords']      = $blog->meta_keywords ? $blog->meta_keywords : $meta['meta_keywords'];
-                $meta['meta_image']         = $blog->meta_image ? uploadedAsset($blog->meta_image) : uploadedAsset($blog->thumbnail_image);
-                $meta['meta_url']           = route('blog', $slug);
-            }
-        } elseif (Route::currentRouteName() == 'page') {
-            $page = Page::where('slug', $slug)->first();
-            if ($page) {
-                $meta['meta_title']         = $page->meta_title ? $page->meta_title : $page->title;
-                $meta['meta_description']   = $page->meta_description ? $page->meta_description : $meta['meta_description'];
-                $meta['meta_keywords']      = $page->meta_keywords ? $page->meta_keywords : $meta['meta_keywords'];
-                $meta['meta_image']         = $page->meta_image ? uploadedAsset($page->meta_image) : $meta['meta_image'];
-                $meta['meta_url']           = route('page', $slug);
-            }
-        }
-
-        return view('frontend.home', compact('settings', 'meta', 'primaryColor', 'secondaryColor'));
+        $settings = \App\Services\StorefrontLinks::normalize($settings);
+        $seo = app(\App\Services\StorefrontSeo::class)->forRequest($request);
+        return response()->view('frontend.home', compact('settings', 'seo', 'primaryColor', 'secondaryColor'), $seo['status'])
+            ->withHeaders([
+                'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0, private',
+                'Pragma' => 'no-cache',
+                'Expires' => '0',
+            ]);
     }
 
     # get enabled header social links

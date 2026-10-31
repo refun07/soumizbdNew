@@ -31,8 +31,8 @@
 
     @if ($simplifiedAdmin)
         <div class="card mb-3" id="admin-product-essentials">
-            <div class="card__title flex items-center justify-between">
-                <div class="flex items-center gap-3">
+            <div class="card__title flex flex-wrap items-center justify-between gap-3">
+                <div class="flex flex-wrap items-center gap-3 min-w-0">
                     @if ($product)
                         <div id="admin-product-language-selector"></div>
                     @endif
@@ -127,7 +127,7 @@
                             @if ($showMinPurchaseQtyField)
                                 <x-backend.inputs.number label="Min Purchase Quantity" name="min_purchase_qty"
                                     placeholder="Type minimum purchase quantity"
-                                    value="{{ $product?->min_purchase_qty ?? 1 }}" min="1" />
+                                    value="{{ max(1, (int) ($product?->min_purchase_qty ?? 1)) }}" min="1" />
                             @else
                                 <input type="hidden" name="min_purchase_qty" value="1">
                             @endif
@@ -135,7 +135,7 @@
                             @if ($showMaxPurchaseQtyField)
                                 <x-backend.inputs.number label="Max Purchase Quantity" name="max_purchase_qty"
                                     placeholder="Type maximum purchase quantity"
-                                    value="{{ $product?->max_purchase_qty ?? 1 }}" min="1" />
+                                    value="{{ max(1, (int) ($product?->max_purchase_qty ?? 100)) }}" min="1" />
                             @else
                                 <input type="hidden" name="max_purchase_qty" value="100">
                             @endif
@@ -523,14 +523,14 @@
                                 <div>
                                     <label class="mb-2">
                                         {{ translate('Slug') }}
-                                        <span class="text-muted ml-2">{{ url('/products') }}/</span>
+                                        <span class="text-muted ml-2">{{ url('/product') }}/</span>
                                     </label>
                                     <x-backend.inputs.text name="slug" placeholder="Type custom slug"
                                         value="{{ $product?->slug }}" />
                                 </div>
 
 
-                                <a href="{{ url('/products') }}/{{ $product?->slug }}" target="_blank">
+                                <a href="{{ url('/product') }}/{{ $product?->slug }}" target="_blank">
                                     {{ translate('Visit Product') }}
                                     <span class="ml-2 text-secondary-light">
                                         <i class="fa-solid fa-eye"></i>
@@ -1703,6 +1703,12 @@
             };
 
             document.getElementById('product-form')?.addEventListener('invalid', function(event) {
+                // Native validation must be able to focus fields in the simplified editor.
+                let ancestor = event.target.parentElement;
+                while (ancestor && ancestor !== this) {
+                    ancestor.hidden = false;
+                    ancestor = ancestor.parentElement;
+                }
                 openContainingAccordion(event.target);
             }, true);
 

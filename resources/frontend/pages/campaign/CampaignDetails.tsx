@@ -155,13 +155,13 @@ const CampaignDetails = () => {
                         className="mb-7"
                     />
 
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                    <div className="bot-catalog-product-grid grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                         {showLoading && !displayProducts?.length ? (
                             Array.from({ length: 5 }).map((_, index) => (
                                 <ProductCardSkeleton key={index} />
                             ))
                         ) : !displayProducts?.length ? (
-                            <div className="col-span-5 py-5 text-center">
+                            <div className="col-span-full py-5 text-center">
                                 {translate('No Product Found')}
                             </div>
                         ) : (

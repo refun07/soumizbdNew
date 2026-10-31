@@ -1,5 +1,6 @@
 import { closePopup, usePopup } from '../../store/features/popup/popupSlice';
 import { useAppDispatch } from '../../store/store';
+import { useEffect } from 'react';
 
 interface Props {
     onClick?: () => void;
@@ -8,6 +9,14 @@ interface Props {
 const Overlay = ({ onClick }: Props) => {
     const dispatch = useAppDispatch();
     const { popup, popupProps } = usePopup();
+    useEffect(() => {
+        if (!popup) return;
+        const handleEscape = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') dispatch(closePopup());
+        };
+        document.addEventListener('keydown', handleEscape);
+        return () => document.removeEventListener('keydown', handleEscape);
+    }, [popup, dispatch]);
 
     const handleClick = () => {
         if (popup) {

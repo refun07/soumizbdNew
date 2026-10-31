@@ -22,6 +22,7 @@ import FilterSidebar from './FilterSidebar';
 
 interface Props {
     breadcrumb?: boolean;
+    concernSlug?: string;
     categorySlug?: string;
     brandSlug?: string;
     shopSlug?: string;
@@ -34,6 +35,7 @@ interface Props {
 
 const SearchAndFilter = ({
     breadcrumb = true,
+    concernSlug,
     categorySlug,
     brandSlug,
     shopSlug,
@@ -55,9 +57,6 @@ const SearchAndFilter = ({
     // Track if we've successfully loaded products (to prevent 404 on pagination errors)
     const hasLoadedProductsRef = useRef(false);
 
-    // Track if we ever had a valid category for this slug (to distinguish invalid category vs pagination error)
-    const hasValidCategoryRef = useRef(false);
-
     // Check if infinite scroll is enabled
     const isInfiniteScrollEnabled = window.config.generalSettings.productInfiniteScroll;
 
@@ -66,8 +65,17 @@ const SearchAndFilter = ({
     const [currentPage, setCurrentPage] = useState(1);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-    const [getProducts, { data: productsRes, isLoading, isFetching }] =
+    const [getProducts, { currentData, originalArgs, isLoading, isFetching, isSuccess, isError }] =
         useLazyGetProductsQuery();
+    // A lazy query initially has no request, and can retain the previous route's
+    // result until the effect triggers. Only use data belonging to this scope.
+    const requestedScope = qs.parse(originalArgs || '', { ignoreQueryPrefix: true });
+    const matchesScope = requestedScope.concernSlug === concernSlug && requestedScope.categorySlug === categorySlug &&
+        requestedScope.brandSlug === brandSlug && requestedScope.shopSlug === shopSlug &&
+        Boolean(requestedScope.discounted) === discounted &&
+        Boolean(requestedScope.onSaleProducts) === onSaleProducts &&
+        Boolean(requestedScope.featuredProducts) === featuredProducts;
+    const productsRes = matchesScope ? currentData : undefined;
 
     const products = productsRes?.products?.data;
     const pagination = productsRes?.products?.meta;
@@ -82,7 +90,8 @@ const SearchAndFilter = ({
         parseArrays: true,
         plainObjects: true,
     });
-    filters.limit = 16;
+    // Fill complete rows in the two-, three-, and four-column catalog layouts.
+    filters.limit = 24;
 
     // Reset accumulated products when filters change (not just page)
     useEffect(() => {
@@ -117,13 +126,13 @@ const SearchAndFilter = ({
     // (to properly show 404 for invalid categories and clear old products)
     useEffect(() => {
         hasLoadedProductsRef.current = false;
-        hasValidCategoryRef.current = false;
         if (isInfiniteScrollEnabled) {
             setAccumulatedProducts([]);
             setCurrentPage(1);
             hasTriggeredRef.current = false;
         }
     }, [
+        concernSlug,
         categorySlug,
         brandSlug,
         shopSlug,
@@ -132,13 +141,6 @@ const SearchAndFilter = ({
         featuredProducts,
         isInfiniteScrollEnabled,
     ]);
-
-    // Track valid category when selectedCategory is available
-    useEffect(() => {
-        if (selectedCategory) {
-            hasValidCategoryRef.current = true;
-        }
-    }, [selectedCategory]);
 
     // Update accumulated products when new data arrives
     useEffect(() => {
@@ -177,6 +179,7 @@ const SearchAndFilter = ({
 
         const scopedFilters: URLFilterParams = {
             ...filters,
+            concernSlug,
             categorySlug,
             brandSlug,
             shopSlug,
@@ -215,7 +218,7 @@ const SearchAndFilter = ({
             },
         );
         getProducts(queryStr, true);
-    }, [location.search, location.pathname, isInfiniteScrollEnabled, categorySlug, brandSlug, shopSlug, discounted, onSaleProducts, featuredProducts]);
+    }, [location.search, location.pathname, isInfiniteScrollEnabled, concernSlug, categorySlug, brandSlug, shopSlug, discounted, onSaleProducts, featuredProducts]);
 
     // Load more products for infinite scroll
     const loadMoreProducts = useCallback(() => {
@@ -232,6 +235,7 @@ const SearchAndFilter = ({
 
         const newFilters = {
             ...filters,
+            concernSlug,
             categorySlug,
             brandSlug,
             shopSlug,
@@ -260,6 +264,7 @@ const SearchAndFilter = ({
         isFetching,
         isLoadingMore,
         filters,
+        concernSlug,
         categorySlug,
         brandSlug,
         shopSlug,
@@ -301,7 +306,7 @@ const SearchAndFilter = ({
 
     // set filters to the search params (url)
     const handleFilter = (query: URLFilterParams) => {
-        const str = qs.stringify(query, {
+        const str = qs.stringify({ ...query, page: 1 }, {
             addQueryPrefix: true,
             arrayFormat: 'brackets',
             encode: false,
@@ -349,26 +354,27 @@ const SearchAndFilter = ({
 
     const pageTitle =
         title ||
+        selectedCategory?.name ||
+        productsRes?.selectedBrand?.name ||
         (categorySlug || brandSlug || shopSlug)?.replace(/[-_]/g, ' ') ||
         (filters.query &&
             `${translate('Search result for')} '${filters.query || ''}'`) ||
         'All Products';
 
-    // Show 404 if category doesn't exist (slug provided but no valid category found)
-    // Only show after loading completes and we never got a valid category
-    if (!isLoading && !isFetching && categorySlug && !selectedCategory && !hasValidCategoryRef.current) {
+    // Absence is only authoritative after this category's request succeeds.
+    if (matchesScope && isSuccess && !isFetching && productsRes && categorySlug && !selectedCategory) {
         return <NotFound />;
     }
 
     // Determine which products to display
-    const displayProducts = isInfiniteScrollEnabled ? accumulatedProducts : products;
-    const showLoading = isFetching && !isLoadingMore;
+    const displayProducts = !matchesScope ? undefined : isInfiniteScrollEnabled ? accumulatedProducts : products;
+    const showLoading = (!matchesScope || originalArgs === undefined || isFetching) && !isLoadingMore;
     const hasMore = pagination ? pagination.current_page < pagination.last_page : false;
 
     return (
         <>
             {breadcrumb && (
-                <Breadcrumb
+                <Breadcrumb headingLevel="p"
                     title={translate('Products')}
                     navigation={[
                         {
@@ -378,7 +384,7 @@ const SearchAndFilter = ({
                         },
                         {
                             name: translate('Products'),
-                            link: '/products',
+                            link: '/product',
                         },
                         {
                             name: pageTitle,
@@ -411,8 +417,9 @@ const SearchAndFilter = ({
                 />
 
                 <div className="min-w-0 lg:col-span-3">
-                    <div className="flex items-end gap-3.5">
+                    <div className="bot-filter-heading flex items-end gap-3.5">
                         <SectionTitle
+                            headingLevel="h1"
                             title={`[${pageTitle}]`}
                             titleAside={titleAside}
                             classNames={{
@@ -482,10 +489,17 @@ const SearchAndFilter = ({
                     )}
 
                     <div
-                        className="grid grid-cols-2 xs:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-4 mt-3 sm:mt-6 gap-5"
+                        className="bot-catalog-product-grid grid grid-cols-2 xs:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-4 mt-3 sm:mt-6 gap-5"
                         id="filtered-products"
                     >
-                        {showLoading && !displayProducts?.length ? (
+                        {matchesScope && isError ? (
+                            <div className="col-span-full rounded-xl border border-primary-14 p-6" role="alert">
+                                <p>{translate('Unable to load products. Please try again.')}</p>
+                                <button type="button" className="mt-3 underline" onClick={() => getProducts(originalArgs, false)}>
+                                    {translate('Retry')}
+                                </button>
+                            </div>
+                        ) : showLoading && !displayProducts?.length ? (
                             Array(8)
                                 .fill(0)
                                 .map((_, i) => <ProductCardSkeleton key={i} />)

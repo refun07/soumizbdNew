@@ -16,10 +16,14 @@
                     {{ translate($page?->title . ' Editor') . ' - ' . $theme }}
                 </div>
                 @if ($page->slug == 'homepage')
+                    <div class="p-5">
+                        <a class="text-primary underline font-bold" href="{{ route('admin.botanical-home.edit') }}">Edit storefront homepage content</a>
+                        <p class="text-sm mt-2">Edit the botanical homepage banners, headings, benefits, products and visibility in the dedicated editor. Customer reviews and extra sections are managed below.</p>
+                    </div>
                     <div class="init-accordion accordion-container border-collapse">
                         <x-backend.forms.storefront-layout-settings-form />
                         @if ($theme == 'theme-one')
-                            <x-backend.forms.homepage-theme-one-form langKey="{{ $lang_key }}" />
+                            <p class="p-5 text-sm">The botanical homepage layout is managed in the dedicated homepage content editor linked above. Manage review entries and extra sections below.</p>
                         @elseif ($theme == 'theme-two')
                             <x-backend.forms.homepage-theme-two-form langKey="{{ $lang_key }}" />
                         @elseif ($theme == 'theme-three')

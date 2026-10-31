@@ -1,3 +1,4 @@
+import { readStoredJson, safeSessionStorage } from '../../../utils/safeStorage';
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { useSelector } from 'react-redux';
 import { ICheckoutData } from '../../../types/checkout';
@@ -23,12 +24,18 @@ const initialState: ICheckoutData = {
 };
 
 const checkoutSessionKey = 'arm-checkoutData';
-const sessionData = JSON.parse(
-    sessionStorage.getItem(checkoutSessionKey) || 'null',
-);
+const sessionData = readStoredJson<ICheckoutData>(safeSessionStorage, checkoutSessionKey);
+const isRecord = (value: unknown): value is Record<string, any> => !!value && typeof value === 'object' && !Array.isArray(value);
+const restoredState: ICheckoutData = isRecord(sessionData) ? {
+    ...initialState,
+    ...sessionData,
+    customerDetails: { ...initialState.customerDetails, ...(isRecord(sessionData.customerDetails) ? sessionData.customerDetails : {}) },
+    selectedShops: isRecord(sessionData.selectedShops) ? sessionData.selectedShops : {},
+    coupons: Array.isArray(sessionData.coupons) ? sessionData.coupons : [],
+} : initialState;
 
 const saveToSessionStorage = (state: ICheckoutData) => {
-    sessionStorage.setItem(checkoutSessionKey, JSON.stringify(state));
+    safeSessionStorage.setItem(checkoutSessionKey, JSON.stringify(state));
 };
 
 const checkoutSlice = createSlice({
@@ -36,7 +43,7 @@ const checkoutSlice = createSlice({
 
     // get initial state from session storage
     // if not found, use initialState
-    initialState: (sessionData as ICheckoutData) || initialState,
+    initialState: restoredState,
 
     reducers: {
         setCheckoutData: (
@@ -52,7 +59,7 @@ const checkoutSlice = createSlice({
         },
 
         clearCheckoutData: () => {
-            sessionStorage.removeItem(checkoutSessionKey);
+            safeSessionStorage.removeItem(checkoutSessionKey);
             return initialState;
         },
     },

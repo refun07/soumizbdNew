@@ -1,3 +1,4 @@
+import BotanicalProductCard from '../../storefront/BotanicalProductCard';
 import { useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useDispatch } from 'react-redux';
@@ -14,10 +15,6 @@ import { togglePopup } from '../../../store/features/popup/popupSlice';
 import { IProductShort } from '../../../types/product';
 import { isProductAvailable } from '../../../utils/checkStock';
 import { translate } from '../../../utils/translate';
-import ProductCardThemeOne from './ProductCardThemeOne';
-import ProductCardThemeFour from './ProductCardThemeFour';
-import ProductCardThemeThree from './ProductCardThemeThree';
-import ProductCardThemeTwo from './ProductCardThemeTwo';
 
 import useGTMEventsNew from 'hooks/useGTMEventNew';
 import { createMetaEventId } from '../../../utils/gtmCustomerData';
@@ -66,7 +63,7 @@ export const useProductActions = (p: IProductShort) => {
         //         togglePopup({
         //             popup: 'user-location',
         //             popupProps: {
-        //                 redirectOnSuccess: `/products/${product.slug}`,
+        //                 redirectOnSuccess: `/product/${product.slug}`,
         //             },
         //         }),
         //     );
@@ -78,18 +75,22 @@ export const useProductActions = (p: IProductShort) => {
             return;
         }
 
-        // if product has variations, show product preview popup
-        if (product.hasVariation) {
-            handleProductPreview();
+        const productDetails = await getProductDetails(product.slug).unwrap();
+        // Card purchases use the first available option; other options remain
+        // accessible through the product page and quick view.
+        const selectedVariation = productDetails.variations.find((variation) => {
+            if (window.config.generalSettings.allowBackorder) return true;
+            const stock = variation.stocks.reduce((sum, item) => sum + item.stockQty, 0);
+            const quantityInCart = carts.find((item) => item.variation.id === variation.id)?.qty || 0;
+            return stock > quantityInCart;
+        }) || productDetails.variations[0];
+        if (!selectedVariation) {
+            toast.error(translate('Out of stock'));
             return;
         }
 
-        // else fetch the product and add it to cart with 1st (and only) variation id
-
-        const productDetails = await getProductDetails(product.slug).unwrap();
-
         // check if the selected variation is in stock or not
-        if (!isProductAvailable(productDetails.variations[0]!, carts)) {
+        if (!isProductAvailable(selectedVariation, carts)) {
             return;
         }
 
@@ -97,15 +98,13 @@ export const useProductActions = (p: IProductShort) => {
             const eventId = createMetaEventId('add_to_cart');
 
             await addToCart({
-                productVariationId: productDetails.variations[0].id,
+                productVariationId: selectedVariation.id,
                 qty: 1,
                 warehouseId:
-                    productDetails.variations[0].stocks[0]?.warehouseId,
+                    (selectedVariation.stocks.find((stock) => stock.stockQty > 0) || selectedVariation.stocks[0])?.warehouseId,
                 eventId,
             }).unwrap();
             toast.success(translate('Added to cart'));
-
-            const selectedVariation = productDetails.variations[0];
 
             const variantId = `${selectedVariation.productId}-${selectedVariation.id}`;
 
@@ -257,18 +256,6 @@ export const useProductActions = (p: IProductShort) => {
     };
 };
 
-const ProductCard = (props: Props) => {
-    if (window.config.defaultProductCard === 'product-card-one') {
-        return <ProductCardThemeOne {...props} />;
-    } else if (window.config.defaultProductCard === 'product-card-two') {
-        return <ProductCardThemeTwo {...props} />;
-    } else if (window.config.defaultProductCard === 'product-card-three') {
-        return <ProductCardThemeThree {...props} />;
-    } else if (window.config.defaultProductCard === 'product-card-four') {
-        return <ProductCardThemeFour {...props} />;
-    } else {
-        return <ProductCardThemeOne {...props} />;
-    }
-};
+const ProductCard = (props: Props) => <BotanicalProductCard {...props} />;
 
 export default ProductCard;

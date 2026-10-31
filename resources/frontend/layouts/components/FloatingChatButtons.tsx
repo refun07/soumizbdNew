@@ -60,7 +60,7 @@ const FloatingChatButtons: React.FC = () => {
         <>
             <div
                 ref={panelRef}
-                className="fixed bottom-20 right-6 z-[100] flex flex-col items-end lg:bottom-6"
+                className="bot-floating-chat fixed bottom-20 right-6 z-[100] flex flex-col items-end lg:bottom-6"
             >
                 <div
                     className={`flex flex-col gap-3 mb-4 transition-all duration-300 ease-in-out ${

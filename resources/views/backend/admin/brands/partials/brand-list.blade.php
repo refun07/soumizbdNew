@@ -1,6 +1,6 @@
 <div class="grid xl:grid-cols-2 gap-3 lg:gap-5">
     @forelse ($brands as $brand)
-        <div class="py-3 px-4 bg-background-primary-light rounded-md flex items-center gap-3.5 relative">
+        <div class="admin-brand-card py-3 px-4 bg-background-primary-light rounded-md flex items-center gap-3.5 relative">
             <img src="{{ uploadedAsset($brand->thumbnail_image) }}" alt=""
                 class="w-[70px] h-[80px] shrink-0 rounded-md object-cover"
                 onerror="this.onerror=null;this.src='{{ asset('images/image-error.png') }}';">
@@ -22,16 +22,16 @@
                 @endif
             </div>
 
-            <div class="flex gap-3 absolute top-3 right-3">
+            <div class="admin-brand-actions flex gap-3 absolute top-3 right-3">
                 @can('edit_brands')
-                    <a class="text-stone-300 hover:text-stone-500"
+                    <a aria-label="Edit {{ $brand->collectTranslation('name') }}" class="admin-action-link text-secondary"
                         href="{{ route('admin.brands.edit', ['brand' => $brand->id, 'lang_key' => config('app.default_language')]) }}&translate">
                         <i class="fa-regular fa-pen-to-square"></i>
                     </a>
                 @endcan
 
                 @can('delete_brands')
-                    <a class="text-red-400 hover:text-rose-600 confirm-modal" href="javascript:void(0);"
+                    <a aria-label="Delete {{ $brand->collectTranslation('name') }}" class="admin-action-link admin-action-link--danger confirm-modal" href="javascript:void(0);"
                         data-href="{{ route('admin.brands.destroy', $brand->id) }}"
                         data-title="{{ translate('Are you sure you want to delete this item?') }}"
                         data-text="{{ translate('All data related to this may get deleted.') }}"

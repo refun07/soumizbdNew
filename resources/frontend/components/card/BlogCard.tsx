@@ -12,10 +12,11 @@ const BlogCard = ({ blog }: Props) => {
     const shareUrl = `${window.config.generalSettings.rootUrl}/blogs/${blog.slug}`;
 
     return (
-        <div className="flex flex-col border rounded-md overflow-hidden group hover:shadow-lg transition-all ease-in-out">
+        <div className="bot-journal-card flex flex-col border rounded-md overflow-hidden group hover:shadow-lg transition-all ease-in-out">
             <Link to={`/blogs/${blog.slug}`} className="w-full relative">
                 <img
                     src={blog.thumbnailImage}
+                    loading="lazy" width="600" height="400"
                     alt={blog.title}
                     className="w-full aspect-[6/4] object-cover"
                 />
@@ -34,30 +35,36 @@ const BlogCard = ({ blog }: Props) => {
             </Link>
 
             <div className="py-8 px-4 text-center">
-                <h4 className="text-lg mb-3 group-hover:text-primary transition-all">
-                    <Link to={`/blogs/${blog.slug}`} className="line-clamp-2">
+                <h2 className="text-lg mb-3 group-hover:text-primary transition-all">
+                    <Link to={`/blogs/${blog.slug}`} className="block break-words lg:line-clamp-2">
                         {blog.title}
                     </Link>
-                </h4>
+                </h2>
 
-                <p>
-                    {translate('Posted By:')} {blog.userName}
-                </p>
-                <div className="flex items-center justify-center gap-4 text-muted-foreground">
-                    {dateFormatter(blog.createdAt, 'MMM DD, YYYY')}
-                </div>
+                {blog.userName && (
+                    <p>
+                        {translate('Posted By:')} {blog.userName}
+                    </p>
+                )}
+                {blog.createdAt && (
+                    <div className="flex items-center justify-center gap-4 text-muted-foreground">
+                        {dateFormatter(blog.createdAt, 'MMM DD, YYYY')}
+                    </div>
+                )}
 
                 <div className="mt-4 flex gap-4 text-muted-foreground justify-center">
                     <a
                         href={`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`}
                         target="_blank"
                         rel="noreferrer"
+                        aria-label={`Share ${blog.title} on Facebook`}
                         className="hover:text-primary transition-all"
                     >
                         <FaFacebookF />
                     </a>
                     <a
                         href={`https://twitter.com/intent/tweet?text=${shareUrl}`}
+                        aria-label={`Share ${blog.title} on X`}
                         target="_blank"
                         rel="noreferrer"
                         className="hover:text-primary transition-all"
@@ -66,6 +73,7 @@ const BlogCard = ({ blog }: Props) => {
                     </a>
                     <a
                         href={`http://www.linkedin.com/shareArticle?mini=true&url=${shareUrl}`}
+                        aria-label={`Share ${blog.title} on LinkedIn`}
                         target="_blank"
                         rel="noreferrer"
                         className="hover:text-primary transition-all"

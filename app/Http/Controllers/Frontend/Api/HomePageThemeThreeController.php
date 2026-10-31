@@ -100,7 +100,7 @@ class HomePageThemeThreeController extends Controller
              'result'    => [
                  'products'                     => ProductResource::collection($products),
                  'showthemeThreeFeaturedProducts'      => getSetting('showthemeThreeFeaturedProducts') ?? 0,
-                 'viewMoreUrl'                  => getSetting('themeThreeFeaturedProductsViewMoreUrl') ?? '/products'
+                 'viewMoreUrl'                  => getSetting('themeThreeFeaturedProductsViewMoreUrl') ?? '/product'
              ],
          ];
      }

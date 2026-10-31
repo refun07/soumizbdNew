@@ -1,4 +1,5 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+import { usePanelFocus } from '../../../hooks/usePanelFocus';
 import { LiaTimesSolid } from 'react-icons/lia';
 import { PiShoppingCartSimpleLight } from 'react-icons/pi';
 import { useAuth } from '../../../store/features/auth/authSlice';
@@ -17,6 +18,8 @@ const CartSidebar = () => {
     const { carts } = useAuth();
     const dispatch = useAppDispatch();
     const isActive = popup === 'cart';
+    const panel = useRef<HTMLElement>(null);
+    usePanelFocus(isActive, panel);
 
     const groupedByShop = groupBy(carts, ({ shop }) => shop.name);
 
@@ -36,8 +39,8 @@ const CartSidebar = () => {
     }, [isActive]);
 
     return (
-        <aside
-            className={`fixed top-0 right-0 bottom-0 w-[calc(100%-50px)] max-w-[450px] flex flex-col bg-white z-[5] overflow-y-auto transition-all duration-150 ease-in-out ${
+        <aside ref={panel} tabIndex={-1} aria-label="Shopping cart"
+            className={`bot-cart-drawer fixed top-0 right-0 bottom-0 w-[calc(100%-50px)] max-w-[450px] flex flex-col bg-white z-[5] overflow-y-auto transition-all duration-150 ease-in-out ${
                 isActive ? 'translate-x-0 delay-150' : 'translate-x-full'
             }`}
             aria-hidden={!isActive}
@@ -47,7 +50,9 @@ const CartSidebar = () => {
                     <h4 className="uppercase">{translate('Your Cart')}</h4>
 
                     <button
-                        className="text-xl"
+                        type="button"
+                        aria-label="Close cart"
+                        className="text-xl min-w-11 min-h-11 inline-flex items-center justify-center"
                         onClick={() => dispatch(closePopup())}
                     >
                         <LiaTimesSolid />

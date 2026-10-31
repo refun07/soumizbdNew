@@ -44,9 +44,7 @@ const ProductCardWide = ({
         useProductActions(cartProduct.product);
 
     const counterOrder: [TCounterOrder, TCounterOrder, TCounterOrder] =
-        size === 'sm'
-            ? ['increment', 'count', 'decrement']
-            : ['decrement', 'count', 'increment'];
+        ['decrement', 'count', 'increment'];
 
     const basePrice = cartProduct.variation!.basePrice;
     const discountPrice = cartProduct.variation!.discountedBasePrice;
@@ -58,13 +56,13 @@ const ProductCardWide = ({
     return (
         <div
             className={cn(
-                'flex items-center gap-2 sm:gap-5 py-1 sm:py-2.5',
+                'bot-cart-line flex items-center gap-2 sm:gap-5 py-1 sm:py-2.5',
                 containerClassName,
             )}
         >
-            <div>
+            <div className="bot-cart-line-image">
                 <Link
-                    to={`/products/${cartProduct.product.slug}`}
+                    to={`/product/${cartProduct.product.slug}`}
                     className="rounded-card border border-primary-14 p-1"
                 >
                     <Image
@@ -82,22 +80,22 @@ const ProductCardWide = ({
                 </Link>
             </div>
 
-            <div className="grow">
+            <div className="bot-cart-line-content grow min-w-0">
                 <h3 className="font-medium mb-1">
                     <Link
-                        to={`/products/${cartProduct.product.slug}`}
-                        className="line-clamp-2"
+                        to={`/product/${cartProduct.product.slug}`}
+                        className="block break-words lg:line-clamp-2"
                     >
                         {cartProduct.product.name}
                     </Link>
                 </h3>
                 {cartProduct.product.unit ? (
-                    <p className="mb-3.5 text-xs font-bold text-black/60 line-clamp-1">
+                    <p className="mb-3.5 text-xs font-bold text-black/60 break-words lg:line-clamp-1">
                         {cartProduct.product.unit}
                     </p>
                 ) : null}
 
-                <div className="text-primary text-sm font-bold flex gap-1 items-center">
+                <div className="bot-cart-line-price text-primary text-sm font-bold flex gap-1 items-center">
                     {discountPrice !== basePrice ? (
                         <>
                             <span>{currencyFormatter(discountPrice)}</span>
@@ -118,7 +116,7 @@ const ProductCardWide = ({
                     )}
 
                     {cartProduct.variation?.name && (
-                        <span className="px-2 py-1 ml-2 text-[9px] sm:text-sm uppercase font-normal text-white leading-none bg-secondary rounded">
+                        <span className="bot-cart-line-variant px-2 py-1 ml-2 text-xs sm:text-sm font-normal leading-none rounded">
                             {cartProduct.variation?.name}
                         </span>
                     )}
@@ -164,7 +162,7 @@ const ProductCardWide = ({
 
             {(counter || deleteBtn) && (
                 <div
-                    className={`h-full flex items-center justify-end ${
+                    className={`bot-cart-line-controls h-full flex items-center justify-end ${
                         size === 'sm' ? 'gap-1' : 'gap-8'
                     }`}
                 >
@@ -175,9 +173,8 @@ const ProductCardWide = ({
                             min={0}
                             max={window.config.generalSettings.allowBackorder ? (cartProduct.product.maxPurchaseQty || 999) : Math.min(cartProduct.product.stockQty, cartProduct.product.maxPurchaseQty || 999)}
                             size={size}
-                            orientation={
-                                size === 'sm' ? 'vertical' : 'horizontal'
-                            }
+                            orientation="horizontal"
+                            classNames={{ container: 'bot-cart-counter', button: 'bot-cart-counter-button' }}
                             onDecrement={() =>
                                 handleCartQuantityChange('decrease')
                             }
@@ -187,7 +184,7 @@ const ProductCardWide = ({
                         />
                     )}
                     {deleteBtn && (
-                        <button className="p-1" onClick={handleDeleteFromCart}>
+                        <button type="button" className="bot-cart-line-remove p-1" aria-label={`Remove ${cartProduct.product.name} from cart`} onClick={handleDeleteFromCart}>
                             <LiaTimesSolid />
                         </button>
                     )}

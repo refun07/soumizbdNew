@@ -16,6 +16,19 @@ use Illuminate\Http\Request;
 
 class HomepageController extends Controller
 {
+    public function botanicalFlashSale()
+    {
+        $section = \App\Services\BotanicalHomeContent::content()['flash'];
+        $ids = \App\Services\BotanicalHomeContent::saleProductIds();
+        $products = Product::fromPublishedShops()->isPublished()->hideOnEcom()->whereIn('id', $ids)->get()
+            ->sortBy(fn ($product) => array_search($product->id, $ids))->values();
+        return ['success' => true, 'result' => [
+            'products' => ProductResource::collection($products),
+            'endsAt' => $section['ends_at'] ?: null,
+            'active' => $section['enabled'] && !\App\Services\BotanicalHomeContent::saleHasEnded($section),
+        ]];
+    }
+
     # get featured brands
     public function featuredBrands(Request $request)
     {
@@ -51,7 +64,15 @@ class HomepageController extends Controller
             ];
         }
 
-        $products = Product::fromPublishedShops()->isPublished()->hideOnEcom()->latest()->take(4)->get();
+        $section = \App\Services\BotanicalHomeContent::content(false)['arrivals'];
+        $query = Product::fromPublishedShops()->isPublished()->hideOnEcom();
+        if (!empty($section['brand_slug'])) {
+            $query->whereHas('brand', fn ($brand) => $brand->isActive()->where('slug', $section['brand_slug']));
+        }
+        if ($section['selection']) {
+            $query->whereIn('id', $section['selection']);
+        }
+        $products = $query->latest()->orderByDesc('id')->take($section['limit'])->get();
         return [
             'success'   => true,
             'status'    => 200,
@@ -74,7 +95,12 @@ class HomepageController extends Controller
             ];
         }
 
-        $products = Product::fromPublishedShops()->isPublished()->hideOnEcom()->orderBy('total_sale_count', 'DESC')->take(4)->get();
+        $section = \App\Services\BotanicalHomeContent::content(false)['best'];
+        $query = Product::fromPublishedShops()->isPublished()->hideOnEcom();
+        if ($section['selection']) {
+            $query->whereIn('id', $section['selection']);
+        }
+        $products = $query->orderBy('total_sale_count', 'DESC')->take($section['limit'])->get();
         return [
             'success'   => true,
             'status'    => 200,
@@ -147,7 +173,7 @@ class HomepageController extends Controller
             }
             $mergedData[] = [
                 'title' => translate($title),
-                'url'   => $link,
+                'url'   => \App\Services\StorefrontLinks::normalize($link),
             ];
         }
 
@@ -155,7 +181,7 @@ class HomepageController extends Controller
         $defaultImportantLinks = [
             ['title' => 'Home', 'link' => '/', 'is_enabled' => true],
             ['title' => 'Shop', 'link' => '/shops', 'is_enabled' => true],
-            ['title' => 'All Products', 'link' => '/products', 'is_enabled' => true],
+            ['title' => 'All Products', 'link' => '/product', 'is_enabled' => true],
             ['title' => 'About Us', 'link' => '/pages/about-us', 'is_enabled' => true],
             ['title' => 'All Brands', 'link' => '/brands', 'is_enabled' => true]
         ];
@@ -171,7 +197,7 @@ class HomepageController extends Controller
             if ($isEnabled === true || $isEnabled === '1' || $isEnabled === 'true') {
                 $importantLinkPages[] = [
                     'title' => translate($link['title'] ?? ''),
-                    'url'   => $link['link'] ?? '',
+                    'url'   => \App\Services\StorefrontLinks::normalize($link['link'] ?? ''),
                 ];
             }
         }
@@ -203,7 +229,7 @@ class HomepageController extends Controller
             ],
             [
                 'title' => 'Delivery Charges',
-                'description' => "Delivery charges are as follows:\nInside Dhaka: 90TK\nOutside Dhaka: 150TK"
+                'description' => "Delivery charges are as follows:\nInside Dhaka: 70TK\nOutside Dhaka: 150TK"
             ],
             [
                 'title' => 'Delivery Time',

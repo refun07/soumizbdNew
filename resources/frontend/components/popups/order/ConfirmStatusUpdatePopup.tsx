@@ -1,3 +1,4 @@
+import { safeLocalStorage } from '../../../utils/safeStorage';
 import { LiaTimesSolid } from 'react-icons/lia';
 import { closePopup, usePopup } from '../../../store/features/popup/popupSlice';
 import { useAppDispatch } from '../../../store/store';
@@ -48,9 +49,9 @@ const ConfirmStatusUpdatePopup = () => {
             method: 'post',
             url: '/admin/api/orders/update-order-status',
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem(STORAGE_KEYS.AUTH_KEY)}`,
+                'Authorization': `Bearer ${safeLocalStorage.getItem(STORAGE_KEYS.AUTH_KEY)}`,
                 'Content-Type': 'application/json',
-                'Accept-Language': localStorage.getItem('i18nextLng')!
+                'Accept-Language': safeLocalStorage.getItem('i18nextLng')!
             },
             data: {
                order_id:order.order_id,

@@ -1,13 +1,13 @@
-<nav class="h-[75px] 2xl:h-[103px] flex items-center">
+<nav aria-label="Admin toolbar" class="admin-toolbar h-[75px] 2xl:h-[103px] flex items-center">
     <div class="px-[15px] lg:px-[50px] flex-grow flex items-center justify-between gap-10">
         <div class="flex items-center grow gap-14">
             <div class="flex items-center gap-7">
                 <button
-                    class="sidebar-toggler text-lg sm:text-2xl w-10 h-10 flex items-center justify-center rounded-md text-secondary">
+                    type="button" aria-label="Open navigation" aria-controls="admin-sidebar" aria-expanded="false" class="sidebar-toggler text-lg sm:text-2xl w-10 h-10 flex items-center justify-center rounded-md text-secondary">
                     <i class="fa-regular fa-bars"></i>
                 </button>
                 <a href="{{ route('admin.dashboard') }}">
-                    <img src="{{ uploadedAsset(getSetting('websiteHeaderLogo')) }}" class="max-h-[60px]" alt="EpikCart"
+                    <img src="{{ uploadedAsset(getSetting('websiteHeaderLogo')) }}" class="admin-brand-image max-h-[60px]" alt="The Soumi’s Can Product"
                         onerror="this.onerror=null;this.src='{{ asset('images/image-error.png') }}';" />
                 </a>
             </div>
@@ -158,13 +158,13 @@
                 </div>
             </div>
 
-            <div class="button button--light h-12 w-12 text-foreground text-xl justify-center toggle-theme-btn">
-                <i class="fa-light fa-sun-bright"></i>
-            </div>
+            <button type="button" aria-label="Switch color theme" class="button button--light h-12 w-12 text-foreground text-xl justify-center toggle-theme-btn">
+                <i class="fa-light fa-sun-bright" aria-hidden="true"></i>
+            </button>
 
             @can('show_notifications')
-                <div class="group relative max-md:hidden" tabindex="0">
-                    <button class="text-primary text-xl relative w-12 h-12 flex items-center justify-center">
+                <div class="admin-header-popover group relative max-md:hidden">
+                    <button aria-label="Notifications" type="button" class="text-primary text-xl relative w-12 h-12 flex items-center justify-center">
                         <i class="fa-regular fa-bell"></i>
                         <span
                             class="absolute top-6 left-7 w-[17px] h-[17px] flex items-center justify-center bg-red-500 text-white text-[9px] rounded-full">
@@ -232,8 +232,8 @@
                 </div>
             @endcan
 
-            <div class="group relative" tabindex="0">
-                <div class="flex items-center gap-2 cursor-pointer">
+            <div class="admin-header-popover group relative">
+                <button type="button" aria-label="Account menu" class="flex items-center gap-2 cursor-pointer min-w-11 min-h-11">
                     @php
                         $user = user();
                     @endphp
@@ -249,7 +249,7 @@
                         <img src="{{ uploadedAsset($user->avatar) }}" alt="" class="w-10 h-10 rounded-full"
                             onerror="this.onerror=null;this.src='{{ asset('images/image-error.png') }}';" />
                     </div>
-                </div>
+                </button>
 
                 <ul
                     class="absolute z-[1] bg-background text-foreground rounded-md right-0 top-[calc(100%+38px)] min-w-[150px] shadow-theme overflow-y-auto p-[2px] divide-y divide-[#78787829] opacity-0 invisible group-focus-within:opacity-100 group-focus-within:visible transition-all duration-300">

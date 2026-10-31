@@ -3,6 +3,7 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
+        "dev:storefront": "vite --config preview/storefront/vite.config.mjs",
         "build": "vite build",
         "lint": "eslint --ext .js,.jsx,.ts,.tsx .",
         "svgr:skeleton": "svgr --title-prop --no-dimensions --typescript -d resources/frontend/components/skeletons/from-svg -- resources/frontend/components/skeletons/svgs",

@@ -31,7 +31,7 @@
         <li>
             <div class="option-dropdown relative -translate-y-5" tabindex="0">
                 <div
-                    class="option-dropdown__toggler no-style no-arrow border-4 border-border flex items-center justify-center w-[55px] aspect-square rounded-full bg-primary text-white text-2xl">
+                    aria-label="Add new" class="option-dropdown__toggler no-style no-arrow border-4 border-border flex items-center justify-center w-[55px] aspect-square rounded-full bg-primary text-white text-2xl">
                     <i class="fal fa-plus"></i>
                 </div>
 
@@ -124,7 +124,7 @@
             </div>
         </li>
         <li>
-            <button href="#" class="toggle-mobile-search text-center leading-none px-3">
+            <button type="button" aria-label="Search admin" class="toggle-mobile-search text-center leading-none px-3">
                 <span class="text-base text-secondary"><i class="fa-regular fa-search"></i></span>
                 <br />
                 <span class="text-[11px] text-muted">{{ translate('Search') }}</span>

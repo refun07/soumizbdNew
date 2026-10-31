@@ -79,6 +79,9 @@ const Counter = ({
                     case 'decrement':
                         return (
                             <button
+                                type="button"
+                                aria-label="Decrease quantity"
+                                disabled={value <= min}
                                 className={buttonClasses}
                                 onClick={handleDecrement}
                                 key={el}
@@ -89,6 +92,9 @@ const Counter = ({
                     case 'increment':
                         return (
                             <button
+                                type="button"
+                                aria-label="Increase quantity"
+                                disabled={typeof max === 'number' && value >= max}
                                 className={buttonClasses}
                                 onClick={handleIncrement}
                                 key={el}

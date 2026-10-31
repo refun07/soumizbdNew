@@ -1,3 +1,5 @@
+import '../css/admin-interactions.css';
+import { initAdminInteractions } from './admin-interactions';
 const { autoUpdate, computePosition, flip, offset, shift } = window.FloatingUIDOM;
 
 $(function () {
@@ -90,6 +92,7 @@ $(function () {
 
         dropdownEl._optionDropdownRequest = null;
         dropdownEl.classList.remove(dropdownOpenClass);
+        dropdownEl.querySelector('.option-dropdown__toggler')?.setAttribute('aria-expanded', 'false');
 
         if (dropdownEl._floatingUICleanup) {
             dropdownEl._floatingUICleanup();
@@ -121,6 +124,7 @@ $(function () {
             if (!document.body.contains(dropdownEl)) return;
 
             dropdownEl.classList.add(dropdownOpenClass);
+            referenceEl.setAttribute('aria-expanded', 'true');
 
             if (dropdownEl._floatingUICleanup) {
                 dropdownEl._floatingUICleanup();
@@ -147,6 +151,18 @@ $(function () {
 
     $(document).on('keydown', '.option-dropdown', function (e) {
         const dropdownEl = this;
+
+        if (['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(e.key)) {
+            e.preventDefault();
+            if (!dropdownEl.classList.contains(dropdownOpenClass)) openOptionDropdown(dropdownEl);
+            requestAnimationFrame(() => {
+                const options = [...dropdownEl.querySelectorAll('.option-dropdown__options a, .option-dropdown__options button, .option-dropdown__option[tabindex]')].filter(node => !node.disabled && node.getClientRects().length);
+                const index = options.indexOf(document.activeElement);
+                const next = e.key === 'Home' ? 0 : e.key === 'End' ? options.length - 1 : e.key === 'ArrowDown' ? (index + 1) % options.length : (index <= 0 ? options.length - 1 : index - 1);
+                options[next]?.focus();
+            });
+            return;
+        }
 
         if (e.key === 'Escape') {
             closeOptionDropdown(dropdownEl);
@@ -238,6 +254,9 @@ $(function () {
         $(this).toggleClass('active');
     });
 
+    if (document.body.classList.contains('admin-panel')) {
+        initAdminInteractions();
+    } else {
     // toggle sidebar
     $('.sidebar-toggler').on('click', function () {
         if (window.innerWidth < 1024) {
@@ -281,6 +300,8 @@ $(function () {
         autoCloseSidebar();
     });
     autoCloseSidebar();
+
+    }
 
     // date picker - skip elements with data-skip-datepicker-init attribute
     $(
@@ -356,7 +377,7 @@ $(function () {
     });
 
     // toggle mobile search popup
-    $('.toggle-mobile-search').on('click', function () {
+    $('body:not(.admin-panel) .toggle-mobile-search').on('click', function () {
         $('.mobile-search-box').toggleClass('active');
         $(this).find('.fa-regular').toggleClass('fa-search fa-times');
     });

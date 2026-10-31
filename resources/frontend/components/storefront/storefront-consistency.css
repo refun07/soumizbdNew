@@ -1,0 +1,177 @@
+/* Shared storefront foundation; never applied to the admin interface. */
+.botanical-storefront #storefront-main .container {
+    width: min(1180px, calc(100% - 80px));
+    max-width: 1180px;
+    margin-inline: auto;
+    padding-inline: 0;
+}
+.botanical-storefront #storefront-main .container .container { width: 100%; }
+.botanical-storefront #storefront-main { min-height: 42vh; }
+.botanical-storefront .bot-page-heading { background: #f4f8f3; border-bottom: 1px solid #e0e9e2; margin-bottom: 32px; }
+.botanical-storefront .bot-page-heading-inner { min-height: 124px; padding-block: 24px; gap: 24px; flex-wrap: wrap; }
+.botanical-storefront .bot-page-title { margin: 0; font-size: clamp(28px, 2.7vw, 38px); font-weight: 600; line-height: 1.25; letter-spacing: -.8px; overflow-wrap: anywhere; }
+.botanical-storefront .bot-page-heading--trail .bot-page-heading-inner { min-height: 64px; padding-block: 12px; }
+.botanical-storefront .bot-breadcrumb-trail { gap: 0; flex-wrap: wrap; font-size: 15px; line-height: 1.5; min-width: 0; }
+.botanical-storefront .bot-breadcrumb-trail li { min-width: 0; overflow-wrap: anywhere; }
+.botanical-storefront .bot-breadcrumb-trail li > span:first-child { color: #698875; }
+.botanical-storefront .bot-breadcrumb-trail a { display: inline-flex; align-items: center; min-height: 44px; color: #53675b; }
+.botanical-storefront .bot-breadcrumb-trail [aria-current="page"] { color: var(--bot-ink); }
+.botanical-storefront .bot-ui-button { min-height: 46px; height: auto; max-width: 100%; padding: 11px 20px; border-radius: 999px; font-size: 16px; line-height: 1.4; text-transform: none; white-space: normal; background-image: none; transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease; }
+.botanical-storefront .bot-ui-button--primary,.botanical-storefront .bot-ui-button--secondary { background-color: var(--bot-green); color: white; border: 1px solid var(--bot-green); }
+.botanical-storefront .bot-ui-button--primary:hover:not(:disabled),.botanical-storefront .bot-ui-button--secondary:hover:not(:disabled) { background-color: var(--bot-deep); border-color: var(--bot-deep); }
+.botanical-storefront .bot-ui-button--outline { background: white; border: 1px solid #a2c4b2; color: var(--bot-green); }
+.botanical-storefront .bot-ui-button--outline:hover:not(:disabled) { background: var(--bot-mint); color: var(--bot-deep); }
+.botanical-storefront .bot-ui-button--link { padding: 8px 0; background: transparent; color: var(--bot-green); }
+.botanical-storefront .bot-ui-button svg { color: inherit; }
+.botanical-storefront .bot-ui-input { min-height: 46px; height: auto; padding-block: 11px; border: 1px solid #ceddd2; border-radius: 10px; background: white; color: var(--bot-ink); font-size: 16px; line-height: 1.4; }
+.botanical-storefront .bot-ui-input::placeholder { color: #6a756f; }
+.botanical-storefront .bot-ui-input:focus { border-color: var(--bot-green); }
+.botanical-storefront .bot-directory-card { border: 1px solid #dce7df; background: #fafbf8; border-radius: 18px; padding: 24px 16px; gap: 8px; overflow: hidden; }
+.botanical-storefront .bot-directory-card:hover { background: #eef5ee; border-color: #a2c4b2; }
+.botanical-storefront .bot-directory-card h3 { font-size: 18px; line-height: 1.5; font-weight: 600; margin-top: 12px; }
+.botanical-storefront .bot-directory-initial { display: grid; place-items: center; width: 88px; height: 88px; margin-inline: auto; border-radius: 24px; background: #e3efe5; color: var(--bot-deep); font-family: Georgia, serif; font-size: 32px; }
+.botanical-storefront .bot-journal-card { border: 1px solid #dce7df; border-radius: 18px; background: white; box-shadow: none; transition: border-color 180ms ease; }
+.botanical-storefront .bot-journal-card:hover { border-color: #9cbaa7; box-shadow: none; }
+.botanical-storefront .bot-journal-card > div { padding: 28px 20px 20px; text-align: left; }
+.botanical-storefront .bot-journal-card h2 { font-size: 21px; line-height: 1.5; font-weight: 600; }
+.botanical-storefront .bot-journal-card h2 a { -webkit-line-clamp: unset; }
+.botanical-storefront .bot-journal-card a[target="_blank"] { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; border: 1px solid #dce7df; border-radius: 50%; color: var(--bot-green); }
+.botanical-storefront .bot-journal-card a[target="_blank"]:hover { background: var(--bot-mint); }
+.botanical-storefront .bot-journal-card a[href^="/blogs/"] { overflow-wrap: anywhere; }
+.botanical-storefront .bot-journal-card > div > div:last-child > a { display: inline-flex; align-items: center; min-height: 44px; text-transform: none; text-decoration: underline; text-underline-offset: 5px; }
+@media (max-width: 700px) {
+    .botanical-storefront #storefront-main .container { width: calc(100% - 40px); }
+    .botanical-storefront #storefront-main .container .container { width: 100%; }
+    .botanical-storefront .bot-page-heading-inner { min-height: 0; flex-direction: column; align-items: flex-start; gap: 8px; padding-block: 24px 16px; }
+    .botanical-storefront .bot-page-title { font-size: 28px; }
+    .botanical-storefront .bot-breadcrumb-trail { font-size: 14px; }
+    .botanical-storefront .bot-breadcrumb-trail li > span:first-child { padding-left: 6px; padding-right: 4px; }
+    .botanical-storefront .bot-page-heading { margin-bottom: 24px; }
+    .botanical-storefront .bot-page-heading--trail .bot-page-heading-inner { padding-block: 10px; }
+    .botanical-storefront .bot-directory-card { padding: 20px 12px; }
+    .botanical-storefront .bot-directory-card h3 { font-size: 17px; }
+    .botanical-storefront .bot-directory-initial { width: 72px; height: 72px; font-size: 28px; }
+    .botanical-storefront .bot-journal-card > div { padding: 28px 16px 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .botanical-storefront .bot-ui-button,.botanical-storefront .bot-directory-card,.botanical-storefront .bot-journal-card { transition: none; }
+}
+.botanical-storefront .bot-journal-index-heading { background: #f4f8f3; border-bottom: 1px solid #e0e9e2; }
+.botanical-storefront .bot-journal-index-heading > .container { min-height: 172px; height: auto; padding-block: 32px; }
+.botanical-storefront .bot-journal-index-heading h1 { font-size: clamp(28px, 2.7vw, 38px); font-weight: 600; letter-spacing: -.8px; line-height: 1.25; }
+.botanical-storefront .bot-journal-index-heading img { max-height: 140px; }
+.botanical-storefront .bot-journal-hero { min-height: 360px; max-width: 1440px; margin-inline: auto; }
+.botanical-storefront .bot-journal-hero > .container { padding-block: 48px; }
+.botanical-storefront .bot-journal-hero h1 { font-size: clamp(28px, 3vw, 44px); line-height: 1.3; max-width: 30ch; overflow-wrap: anywhere; }
+.botanical-storefront .bot-journal-hero a[target="_blank"],.botanical-storefront .bot-journal-hero button { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; border: 1px solid #ffffff66; border-radius: 50%; }
+@media (max-width: 700px) {
+    .botanical-storefront .bot-journal-hero { min-height: 320px; }
+    .botanical-storefront .bot-journal-hero > .container { padding-block: 32px; }
+    .botanical-storefront .bot-journal-hero h1 { font-size: 28px; }
+    .botanical-storefront .bot-journal-hero .flex.gap-4 { gap: 8px; }
+}
+.botanical-storefront .bot-common-heading :is(h1,h2) { font-size: clamp(26px, 2.2vw, 32px); font-weight: 600; line-height: 1.3; letter-spacing: -.6px; color: var(--bot-ink); }
+.botanical-storefront .bot-common-heading :is(h1,h2) > span { color: inherit; font-weight: inherit; border-bottom: 0; padding-bottom: 0; }
+.botanical-storefront #storefront-main .container .container.border { padding: 24px; }
+@media (max-width: 700px) {
+    .botanical-storefront #storefront-main .container .container.border { padding: 16px; }
+}
+/* Keep checkout's return link readable against its pale header in every state. */
+.botanical-storefront .bot-checkout-back-link {
+    min-height: 44px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    color: var(--bot-green);
+    font-size: 15px;
+    line-height: 1.4;
+    text-decoration: none;
+    transition: background-color 180ms ease, color 180ms ease;
+}
+.botanical-storefront .bot-checkout-back-link:hover,
+.botanical-storefront .bot-checkout-back-link:active {
+    color: var(--bot-deep);
+    background-color: #dfede3;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+.botanical-storefront .bot-checkout-back-link:focus-visible {
+    color: var(--bot-deep);
+    background-color: #dfede3;
+    outline: 2px solid var(--bot-green);
+    outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+    .botanical-storefront .bot-checkout-back-link { transition: none; }
+}
+/* Interaction states use readable colors and retain a stable hit area. */
+.botanical-storefront :is(a,button,input,textarea,select):focus-visible { outline: 2px solid var(--bot-green); outline-offset: 3px; }
+.botanical-storefront .bot-footer :is(a,button):focus-visible { outline-color: white; }
+.botanical-storefront .bot-ui-icon-button { min-width: 44px; min-height: 44px; border: 1px solid #b5ccbd; border-radius: 50%; background: white; color: var(--bot-green); transition: color 180ms ease, background-color 180ms ease, border-color 180ms ease; }
+.botanical-storefront .bot-ui-icon-button:hover:not(:disabled),
+.botanical-storefront .bot-ui-icon-button:active:not(:disabled) { background: #dfede3; color: var(--bot-deep); border-color: #83aa92; }
+.botanical-storefront .bot-ui-icon-button:disabled { background: #f1f4f2; color: #68756d; border-color: #d7dfda; cursor: not-allowed; }
+.botanical-storefront .bot-ui-button--outline .text-secondary { color: inherit; }
+.botanical-storefront .bot-ui-button--primary:active:not(:disabled),
+.botanical-storefront .bot-ui-button--secondary:active:not(:disabled) { background: var(--bot-deep); color: white; }
+.botanical-storefront .bot-ui-button--link:hover { color: var(--bot-deep); text-decoration: underline; text-underline-offset: 4px; }
+.botanical-storefront .bot-ui-button:disabled { background-image: none; pointer-events: auto; cursor: not-allowed; }
+.botanical-storefront .bot-pagination-control { min-width: 44px; min-height: 44px; border-radius: 50%; font-size: 16px; color: var(--bot-green); border-color: #b5ccbd; }
+.botanical-storefront .bot-pagination-control:hover:not([aria-disabled="true"]),
+.botanical-storefront .bot-pagination-control[aria-current="page"] { background: var(--bot-green); color: white; border-color: var(--bot-green); }
+.botanical-storefront .bot-pagination-control[aria-disabled="true"],
+.botanical-storefront .disabled > .bot-pagination-control { background: #f1f4f2; color: #68756d; border-color: #d7dfda; cursor: not-allowed; }
+.botanical-storefront .bot-journal-hero :is(a[target="_blank"],button):is(:hover,:focus-visible) { background: white; color: var(--bot-deep); border-color: white; }
+.botanical-storefront .bot-journal-hero :is(a,button):focus-visible { outline-color: white; }
+.botanical-storefront .bot-copy-link { min-height: 44px; border: 1px solid #b5ccbd; background: var(--bot-mint); color: var(--bot-deep); }
+.botanical-storefront .bot-copy-link:hover { background: #dfede3; border-color: #83aa92; color: var(--bot-deep); }
+.botanical-storefront .bot-directory-card:focus-visible { background: #eef5ee; border-color: var(--bot-green); }
+.botanical-storefront .bot-directory-card:hover img { transform: scale(1.025); }
+.botanical-storefront .theme-radio { min-height: 44px; }
+.botanical-storefront .theme-radio:focus-within .theme-radio__checkmark { outline: 2px solid var(--bot-green); outline-offset: 3px; }
+.botanical-storefront .theme-radio:has(input:disabled) { cursor: not-allowed; opacity: .6; }
+.botanical-storefront .bot-flash-sale .bot-sale-more:focus-visible { outline-color: var(--bot-sale-ink); }
+@media (prefers-reduced-motion: reduce) {
+    .botanical-storefront :is(.bot-ui-icon-button,.bot-directory-card img,.bot-product-image-wrap img) { transition: none; }
+    .botanical-storefront .bot-directory-card:hover img { transform: none; }
+}
+.botanical-storefront .bot-header-actions > button { width: 44px; height: 44px; }
+.botanical-storefront .suggestions a { min-height: 44px; }
+.botanical-storefront .bot-footer a { min-height: 44px; }
+@media (max-width: 374px) {
+    /* Account access remains available in the persistent bottom navigation. */
+    .botanical-storefront .bot-header-actions > button:first-child { display: none; }
+}
+.botanical-storefront .bot-footer-grid > div > a:not(.bot-logo) { min-height: 44px; display: flex; align-items: center; margin-bottom: 4px; }
+.botanical-storefront .bot-socials a { width: 44px; min-width: 44px; height: 44px; }
+.botanical-storefront .bot-cart-drawer[aria-hidden="true"] { visibility: hidden; pointer-events: none; }
+@media (max-width: 1023px) {
+    .botanical-storefront .product-filter-sidebar:not(.is-open) { visibility: hidden; pointer-events: none; }
+}
+/* Visibility changes immediately so focus can enter before the slide finishes. */
+.botanical-storefront .bot-cart-drawer { transition-property: transform; }
+@media (max-width: 1023px) {
+    .botanical-storefront .product-filter-sidebar { transition-property: transform; }
+}
+/* The catalog card contract is shared by home, sale, listing and recommendation cards. */
+.botanical-storefront .bot-product .bot-product-actions { grid-template-columns: minmax(0,1fr) 44px; gap: 8px; }
+.botanical-storefront .bot-product .bot-product-preview { display: grid; place-items: center; width: 44px; height: 44px; min-width: 44px; border: 1px solid #a2c4b2; border-radius: 50%; }
+.botanical-storefront .bot-product .bot-product-preview::before { content: none; }
+.botanical-storefront .bot-catalog-product-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(min(100%,220px),1fr)); gap: 24px; align-items: stretch; }
+@media (max-width: 700px) { .botanical-storefront .bot-catalog-product-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; } }
+.botanical-storefront .bot-product .bot-product-meta { margin-top: auto; padding-top: 4px; }
+.botanical-storefront .bot-product .bot-product-actions { margin-top: 0; }
+
+/* Give mobile purchase labels the full card width while keeping quick view accessible. */
+.botanical-storefront .bot-product .bot-product-preview--mobile { display: none; }
+@media (max-width: 700px) {
+    .botanical-storefront .bot-product .bot-product-actions { grid-template-columns: minmax(0, 1fr); }
+    .botanical-storefront .bot-product .bot-product-actions .bot-product-preview { display: none; }
+    .botanical-storefront .bot-product .bot-product-preview--mobile { display: grid; position: absolute; right: 8px; bottom: 8px; z-index: 2; background: #fff; box-shadow: 0 2px 8px #163c2914; }
+    .botanical-storefront .bot-product .bot-product-actions .bot-button--small { min-height: 44px; padding: 10px 6px; font-size: 14px; gap: 5px; white-space: nowrap; }
+    .botanical-storefront .bot-product .bot-product-actions .bot-button--small > svg:not(.bot-spin) { display: none; }
+    .botanical-storefront .bot-product .bot-product-actions .bot-button--small > .bot-spin { width: 14px; height: 14px; }
+}
+
+/* Keep checkout actions at their content height instead of stretching with the summary grid. */
+.botanical-storefront .bot-checkout-actions { align-self: start; align-items: center; }
+.botanical-storefront .bot-checkout-actions .bot-checkout-submit { height: 52px; min-height: 52px; padding: 12px 20px; border-radius: 12px; line-height: 1.3; }

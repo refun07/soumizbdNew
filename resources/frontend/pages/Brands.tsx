@@ -40,7 +40,7 @@ const Brands = () => {
             </div>
 
             <div className="container !py-11">
-                <div className="grid grid-cols-3 xs:grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8">
+                <div className="bot-directory-grid grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     {isLoading ? (
                         [...Array(12)].map((_, i) => (
                             <CategorySkeleton
@@ -49,7 +49,7 @@ const Brands = () => {
                             />
                         ))
                     ) : !brands?.length ? (
-                        <div className="col-span-8 text-center text-black/70  ">
+                        <div className="col-span-full text-center text-black/70  ">
                             <p className="my-10">
                                 {translate('No brand found')}
                             </p>

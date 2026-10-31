@@ -1,0 +1,9 @@
+.bot-concerns { background: #fff; border-bottom: 1px solid #e0e9e2; }
+.bot-concerns .bot-concerns-list { display: flex; justify-content: space-between; gap: 12px; overflow-x: auto; padding-block: 22px 18px; list-style: none; scrollbar-width: thin; scrollbar-color: #a2c4b2 transparent; }
+.bot-concerns-list li { flex: 0 0 96px; }
+.bot-concerns-list a { display: flex; flex-direction: column; align-items: center; gap: 7px; min-height: 106px; color: var(--bot-ink); text-align: center; font-size: 13px; line-height: 1.4; }
+.bot-concerns-list img { width: 66px; height: 66px; border: 3px solid #064b43; border-radius: 50%; object-fit: cover; transition: border-color 180ms ease; }
+.bot-concerns-list a:hover img { border-color: var(--bot-green); }
+.bot-concerns-list a:focus-visible { outline: 2px solid var(--bot-green); outline-offset: 3px; border-radius: 6px; }
+@media (max-width: 700px) { .bot-concerns .bot-concerns-list { gap: 10px; padding-block: 14px 12px; } .bot-concerns-list li { flex-basis: 88px; } .bot-concerns-list a { font-size: 12px; } }
+@media (prefers-reduced-motion: reduce) { .bot-concerns-list img { transition: none; } }

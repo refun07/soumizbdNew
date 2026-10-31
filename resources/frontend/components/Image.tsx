@@ -4,7 +4,7 @@ interface Props extends React.ImgHTMLAttributes<HTMLImageElement> {}
 
 const errorImgPath = '/images/image-error.png';
 
-const Image = ({ ...rest }: Props) => {
+const Image = ({ src, ...rest }: Props) => {
     const imgRef = useRef<HTMLImageElement>(null);
 
     const onError = () => {
@@ -15,7 +15,7 @@ const Image = ({ ...rest }: Props) => {
         }
     };
 
-    return <img {...rest} onError={onError} loading="lazy" ref={imgRef} />;
+    return <img {...rest} src={src || errorImgPath} onError={onError} loading="lazy" ref={imgRef} />;
 };
 
 export default Image;

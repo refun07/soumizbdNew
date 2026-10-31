@@ -28,6 +28,8 @@ const PaymentMethodForm = () => {
                 ) : (
                     window.config.paymentMethods.map((method) => (
                         <button
+                            type="button"
+                            aria-pressed={paymentMethod === method.value}
                             className={cn(
                                 'relative flex items-center justify-center px-4 py-3 border border-slate-200 bg-slate-50 rounded-[3px]',
                                 {

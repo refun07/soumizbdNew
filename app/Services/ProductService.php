@@ -484,7 +484,7 @@ class ProductService
 
         $products   = $products->paginate($limit);
 
-        $categories = Category::where('parent_id', 0)
+        $categories = Category::where(fn ($query) => $query->where('parent_id', 0)->orWhereNull('parent_id'))
             ->orderBy('name', 'ASC')
             ->with('childrenCategories')
             ->get();
@@ -514,7 +514,7 @@ class ProductService
     # return view of create form
     public static function create()
     {
-        $categories = Category::where('parent_id', 0)
+        $categories = Category::where(fn ($query) => $query->where('parent_id', 0)->orWhereNull('parent_id'))
             ->orderBy('name', 'ASC')
             ->with('childrenCategories')
             ->get();
@@ -1148,7 +1148,7 @@ class ProductService
                 }
             }
             $product = Product::shop()->findOrFail($id);
-            $categories = Category::where('parent_id', 0)
+            $categories = Category::where(fn ($query) => $query->where('parent_id', 0)->orWhereNull('parent_id'))
                 ->orderBy('name', 'ASC')
                 ->with('childrenCategories')
                 ->get();
@@ -1224,7 +1224,9 @@ class ProductService
 
         if ($request->lang_key == config("app.default_language")) {
             $product->name              = $request->name;
-            $product->slug              = (!is_null($request->slug)) ? Str::slug($request->slug, '-') : Str::slug($request->name, '-');
+            $product->slug              = $request->slug === $oldProduct->slug
+                ? $oldProduct->slug
+                : Str::slug($request->slug ?? $request->name, '-');
             $product->brand_id          = $request->brand_id;
             $product->collection_id     = self::resolveCollectionId($request->brand_id, $request->collection_id);
             $product->unit_id           = $request->unit_id;

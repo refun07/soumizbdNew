@@ -54,10 +54,10 @@ const CustomerDetailsForm = () => {
                 <Link
                     to={
                         window.config.generalSettings.skipCart
-                            ? '/products'
+                            ? '/product'
                             : '/cart'
                     }
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary transition-colors hover:text-secondary sm:text-sm"
+                    className="bot-checkout-back-link inline-flex items-center gap-1.5 font-semibold"
                 >
                     <IoArrowBack />
                     {window.config.generalSettings.skipCart
@@ -75,13 +75,15 @@ const CustomerDetailsForm = () => {
                 />
 
                 <InputGroup>
-                    <Label className="!mb-1.5 !normal-case font-semibold text-slate-800">
+                    <Label htmlFor="checkout-name" className="!mb-1.5 !normal-case font-semibold text-slate-800">
                         {translate('Name')}
                         <span className="text-red-400 text-xs ml-1">
                             {translate('*')}
                         </span>
                     </Label>
                     <Input
+                        id="checkout-name"
+                        autoComplete="name"
                         name="name"
                         type="text"
                         className="!rounded-[3px] !border-slate-200 !bg-slate-50 placeholder:!text-slate-400 focus:!border-primary"
@@ -92,13 +94,15 @@ const CustomerDetailsForm = () => {
                 </InputGroup>
 
                 <InputGroup>
-                    <Label className="!mb-1.5 !normal-case font-semibold text-slate-800">
+                    <Label htmlFor="checkout-phone" className="!mb-1.5 !normal-case font-semibold text-slate-800">
                         {translate('Phone')}
                         <span className="text-red-400 text-xs ml-1">
                             {translate('*')}
                         </span>
                     </Label>
                     <Input
+                        id="checkout-phone"
+                        autoComplete="tel-national"
                         name="phone"
                         type="text"
                         inputMode="numeric"

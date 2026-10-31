@@ -25,7 +25,17 @@ class FileManagerController extends Controller
     # upload files
     public function upload(Request $request)
     {
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), ['media_file' => ['required', 'file', 'max:10240']], [
+            'media_file.required' => 'Choose a file below the server upload limit ('.ini_get('upload_max_filesize').').',
+            'media_file.uploaded' => 'The upload failed. Use a file below the server upload limit ('.ini_get('upload_max_filesize').').',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()->first(), 'errors' => $validator->errors()], 422);
+        }
         $response = FileManagerService::upload($request);
+        if (empty($response['result']) || ($response['status'] ?? 200) !== 200) {
+            return response()->json(['message' => 'The file could not be uploaded. Check the file size and try again.'], 422);
+        }
         return $response['result'];
     }
 

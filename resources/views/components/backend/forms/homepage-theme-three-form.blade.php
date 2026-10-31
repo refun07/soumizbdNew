@@ -250,7 +250,7 @@
                     <x-backend.inputs.text :labelInline="false" label="View More URL"
                         name="themeThreeFeaturedProductsViewMoreUrl"
                         value="{{ getSetting('themeThreeFeaturedProductsViewMoreUrl') }}"
-                        placeholder="/products" :isRequired="false" />
+                        placeholder="/product" :isRequired="false" />
 
                     <div class="flex justify-end pt-2">
                         <x-backend.inputs.button type="submit" buttonText="{{ translate('Save Changes') }}"

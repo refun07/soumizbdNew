@@ -9,6 +9,7 @@ import { sendOTP } from '../../../backend/react/utils/actions';
 import Breadcrumb from '../../components/Breadcrumb';
 import Button from '../../components/buttons/Button';
 import Image from '../../components/Image';
+import ContactPaymentOptions from '../../components/ContactPaymentOptions';
 import Input from '../../components/inputs/Input';
 import InputGroup from '../../components/inputs/InputGroup';
 import Label from '../../components/inputs/Label';
@@ -51,7 +52,7 @@ import {
 } from '../../utils/gtmCustomerData';
 
 export const customerDetailsSchema = object().shape({
-    name: string().required('Name is required'),
+    name: string().trim().required('Name is required'),
     email: string().email('Invalid email'),
     phone: string()
         .required('Phone is required')
@@ -296,16 +297,15 @@ const Checkout = () => {
     const [total, setTotal] = useState(0);
     const [getPassword, setGetPassword] = useState(false);
     const [password, setPassword] = useState<string>('');
+    const [orderError, setOrderError] = useState<string | null>(null);
+    const [deliveryReady, setDeliveryReady] = useState(false);
     // cart products grouped by shop
     const [selectedShopProducts, setSelectedShopsProducts] = useState<
         Record<string, ICartProduct[]>
     >({});
-    const checkIfNotProduction = () => {
-        return window.config.generalSettings.env == 'local' ? true : false;
-    };
     const [showFullForm, setShowFullForm] = useState(() => {
         return window.config.generalSettings.env == 'local'
-            ? checkIfNotProduction
+            ? true
             : isVerified;
     });
 
@@ -325,9 +325,9 @@ const Checkout = () => {
         }
     }, [carts, isLoading, isFromLanding]);
 
-    // Handle empty cart scenario - redirect to products page
+    // Handle empty cart scenario with a single redirect to the empty cart.
     useEffect(() => {
-        if (!isLoading && carts.length === 0 && !isFromLanding) {
+        if (!isSubmittingOrder.current && !isLoading && carts.length === 0 && !isFromLanding) {
             // Clear checkout data when cart is empty
             dispatch(
                 setCheckoutData({
@@ -336,7 +336,7 @@ const Checkout = () => {
                     coupons: [],
                 }),
             );
-            navigate('/products');
+            navigate('/cart');
             toast(translate('Your cart is empty'), { icon: '🛒' });
         }
     }, [carts, isLoading, isFromLanding]);
@@ -404,7 +404,7 @@ const Checkout = () => {
     }, [user]);
 
     useEffect(() => {
-        if (!checkIfNotProduction()) {
+        if (window.config.generalSettings.env !== 'local') {
             setShowFullForm(isVerified);
             dispatch(setCheckoutData({ isVerified: true }));
         }
@@ -457,6 +457,7 @@ const Checkout = () => {
     useEffect(() => {
         if (isLoading) return;
         if (isSubmittingOrder.current) return;
+        if (!isFromLanding && !currentCarts.length) return;
         // Skip this redirect if skipCart is enabled - let the empty cart handler manage it
         if (window.config.generalSettings.skipCart) return;
         if (!isFromLanding && !Object.values(selectedShops).includes(true)) {
@@ -475,6 +476,10 @@ const Checkout = () => {
             });
         } catch (err: any) {
             toast.error(err.errors[0]);
+            const field = err.inner?.[0]?.path || err.path;
+            if (['name', 'phone', 'email'].includes(field)) {
+                document.querySelector<HTMLInputElement>(`input[name="${field}"]`)?.focus();
+            }
             return;
         }
 
@@ -482,7 +487,7 @@ const Checkout = () => {
             searchParams.set(stepQueryKey, String(currentStep + 1));
             setSearchParams(searchParams);
         } else {
-            if (!paymentMethod) {
+            if (!window.config.paymentMethods.some((method) => method.value === paymentMethod)) {
                 toast.error('Please select a payment method');
                 return;
             }
@@ -521,6 +526,8 @@ const Checkout = () => {
     };
 
     const handleSubmitOrder = async () => {
+        if (isSubmittingOrder.current || creatingMnualOrder) return;
+        setOrderError(null);
         const selectedShopIds = Object.values(selectedShopProducts)
             .map((products) => products[0].shop.id)
             .filter((id, i, arr) => arr.indexOf(id) === i);
@@ -529,13 +536,23 @@ const Checkout = () => {
             .map((products) => products.map((product) => product.id))
             .flat(1);
 
-        if (!shippingAddress?.address) {
+        if (!selectedCartIds.length) {
+            toast.error('Please add a product to your cart');
+            return;
+        }
+
+        if (!shippingAddress?.address?.trim()) {
             toast.error('Please enter your full delivery address');
+            document.querySelector<HTMLTextAreaElement>('textarea')?.focus();
             return;
         }
 
         if (!shippingZoneId) {
             toast.error('Please select a delivery area');
+            return;
+        }
+        if (!deliveryReady) {
+            toast.error('Delivery charges are not ready. Please retry loading delivery areas.');
             return;
         }
 
@@ -546,9 +563,10 @@ const Checkout = () => {
 
             const payload: IManualOrderPayload = {
                 ...customerDetails,
+                name: customerDetails.name.trim(),
                 email: '',
                 guestUserId: guestUserId || undefined,
-                shippingAddress: shippingAddress,
+                shippingAddress: { ...shippingAddress, address: shippingAddress.address.trim() },
                 shippingZoneId,
                 billingAddress: billingAddress,
                 shopIds: selectedShopIds,
@@ -570,73 +588,79 @@ const Checkout = () => {
                     return;
                 }
 
-                const purchasedItems = Object.values(selectedShopProducts)
-                    .flat(1)
-                    .filter((cart) => selectedCartIds.includes(cart.id));
+                // Analytics must never delay confirmation or turn a saved order
+                // into a retryable checkout error (which could create duplicates).
+                void (async () => {
+                    const purchasedItems = Object.values(selectedShopProducts)
+                        .flat(1)
+                        .filter((cart) => selectedCartIds.includes(cart.id));
 
-                const items = purchasedItems.map((item) => ({
-                    item_id: `${item.product.id}-${item.variation.id}`,
-                    item_name: `${item.product.name} (${item.variation.name})`,
-                    price:
-                        (item as ICartProduct & { price?: number }).price ??
-                        item.variation.discountedBasePrice ??
-                        item.product.basePrice,
-                    quantity: item.qty,
-                }));
+                    const items = purchasedItems.map((item) => ({
+                        item_id: `${item.product.id}-${item.variation.id}`,
+                        item_name: `${item.product.name} (${item.variation.name})`,
+                        price:
+                            (item as ICartProduct & { price?: number }).price ??
+                            item.variation.discountedBasePrice ??
+                            item.product.basePrice,
+                        quantity: item.qty,
+                    }));
 
-                const totalValue = Math.round(total);
-                const billingGTMAddress = mapCheckoutAddressToGTMAddress(
-                    billingAddress || shippingAddress,
-                    customerDetails,
-                );
-                const shippingGTMAddress = mapCheckoutAddressToGTMAddress(
-                    shippingAddress,
-                    customerDetails,
-                );
+                    const totalValue = Math.round(total);
+                    const billingGTMAddress = mapCheckoutAddressToGTMAddress(
+                        billingAddress || shippingAddress,
+                        customerDetails,
+                    );
+                    const shippingGTMAddress = mapCheckoutAddressToGTMAddress(
+                        shippingAddress,
+                        customerDetails,
+                    );
 
-                gtmEvent({
-                    event: 'purchase',
-                    event_id: eventId,
-                    ...(await buildGTM4WPData({
-                        user,
-                        totalOrders: dashboardInfo?.totalOrders,
-                        totalOrderValue: dashboardInfo?.totalExpense,
-                        billingAddress: billingGTMAddress,
-                        shippingAddress: shippingGTMAddress,
-                    })),
-                    orderData: await buildGTM4WPOrderData({
-                        orderCode: orderGroup.orderCode,
-                        paymentMethod,
-                        shippingMethod:
-                            shippingAddress.area?.name ||
-                            shippingAddress.city?.name ||
-                            '',
-                        carts: purchasedItems,
-                        coupons,
-                        subtotal: subTotal,
-                        discountTotal: discount,
-                        shippingTotal: shippingCharge,
-                        tax,
-                        total: totalValue,
-                        customerId: user?.id,
-                        billingAddress: billingGTMAddress,
-                        shippingAddress: shippingGTMAddress,
-                    }),
-                    new_customer: (dashboardInfo?.totalOrders ?? 0) === 0,
-                    customer: buildGTMCustomerContext(
-                        user,
-                        dashboardInfo?.totalOrders,
-                    ),
-                    user_data: await buildGTMUserData(billingGTMAddress),
-                    ecommerce: {
-                        transaction_id: orderGroup.orderCode.toString(),
-                        currency: window.config.currency.code,
-                        value: totalValue,
-                        tax,
-                        shipping: shippingCharge,
-                        coupon: coupons.map((coupon) => coupon.code).join(','),
-                        items,
-                    },
+                    gtmEvent({
+                        event: 'purchase',
+                        event_id: eventId,
+                        ...(await buildGTM4WPData({
+                            user,
+                            totalOrders: dashboardInfo?.totalOrders,
+                            totalOrderValue: dashboardInfo?.totalExpense,
+                            billingAddress: billingGTMAddress,
+                            shippingAddress: shippingGTMAddress,
+                        })),
+                        orderData: await buildGTM4WPOrderData({
+                            orderCode: orderGroup.orderCode,
+                            paymentMethod,
+                            shippingMethod:
+                                shippingAddress.area?.name ||
+                                shippingAddress.city?.name ||
+                                '',
+                            carts: purchasedItems,
+                            coupons,
+                            subtotal: subTotal,
+                            discountTotal: discount,
+                            shippingTotal: shippingCharge,
+                            tax,
+                            total: totalValue,
+                            customerId: user?.id,
+                            billingAddress: billingGTMAddress,
+                            shippingAddress: shippingGTMAddress,
+                        }),
+                        new_customer: (dashboardInfo?.totalOrders ?? 0) === 0,
+                        customer: buildGTMCustomerContext(
+                            user,
+                            dashboardInfo?.totalOrders,
+                        ),
+                        user_data: await buildGTMUserData(billingGTMAddress),
+                        ecommerce: {
+                            transaction_id: orderGroup.orderCode.toString(),
+                            currency: window.config.currency.code,
+                            value: totalValue,
+                            tax,
+                            shipping: shippingCharge,
+                            coupon: coupons.map((coupon) => coupon.code).join(','),
+                            items,
+                        },
+                    });
+                })().catch((error) => {
+                    console.warn('Purchase analytics could not be recorded', error);
                 });
 
                 navigate(
@@ -647,13 +671,9 @@ const Checkout = () => {
                 getCartProducts();
             } catch (err: any) {
                 isSubmittingOrder.current = false;
-
-                toast.error(
-                    err?.data?.message ||
-                        err?.error ||
-                        'Unable to place the order. Please try again.',
-                );
-                navigate(`/orders/failed`);
+                const message = err?.data?.message || 'Unable to place the order. Please check your connection and try again.';
+                setOrderError(message);
+                toast.error(message);
             }
         }
     };
@@ -784,19 +804,16 @@ const Checkout = () => {
                 ]}
             />
 
-            <div className="container no-style grid lg:grid-cols-5 mb-12">
-                <div className="lg:col-span-3">
+            <div className="bot-checkout-page container no-style grid grid-cols-1 gap-6 lg:grid-cols-5 lg:gap-x-6 mb-12">
+                <div className="min-w-0 lg:col-span-3">
                     <div className="bg-white rounded-[4px] px-3 pb-3 sm:px-5 sm:pb-5 md:px-7 md:pb-7">
                         <CustomerDetailsForm />
 
                         {showFullForm && (
                             <>
                                 <div className="rounded-[4px] border border-slate-200 mt-4 overflow-hidden">
-                                    <h3 className="py-3 px-4 sm:px-5 bg-slate-100 text-sm font-bold text-slate-800 uppercase">
-                                        SHIPPING ADDRESS
-                                    </h3>
                                     <div className="px-4 pt-4 sm:px-5">
-                                        <SimpleAddressForm />
+                                        <SimpleAddressForm onReadyChange={setDeliveryReady} />
                                     </div>
                                 </div>
                                 {/* <div className="-mt-6">
@@ -829,58 +846,18 @@ const Checkout = () => {
                             </>
                         )}
 
-                        <div className="flex justify-end mt-7">
-                            {currentStep > 1 && (
-                                <Button
-                                    size="lg"
-                                    onClick={handlePrev}
-                                    variant="outline"
-                                    arrow={'left'}
-                                    className="mr-auto"
-                                >
-                                    {translate('Previous Step')}
-                                </Button>
-                            )}
-                            {showFullForm ? (
-                                <Button
-                                    variant="primary"
-                                    size="lg"
-                                    onClick={handleNext}
-                                    arrow={false}
-                                    className="grow !rounded-[3px] !bg-none !bg-[#e8174f] hover:!bg-[#c91343] !text-white"
-                                    isLoading={creatingMnualOrder}
-                                    disabled={
-                                        creatingMnualOrder ||
-                                        (currentStep === steps.length &&
-                                            !window.config.paymentMethods
-                                                .length)
-                                    }
-                                >
-                                    {currentStep === steps.length
-                                        ? translate('Complete Order')
-                                        : translate('Next Step')}
-                                </Button>
-                            ) : (
-                                <Button
-                                    variant="primary"
-                                    size="lg"
-                                    onClick={sendOTPVerification}
-                                >
-                                    {translate('Verify phone')}
-                                </Button>
-                            )}
-                        </div>
+
                     </div>
                 </div>
 
-                <div className="lg:col-span-2">
+                <div className="min-w-0 lg:col-span-2 lg:row-span-2 lg:col-start-4 lg:row-start-1">
                     <div className="bg-white rounded-card overflow-hidden">
-                        <div className="flex items-center justify-between gap-3 bg-primary py-3 px-4 text-white sm:px-5 md:px-8">
+                        <div className="flex max-sm:flex-col max-sm:items-start items-center justify-between gap-3 bg-primary py-3 px-4 text-white sm:px-5 md:px-8">
                             <h3>{translate('Order Summary')}</h3>
                             {!getPassword && (
                                 <button
                                     type="button"
-                                    className="text-right text-xs font-semibold uppercase text-white/90 underline-offset-4 hover:text-white hover:underline sm:text-sm"
+                                    className="text-left sm:text-right text-xs font-semibold uppercase text-white/90 underline-offset-4 hover:text-white hover:underline sm:text-sm"
                                     onClick={() => {
                                         setGetPassword(true);
                                     }}
@@ -891,7 +868,7 @@ const Checkout = () => {
                         </div>
 
                         <div>
-                            <div className="grid grid-cols-[minmax(0,2fr)_minmax(64px,.75fr)_minmax(92px,1fr)_minmax(76px,.85fr)_36px] items-center gap-2 border-b border-slate-200 bg-slate-50 px-3 py-2.5 text-[10px] font-bold uppercase text-slate-600 sm:px-4 sm:text-[11px]">
+                            <div className="bot-checkout-summary-head hidden sm:grid sm:grid-cols-[minmax(0,2fr)_minmax(64px,.75fr)_minmax(92px,1fr)_minmax(76px,.85fr)_36px] items-center gap-2 border-b border-slate-200 bg-slate-50 px-3 py-2.5 text-[10px] font-bold uppercase text-slate-600 sm:px-4 sm:text-[11px]">
                                 <span>{translate('Product')}</span>
                                 <span>{translate('Price')}</span>
                                 <span className="text-center">
@@ -929,12 +906,12 @@ const Checkout = () => {
 
                                             return (
                                                 <div
-                                                    className="grid grid-cols-[minmax(0,2fr)_minmax(64px,.75fr)_minmax(92px,1fr)_minmax(76px,.85fr)_36px] items-center gap-2 border-b border-slate-200 px-3 py-3 text-xs sm:px-4 sm:text-sm"
+                                                    className="bot-checkout-summary-row grid grid-cols-[minmax(0,1fr)_auto_44px] sm:grid-cols-[minmax(0,2fr)_minmax(64px,.75fr)_minmax(92px,1fr)_minmax(76px,.85fr)_36px] items-center gap-2 border-b border-slate-200 px-3 py-3 text-xs sm:px-4 sm:text-sm"
                                                     key={item.id}
                                                 >
                                                 <Link
-                                                    to={`/products/${item.product.slug}`}
-                                                    className="flex min-w-0 items-center gap-2 font-medium text-slate-800 hover:text-primary"
+                                                    to={`/product/${item.product.slug}`}
+                                                    className="col-span-2 sm:col-span-1 flex min-w-0 items-center gap-2 font-medium text-slate-800 hover:text-primary"
                                                 >
                                                     <Image
                                                         src={
@@ -947,8 +924,11 @@ const Checkout = () => {
                                                         className="h-10 w-10 shrink-0 rounded-[3px] border border-slate-200 object-cover sm:h-12 sm:w-12"
                                                     />
                                                     <span className="min-w-0">
-                                                        <span className="line-clamp-2">
+                                                        <span className="block break-words lg:line-clamp-2">
                                                             {item.product.name}
+                                                        </span>
+                                                        <span className="mt-1 block font-semibold text-primary sm:hidden">
+                                                            {currencyFormatter(item.variation.discountedBasePrice)}
                                                         </span>
                                                         {Number(
                                                             item.product
@@ -962,24 +942,25 @@ const Checkout = () => {
                                                     </span>
                                                 </Link>
 
-                                                <span className="font-semibold text-primary">
+                                                <span className="hidden sm:inline font-semibold text-primary">
                                                     {currencyFormatter(
                                                         item.variation
                                                             .discountedBasePrice,
                                                     )}
                                                 </span>
 
-                                                <div className="flex items-center justify-center">
+                                                <div className="col-start-1 row-start-2 sm:col-auto sm:row-auto flex items-center justify-start sm:justify-center">
                                                     <div className="inline-flex items-center overflow-hidden rounded-[3px] border border-slate-200">
                                                         <button
                                                             type="button"
-                                                            className="h-7 w-7 bg-slate-50 text-base text-slate-600 hover:bg-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-40 sm:h-8 sm:w-8 sm:text-lg"
+                                                            className="h-11 w-11 bg-slate-50 text-base text-slate-600 hover:bg-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-40 sm:h-8 sm:w-8 sm:text-lg"
                                                             onClick={() =>
                                                                 handleCartQuantityChange(
                                                                     item,
                                                                     'decrease',
                                                                 )
                                                             }
+                                                            aria-label={translate('Decrease quantity')}
                                                             disabled={
                                                                 item.qty <= 1
                                                             }
@@ -991,20 +972,22 @@ const Checkout = () => {
                                                         </span>
                                                         <button
                                                             type="button"
-                                                            className="h-7 w-7 bg-slate-50 text-base text-slate-600 hover:bg-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-40 sm:h-8 sm:w-8 sm:text-lg"
+                                                            className="h-11 w-11 bg-slate-50 text-base text-slate-600 hover:bg-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-40 sm:h-8 sm:w-8 sm:text-lg"
                                                             onClick={() =>
                                                                 handleCartQuantityChange(
                                                                     item,
                                                                     'increase',
                                                                 )
                                                             }
+                                                            aria-label={translate('Increase quantity')}
                                                             disabled={
-                                                                !window.config
+                                                                (Boolean(item.product.maxPurchaseQty) && item.qty >= item.product.maxPurchaseQty) ||
+                                                                (!window.config
                                                                     .generalSettings
                                                                     .allowBackorder &&
                                                                 item.qty >=
                                                                     item.product
-                                                                        .stockQty
+                                                                        .stockQty)
                                                             }
                                                         >
                                                             +
@@ -1012,7 +995,7 @@ const Checkout = () => {
                                                     </div>
                                                 </div>
 
-                                                <span className="text-right font-bold text-slate-800">
+                                                <span className="col-start-2 row-start-2 sm:col-auto sm:row-auto text-right font-bold text-slate-800">
                                                     {currencyFormatter(
                                                         item.variation
                                                             .discountedBasePrice *
@@ -1022,7 +1005,7 @@ const Checkout = () => {
 
                                                 <button
                                                     type="button"
-                                                    className="mx-auto inline-flex h-8 w-8 items-center justify-center rounded-[3px] text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500"
+                                                    className="col-start-3 row-start-1 sm:col-auto sm:row-auto mx-auto inline-flex h-11 w-11 sm:h-8 sm:w-8 items-center justify-center rounded-[3px] text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500"
                                                     onClick={() =>
                                                         handleRemoveFromCart(
                                                             item,
@@ -1074,6 +1057,49 @@ const Checkout = () => {
                         </div>
                     </div>
                 </div>
+                        <div className="bot-checkout-actions flex flex-wrap justify-end gap-3 lg:col-span-3 lg:col-start-1 lg:row-start-2">
+                            {orderError && <p role="alert" className="w-full rounded border border-red-200 bg-red-50 p-3 text-sm text-red-800">{orderError}</p>}
+                            {currentStep > 1 && (
+                                <Button
+                                    size="lg"
+                                    onClick={handlePrev}
+                                    variant="outline"
+                                    arrow={'left'}
+                                    className="mr-auto"
+                                >
+                                    {translate('Previous Step')}
+                                </Button>
+                            )}
+                            {showFullForm ? (
+                                <Button
+                                    variant="primary"
+                                    size="lg"
+                                    onClick={handleNext}
+                                    arrow={false}
+                                    className="bot-checkout-submit grow"
+                                    isLoading={creatingMnualOrder}
+                                    disabled={
+                                        creatingMnualOrder ||
+                                        (currentStep === steps.length &&
+                                            !window.config.paymentMethods
+                                                .length)
+                                    }
+                                >
+                                    {currentStep === steps.length
+                                        ? translate('Complete Order')
+                                        : translate('Next Step')}
+                                </Button>
+                            ) : (
+                                <Button
+                                    variant="primary"
+                                    size="lg"
+                                    onClick={sendOTPVerification}
+                                >
+                                    {translate('Verify phone')}
+                                </Button>
+                            )}
+                            <ContactPaymentOptions className="w-full" showContactButtons={false} />
+                        </div>
             </div>
         </>
     );

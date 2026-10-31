@@ -60,7 +60,7 @@ interface Props extends Omit<HTMLAttributes<HTMLInputElement>, 'onSubmit'> {
 
 const SearchForm = ({
     name = 'query',
-    path = '/products',
+    path = '/product',
     suggestions = true,
     searchOnType = true,
     submittableButton = false,
@@ -129,18 +129,22 @@ const SearchForm = ({
         };
 
         // set search key to state and navigate
-        inputEl.current?.addEventListener('input', (e: any) => {
-            const value = e.target.value;
+        const input = inputEl.current;
+        const handleInput = (e: Event) => {
+            const value = (e.target as HTMLInputElement).value;
             setQuery(value);
 
             debouncedNavigate(value);
-        });
+        };
 
-        inputEl.current?.addEventListener('focus', () => {
+        const handleFocus = () => {
             if (suggestions) {
                 setShowSuggestions(true);
             }
-        });
+        };
+
+        input?.addEventListener('input', handleInput);
+        input?.addEventListener('focus', handleFocus);
 
         document.addEventListener('click', handleClickOutside);
         document.addEventListener('keydown', handleKeydown);
@@ -148,7 +152,8 @@ const SearchForm = ({
         return () => {
             document.removeEventListener('click', handleClickOutside);
             document.removeEventListener('keydown', handleKeydown);
-            inputEl.current?.removeEventListener('input', () => {});
+            input?.removeEventListener('input', handleInput);
+            input?.removeEventListener('focus', handleFocus);
         };
     }, []);
 
@@ -175,15 +180,13 @@ const SearchForm = ({
         e.preventDefault();
 
         setShowSuggestions(false);
-        if (query) {
-            navigate(`${path}?${name}=${query}`);
-        }
+        navigate(`${path}?${new URLSearchParams({ [name]: query.trim() })}`);
         onSubmit?.(e);
     };
 
     const debouncedNavigate = debounce((value: string) => {
         if (searchOnType) {
-            navigate(`${path}?${name}=${value}`);
+            navigate(`${path}?${new URLSearchParams({ [name]: value.trim() })}`);
         }
     }, 600);
 
@@ -199,6 +202,7 @@ const SearchForm = ({
                 >
                     <input
                         type="text"
+                        aria-label={rest.placeholder || translate('Search products')}
                         name={name}
                         className={cn(
                             'theme-input search-form__input border-secondary h-[45px]',
@@ -212,6 +216,7 @@ const SearchForm = ({
                     />
                     <button
                         type="submit"
+                        aria-label={translate('Search')}
                         className={cn(
                             'text-primary absolute top-0 right-0 h-full flex items-center justify-center px-4 pointer-events-none rounded-r-md',
                             {
@@ -226,6 +231,8 @@ const SearchForm = ({
                 </form>
                 {searchPopupCloseBtn ? (
                     <button
+                        type="button"
+                        aria-label={translate('Close search')}
                         className="text-secondary text-xl"
                         onClick={() => dispatch(closePopup())}
                     >
@@ -282,7 +289,7 @@ const SearchForm = ({
 
                                         return (
                                             <Link
-                                                to={`/products/${product.slug}`}
+                                                to={`/product/${product.slug}`}
                                                 className={cn(
                                                     'hover:text-primary focus:text-primary flex items-center gap-3 py-2',
                                                     classNames?.suggestionItem,

@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
-import { Route, Routes, useLocation } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import PaymentGateway from './components/order/PaymentGateway';
 import DashboardLayout from './layouts/DashboardLayout';
 import PrimaryLayout from './layouts/PrimaryLayout';
@@ -23,12 +23,19 @@ import {
 } from './utils/gtmCustomerData';
 import localAxios from './utils/axios';
 
+function LegacyProductRedirect() {
+    const { pathname, search, hash } = useLocation();
+    return <Navigate replace to={{ pathname: pathname.replace(/^\/products(?=\/|$)/, '/product'), search, hash }} />;
+}
+
 const HomeIndex = lazy(() => import('./pages/home'));
 const Brands = lazy(() => import('./pages/Brands'));
 const Shops = lazy(() => import('./pages/shops/Shops'));
 
 const ProductDetails = lazy(() => import('./pages/ProductDetails'));
 const Brand = lazy(() => import('./pages/search-filter/Brand'));
+const Concern = lazy(() => import('./pages/search-filter/Concern'));
+const Categories = lazy(() => import('./pages/search-filter/Categories'));
 const Category = lazy(() => import('./pages/search-filter/Category'));
 const FeaturedProducts = lazy(() => import('./pages/search-filter/FeaturedProducts'));
 const OnSaleProducts = lazy(() => import('./pages/search-filter/OnSaleProducts'));
@@ -224,10 +231,14 @@ const App = () => {
             <Route element={<PrimaryLayout />}>
                 <Route path="/" element={<HomeIndex />} />
 
+                <Route path="/concerns/:concernSlug" element={<Concern />} />
+                <Route path="/categories" element={<Categories />} />
                 <Route path="/blogs" element={<Blogs />} />
                 <Route path="/blogs/:blogSlug" element={<BlogDetails />} />
 
-                <Route path="/products/:slug" element={<ProductDetails />} />
+                <Route path="/products" element={<LegacyProductRedirect />} />
+                <Route path="/products/:slug" element={<LegacyProductRedirect />} />
+                <Route path="/product/:slug" element={<ProductDetails />} />
 
                 <Route path="/brands" element={<Brands />} />
                 {/* start::uses search and filter */}
@@ -236,7 +247,7 @@ const App = () => {
                     path="/categories/:categorySlug"
                     element={<Category />}
                 />
-                <Route path="/products" element={<Search />} />
+                <Route path="/product" element={<Search />} />
                 <Route path="/featured-products" element={<FeaturedProducts />} />
                 <Route path="/on-sale-products" element={<OnSaleProducts />} />
                 {/* end::uses search and filter */}

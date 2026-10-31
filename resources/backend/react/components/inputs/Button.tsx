@@ -48,7 +48,7 @@ const Button = (props: Props) => {
         full: 'w-full grow',
     }[props.size || 'md'];
 
-    const defaultClassName = `uppercase leading-none inline-flex justify-center items-center gap-2.5 rounded transition-all disabled:bg-gray-300 disabled:text-white dark:disabled:bg-gray-700 disabled:cursor-not-allowed`;
+    const defaultClassName = `admin-ui-button admin-ui-button--${props.variant || 'primary'} uppercase leading-none inline-flex justify-center items-center gap-2.5 rounded transition-all disabled:bg-gray-300 disabled:text-white dark:disabled:bg-gray-700 disabled:cursor-not-allowed`;
 
     if (props.as === 'link') {
         const { className, children, ...rest } = props;
@@ -83,8 +83,9 @@ const Button = (props: Props) => {
                     sizeClasses,
                     className,
                 )}
-                disabled={isLoading}
                 {...rest}
+                disabled={rest.disabled || isLoading}
+                aria-busy={isLoading || undefined}
             >
                 {isLoading ? (
                     <span className="inline-flex items-center gap-2">

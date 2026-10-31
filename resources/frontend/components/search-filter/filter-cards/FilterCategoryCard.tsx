@@ -17,7 +17,7 @@ const FilterCategoryCard = ({
 }: Props) => {
     const allCategoryDOM = (
         <Link
-            to={`/products`}
+            to={`/product`}
             className="flex items-center gap-2 text-black/70 py-2 hover:text-black"
         >
             <span>

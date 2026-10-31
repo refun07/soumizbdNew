@@ -1,3 +1,4 @@
+import { safeSessionStorage } from '../../utils/safeStorage';
 import { useEffect, useRef, useState } from 'react';
 import { useGetHomepagePopupQuery } from '../../store/features/api/homeApis/commonHomeApi';
 import { togglePopup, usePopup } from '../../store/features/popup/popupSlice';
@@ -32,7 +33,7 @@ const HomepagePopup = () => {
         if (
             popupData?.showHomepagePopup === '1' &&
             popupData?.homepagePopupImage &&
-            !sessionStorage.getItem('homepagePopupClosed')
+            !safeSessionStorage.getItem('homepagePopupClosed')
         ) {
             setShowPopup(true);
             setIsExiting(false);
@@ -47,7 +48,7 @@ const HomepagePopup = () => {
 
         clearTimers();
         setIsExiting(true);
-        sessionStorage.setItem('homepagePopupClosed', 'true');
+        safeSessionStorage.setItem('homepagePopupClosed', 'true');
         closeTimeoutRef.current = window.setTimeout(() => {
             setShowPopup(false);
             setIsExiting(false);

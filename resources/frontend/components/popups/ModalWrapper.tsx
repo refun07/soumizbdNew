@@ -1,16 +1,19 @@
-import { ReactNode } from 'react';
+import { ReactNode, useRef } from 'react';
 import { usePopup } from '../../store/features/popup/popupSlice';
 import { cn } from '../../utils/cn';
+import { usePanelFocus } from '../../hooks/usePanelFocus';
 
 interface Props {
     isActive: boolean;
     className?: string;
     children?: ReactNode | ReactNode[];
     size?: 'sm' | 'md' | 'lg' | 'xl';
+    ariaLabel?: string;
 }
 
-const ModalWrapper = ({ isActive, size, className, children }: Props) => {
-    // console.log('is active',isActive)
+const ModalWrapper = ({ isActive, size, className, children, ariaLabel = 'Dialog' }: Props) => {
+    const element = useRef<HTMLDivElement>(null);
+    usePanelFocus(isActive, element);
 
     const { size: sizeFromState } = usePopup();
 
@@ -25,6 +28,11 @@ const ModalWrapper = ({ isActive, size, className, children }: Props) => {
 
     return (
         <div
+            ref={element}
+            role="dialog"
+            aria-modal={isActive || undefined}
+            aria-label={ariaLabel}
+            tabIndex={-1}
             className={cn(`theme-modal`, sizeClasses[modalSize], className, {
                 active: isActive,
                 'pointer-events-none': !isActive,

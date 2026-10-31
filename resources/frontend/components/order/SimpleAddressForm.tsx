@@ -17,15 +17,20 @@ import Textarea from '../inputs/Textarea';
 
 interface Props {
     className?: string;
+    onReadyChange?: (ready: boolean) => void;
 }
 
-const SimpleAddressForm = ({ className }: Props) => {
+const SimpleAddressForm = ({ className, onReadyChange }: Props) => {
     const dispatch = useAppDispatch();
     const { carts, user, guestUserId } = useAuth();
     const { shippingAddress, shippingZoneId, selectedShops, coupons } =
         useCheckoutData();
-    const [getDeliveryAreas, { data: deliveryAreas = [], isFetching }] =
+    const [getDeliveryAreas, { data: deliveryAreas = [], isFetching, isError }] =
         useLazyGetDeliveryAreasQuery();
+
+    useEffect(() => {
+        onReadyChange?.(!isFetching && !isError && deliveryAreas.some((area) => area.id === shippingZoneId));
+    }, [deliveryAreas, shippingZoneId, isFetching, isError, onReadyChange]);
 
     const countries = window.config.countries || [];
     const bangladeshCountry =
@@ -68,24 +73,16 @@ const SimpleAddressForm = ({ className }: Props) => {
 
     useEffect(() => {
         if (!quotePayload.shopIds.length) return;
+        getDeliveryAreas(quotePayload, false);
+    }, [getDeliveryAreas, quotePayload]);
 
-        getDeliveryAreas(quotePayload, false)
-            .unwrap()
-            .then((areas) => {
-                const selectedArea = areas.find(
-                    (area) => area.id === shippingZoneId,
-                );
-
-                if (selectedArea) {
-                    dispatch(
-                        setCheckoutData({
-                            shippingCharge: selectedArea.charge,
-                            shippingZoneName: selectedArea.name,
-                        }),
-                    );
-                }
-            });
-    }, [getDeliveryAreas, quotePayload, shippingZoneId]);
+    useEffect(() => {
+        if (isFetching || isError) return;
+        const selectedArea = deliveryAreas.find((area) => area.id === shippingZoneId);
+        if (selectedArea) {
+            dispatch(setCheckoutData({ shippingCharge: selectedArea.charge, shippingZoneName: selectedArea.name }));
+        }
+    }, [deliveryAreas, shippingZoneId, isFetching, isError, dispatch]);
 
     const selectDeliveryArea = (area: IDeliveryArea) => {
         dispatch(
@@ -127,11 +124,13 @@ const SimpleAddressForm = ({ className }: Props) => {
     return (
         <div className={cn('space-y-4 pb-4', className)}>
             <InputGroup>
-                <Label className="!mb-1.5 !normal-case font-semibold text-slate-800">
+                <Label htmlFor="checkout-address" className="!mb-1.5 !normal-case font-semibold text-slate-800">
                     {translate('Full Delivery Address')}
                     <span className="text-theme-alert ml-1">*</span>
                 </Label>
                 <Textarea
+                    id="checkout-address"
+                    autoComplete="street-address"
                     name="address"
                     rows={3}
                     className="!rounded-[3px] !border-slate-200 !bg-slate-50 placeholder:!text-slate-400 focus:!border-primary"
@@ -150,7 +149,12 @@ const SimpleAddressForm = ({ className }: Props) => {
                 </legend>
 
                 <div className="space-y-2">
-                    {isFetching && !deliveryAreas.length ? (
+                    {isError ? (
+                        <div role="alert" className="rounded border border-red-200 p-3 text-sm">
+                            <p>Unable to load delivery charges. Please try again.</p>
+                            <button type="button" className="bot-button mt-3" onClick={() => getDeliveryAreas(quotePayload, false)}>Retry delivery charges</button>
+                        </div>
+                    ) : isFetching && !deliveryAreas.length ? (
                         <div className="bg-slate-100 px-4 py-3 text-sm text-slate-500">
                             {translate('Calculating delivery charges')}...
                         </div>

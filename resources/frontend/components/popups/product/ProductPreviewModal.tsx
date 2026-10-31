@@ -10,9 +10,11 @@ const ProductPreviewModal = () => {
     const isActive = popup === 'product-preview';
 
     return (
-        <ModalWrapper isActive={isActive}>
+        <ModalWrapper isActive={isActive} ariaLabel="Product quick view">
             <button
-                className="absolute right-5 top-5 text-xl text-primary z-[2]"
+                type="button"
+                aria-label="Close product quick view"
+                className="absolute right-2 top-2 inline-flex size-11 items-center justify-center rounded-full bg-white text-xl text-primary z-[2]"
                 onClick={() => dispatch(closePopup())}
             >
                 <LiaTimesSolid />

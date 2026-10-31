@@ -65,7 +65,7 @@ const Shops = () => {
                                 />
                             ))
                         ) : !shops?.length ? (
-                            <div className="col-span-6 text-center text-black/70  ">
+                            <div className="col-span-full text-center text-black/70  ">
                                 <p className="my-10">
                                     {translate('No shops found')}
                                 </p>

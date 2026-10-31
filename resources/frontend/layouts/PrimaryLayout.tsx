@@ -1,3 +1,5 @@
+import StorefrontSeo from '../components/seo/StorefrontSeo';
+import PageErrorBoundary from '../components/PageErrorBoundary';
 import { Suspense, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LuShoppingCart } from 'react-icons/lu';
@@ -7,9 +9,11 @@ import { setAuthData, useAuth } from '../store/features/auth/authSlice';
 import { closePopup, togglePopup } from '../store/features/popup/popupSlice';
 import { useAppDispatch } from '../store/store';
 import { currencyFormatter } from '../utils/numberFormatter';
-import Copyright from './components/Copyright';
-import Footer from './components/Footer';
-import Header from './components/header';
+import Footer from '../components/storefront/BotanicalFooter';
+import Header from '../components/storefront/BotanicalHeader';
+import '../components/storefront/botanical.css';
+import '../components/storefront/storefront-consistency.css';
+import BottomBar from './components/header/theme-one/BottomBar';
 import FloatingChatButtons from './components/FloatingChatButtons';
 
 const PrimaryLayout = () => {
@@ -44,26 +48,27 @@ const PrimaryLayout = () => {
     }, [carts]);
 
     return (
-        <>
+        <div className="botanical-storefront">
+            <StorefrontSeo />
             <Header />
-            <main>
+            <main id="storefront-main" tabIndex={-1}>
                 {/* floating cart button */}
                 {(window.config.defaultTheme === 'theme-two' || window.config.defaultTheme === 'theme-one') && window.config.cartVisibilityToggle === '1' ? (
-                    <div className="fixed top-1/3 right-0 z-[2]">
+                    <div className="hidden lg:block fixed top-1/3 right-0 z-[2]">
                         <button
-                            className="overflow-hidden rounded-l-[4px] bg-[#b3052a] text-white shadow-[0_8px_20px_rgba(0,0,0,0.18)] transition hover:bg-[#95031f]"
+                            className="overflow-hidden rounded-l-[4px] bg-[#087c3e] text-white shadow-[0_8px_20px_rgba(0,0,0,0.18)] transition hover:bg-[#005b2d]"
                             onClick={() => dispatch(togglePopup('cart'))}
                         >
                             <span className="relative flex h-[38px] min-w-[58px] items-center justify-center">
                                 <LuShoppingCart className="text-[22px] text-white" />
-                                <span className="absolute right-2 top-1 inline-flex h-[15px] min-w-[15px] items-center justify-center rounded-full bg-white px-1 text-[9px] font-semibold leading-none text-[#b3052a]">
+                                <span className="absolute right-2 top-1 inline-flex h-[15px] min-w-[15px] items-center justify-center rounded-full bg-white px-1 text-[9px] font-semibold leading-none text-[#087c3e]">
                                     {totalCartQuantity < 10
                                         ? String(totalCartQuantity).padStart(2, '0')
                                         : '9+'}
                                 </span>
                             </span>
 
-                            <span className="block min-w-[58px] bg-[#f3dfc4] px-2 py-1.5 text-center text-[11px] font-semibold text-[#1c0f0f]">
+                            <span className="block min-w-[58px] bg-[#e9f3ed] px-2 py-1.5 text-center text-[11px] font-semibold text-[#1c0f0f]">
                                 {currencyFormatter(totalCartPrice, {
                                     compactDisplay: 'short',
                                 })}
@@ -73,12 +78,14 @@ const PrimaryLayout = () => {
                 ) : null}
                 {/* floating cart button */}
 
-                <Suspense fallback={<div className="min-h-screen"></div>}>
-                    <Outlet />
-                </Suspense>
+                <PageErrorBoundary key={location.pathname}>
+                    <Suspense fallback={<div className="container min-h-64 py-16" role="status">Loading page…</div>}>
+                        <Outlet />
+                    </Suspense>
+                </PageErrorBoundary>
             </main>
             <Footer />
-            <Copyright />
+            <BottomBar accentColor="var(--bot-green)" />
 
             {/* floating chat buttons */}
             <FloatingChatButtons />
@@ -86,7 +93,7 @@ const PrimaryLayout = () => {
 
             {/* popups */}
             <Popups />
-        </>
+        </div>
     );
 };
 

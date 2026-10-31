@@ -1,3 +1,4 @@
+import toast from 'react-hot-toast';
 import { FaFacebookF, FaLinkedinIn, FaTwitter } from 'react-icons/fa6';
 import { IoMdCopy } from 'react-icons/io';
 import { Link, useParams } from 'react-router-dom';
@@ -10,10 +11,21 @@ import { translate } from '../../../utils/translate';
 const BlogDetails = () => {
     const params = useParams<{ blogSlug: string }>();
 
-    const { data: blogRes, isLoading } = useGetBlogQuery(params.blogSlug!);
+    const { data: blogRes, isLoading, isError, refetch } = useGetBlogQuery(params.blogSlug!);
 
-    if (!blogRes && !isLoading) {
-        return <div>Blog not found</div>;
+    if (isLoading) {
+        return <section className="container py-12" role="status" aria-label="Loading article">
+            <div className="h-64 rounded-2xl bg-slate-100 animate-pulse" />
+            <p className="mt-4">Loading article…</p>
+        </section>;
+    }
+    if (!blogRes) {
+        return <section className="container py-12">
+            <h1 className="text-3xl font-semibold">{isError ? 'Unable to load this article' : 'Article not found'}</h1>
+            <p className="my-4">{isError ? 'Please try again in a moment.' : 'Explore more stories in our beauty journal.'}</p>
+            {isError && <button className="bot-ui-button bot-ui-button--primary mr-3" onClick={() => refetch()}>Try again</button>}
+            <Link className="bot-ui-button bot-ui-button--outline" to="/blogs">Back to journal</Link>
+        </section>;
     }
 
     function copyToClipboard(text) {
@@ -25,8 +37,11 @@ const BlogDetails = () => {
         input.value = text;
         document.body.appendChild(input);
         input.select();
-        document.execCommand('copy');
-        document.body.removeChild(input);
+        try {
+            if (!document.execCommand('copy')) throw new Error('Copy failed');
+        } finally {
+            document.body.removeChild(input);
+        }
     }
 
     const blog = blogRes?.blog;
@@ -35,7 +50,7 @@ const BlogDetails = () => {
     return (
         <>
             <section
-                className="lg:h-[850px] flex flex-col justify-end text-white bg-cover bg-center"
+                className="bot-journal-hero flex flex-col justify-end text-white bg-cover bg-center"
                 style={{
                     backgroundImage: `linear-gradient(to top, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.1)), url(${blog?.banner})`,
                 }}
@@ -47,14 +62,18 @@ const BlogDetails = () => {
                     </h1>
 
                     <div className="mt-10 text-xs flex justify-between pb-6 border-b border-white/30">
-                        <p>{dateFormatter(blog?.createdAt!)}</p>
+                        <p>
+                            {blog?.createdAt
+                                ? dateFormatter(blog.createdAt)
+                                : null}
+                        </p>
 
                         <div className="flex gap-4">
                             <a
                                 href={`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="hover:text-primary transition-all"
+                                className="hover:text-primary transition-all" aria-label="Share article on Facebook"
                             >
                                 <FaFacebookF />
                             </a>
@@ -62,7 +81,7 @@ const BlogDetails = () => {
                                 href={`https://twitter.com/intent/tweet?text=${shareUrl}`}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="hover:text-primary transition-all"
+                                className="hover:text-primary transition-all" aria-label="Share article on X"
                             >
                                 <FaTwitter />
                             </a>
@@ -70,21 +89,17 @@ const BlogDetails = () => {
                                 href={`http://www.linkedin.com/shareArticle?mini=true&url=${shareUrl}`}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="hover:text-primary transition-all"
+                                className="hover:text-primary transition-all" aria-label="Share article on LinkedIn"
                             >
                                 <FaLinkedinIn />
                             </a>
-                            <button
+                            <button aria-label="Copy article link"
                                 onClick={async () => {
                                     try {
-                                        copyToClipboard(shareUrl);
-                                        alert(
-                                            translate(
-                                                'Link copied to clipboard',
-                                            ),
-                                        );
+                                        await copyToClipboard(shareUrl);
+                                        toast.success(translate('Link copied to clipboard'));
                                     } catch {
-                                        //
+                                        toast.error(translate('Could not copy the link. Please try again.'));
                                     }
                                 }}
                                 className="hover:text-primary transition-all"
@@ -102,10 +117,10 @@ const BlogDetails = () => {
                 </Link>
                 <span className="h-1.5 w-1.5 bg-slate-600 rounded-full"></span>
                 <Link
-                    to={`/blogs?blogCategoryId=${blogRes?.blogCategories[0].id}`}
+                    to={`/blogs?blogCategoryId=${blog?.blogCategoryId}`}
                     className="hover:text-primary"
                 >
-                    {blogRes?.blogCategories[0].name}
+                    {blog?.blogCategoryName}
                 </Link>
                 <span className="h-1.5 w-1.5 bg-slate-600 rounded-full"></span>
                 <p className="text-slate-500">{blog?.title.slice(0, 20)}...</p>
@@ -118,7 +133,7 @@ const BlogDetails = () => {
                             dangerouslySetInnerHTML={{
                                 __html: blog?.description!,
                             }}
-                            className="leading-relaxed"
+                            className="leading-relaxed bot-blog-content"
                         ></div>
 
                         <p className="mt-10 mb-2">Share It:</p>
@@ -157,20 +172,16 @@ const BlogDetails = () => {
                                 </span>
                                 <span>LinkedIn</span>
                             </a>
-                            <button
+                            <button aria-label="Copy article link"
                                 onClick={async () => {
                                     try {
-                                        copyToClipboard(shareUrl);
-                                        alert(
-                                            translate(
-                                                'Link copied to clipboard',
-                                            ),
-                                        );
+                                        await copyToClipboard(shareUrl);
+                                        toast.success(translate('Link copied to clipboard'));
                                     } catch {
-                                        //
+                                        toast.error(translate('Could not copy the link. Please try again.'));
                                     }
                                 }}
-                                className="flex w-full md:w-auto mb-2 md:mb-0 gap-3 items-center py-2 px-5 rounded-md transition-all bg-[#cec004] text-white"
+                                className="flex w-full md:w-auto mb-2 md:mb-0 gap-3 items-center py-2 px-5 rounded-md transition-all bot-copy-link bg-[#e9f3ed] text-[#005b2d]"
                             >
                                 <IoMdCopy className="text-md" />
                                 <span>Copy Link</span>

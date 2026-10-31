@@ -57,7 +57,7 @@ const SmallProductsColumn = () => {
                         <hr className="grow" />
                         <Button
                             as="link"
-                            to={'/products?sortBy=newest'}
+                            to={'/product?sortBy=newest'}
                             variant="outline"
                             className=""
                         >
@@ -94,7 +94,7 @@ const SmallProductsColumn = () => {
                         <hr className="grow" />
                         <Button
                             as="link"
-                            to={'/products'}
+                            to={'/product'}
                             variant="outline"
                             className=""
                         >
@@ -131,7 +131,7 @@ const SmallProductsColumn = () => {
                         <hr className="grow" />
                         <Button
                             as="link"
-                            to={'/products'}
+                            to={'/product'}
                             variant="outline"
                             className=""
                         >

@@ -175,7 +175,7 @@ const CouponDetails = () => {
                             <Button
                                 as="link"
                                 variant="outline"
-                                to={`/products?couponCode=${coupon.code}`}
+                                to={`/product?couponCode=${coupon.code}`}
                             >
                                 {translate('View Shop')}
                             </Button>

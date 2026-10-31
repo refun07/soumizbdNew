@@ -1,14 +1,15 @@
+@php($inputId = $attributes->get('id') ?: (str_contains($name, '[') ? 'field-' . \Illuminate\Support\Str::uuid() : $name))
 <div class="{{ $labelInline ? 'theme-input-group' : '' }}  {{ !$label ? 'no-label' : '' }}">
     @if ($label)
-        <label for="{{ $name }}"
+        <label for="{{ $inputId }}"
             class="theme-input-label {{ $labelInline ? '' : 'pt-0' }} {{ $isRequired ? 'input-required' : '' }}">
             {{ translate($label) }}
         </label>
     @endif
 
     <div class="theme-input-wrapper flex gap-3 {{ $label ? '' : 'col-span-4' }}">
-        <textarea class="theme-input theme-textarea {{ $rich ? 'jodit-editor' : '' }}" placeholder="{{ translate($placeholder) }}"
-            rows="{{ $rows }}" id="{{ $name }}" name="{{ $name }}" @required(!$rich && $isRequired)
+        <textarea {{ $attributes->except('id')->merge(['class' => 'theme-input theme-textarea ' . ($rich ? 'jodit-editor' : '')]) }} placeholder="{{ translate($placeholder) }}"
+            rows="{{ $rows }}" id="{{ $inputId }}" name="{{ $name }}" @required(!$rich && $isRequired)
             @disabled($isDisabled)>{!! $value !!}</textarea>
         @if ($aiGenerate)
             <div>

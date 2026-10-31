@@ -9,6 +9,7 @@ import CountDown from '../CountDown';
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
     subTitle?: string;
     title: string;
+    headingLevel?: 'h1' | 'h2';
     titleAside?: ReactNode;
     highlightFirstWord?: boolean;
     highlightClassName?: string;
@@ -35,6 +36,7 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
 
 const SectionTitle = ({
     title,
+    headingLevel = 'h2',
     titleAside,
     highlightFirstWord,
     highlightClassName,
@@ -52,6 +54,7 @@ const SectionTitle = ({
     className,
     ...rest
 }: Props) => {
+    const Heading = headingLevel === 'h1' ? motion.h1 : motion.h2;
     const animation = {
         initial: { opacity: 0, y: 10 },
         whileInView: { opacity: 1, y: 0 },
@@ -61,7 +64,7 @@ const SectionTitle = ({
     return (
         <div
             className={cn(
-                `flex items-start justify-between gap-3 relative mb-10`,
+                `bot-common-heading flex items-start justify-between gap-3 relative mb-10`,
                 className,
                 classNames?.container,
             )}
@@ -85,7 +88,7 @@ const SectionTitle = ({
                         classNames?.titleContainer,
                     )}
                 >
-                    <motion.h2
+                    <Heading
                         {...(animated ? animation : {})}
                         transition={{ duration: 0.5, delay: 0.2 }}
                         className={cn(
@@ -100,10 +103,15 @@ const SectionTitle = ({
                                 renderBottomBorder: true,
                             }),
                         }}
-                    ></motion.h2>
+                    ></Heading>
 
                     {titleAside && (
-                        <div className={cn('min-w-0 flex-1 pb-4', classNames?.titleAside)}>
+                        <div
+                            className={cn(
+                                'min-w-0 flex-1 pb-4',
+                                classNames?.titleAside,
+                            )}
+                        >
                             {titleAside}
                         </div>
                     )}

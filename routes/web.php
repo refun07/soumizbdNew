@@ -135,7 +135,13 @@ Route::get('/products/{id}/qr/image', [ProductController::class, 'generateQrImag
 # public invoice verification route (for QR code scanning)
 Route::get('/invoice/verify/{hash}', [\App\Http\Controllers\Backend\Admin\Orders\OrderController::class, 'showPublicInvoice'])->name('invoice.public.verify');
 
-Route::get('/products/{slug}', [HomeController::class, 'index'])->name('product');
+// SEO endpoints must precede the storefront catch-all.
+Route::get('/seo/metadata', [\App\Http\Controllers\Frontend\SeoController::class, 'metadata']);
+Route::get('/sitemap.xml', [\App\Http\Controllers\Frontend\SeoController::class, 'sitemap']);
+Route::get('/robots.txt', [\App\Http\Controllers\Frontend\SeoController::class, 'robots']);
+Route::get('/{kind}/{slug?}', [\App\Http\Controllers\Frontend\SeoController::class, 'legacy'])->where('kind', 'products|category|blog|shop');
+
+Route::get('/product/{slug}', [HomeController::class, 'index'])->name('product');
 Route::get('/categories/{slug}', [HomeController::class, 'index'])->name('category');
 Route::get('/brands/{slug}', [HomeController::class, 'index'])->name('brand');
 Route::get('/shops/{slug}', [HomeController::class, 'index'])->name('shop');

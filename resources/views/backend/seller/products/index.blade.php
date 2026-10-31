@@ -214,7 +214,7 @@
                                         <div class="option-dropdown__options">
                                             <ul>
                                                 <li>
-                                                    <a href="{{ url('/products\/') . $product->slug }}" target="_blank"
+                                                    <a href="{{ route('product', $product->slug) }}" target="_blank"
                                                         class="option-dropdown__option">{{ translate('View Product') }}</a>
                                                 </li>
 

@@ -4,6 +4,7 @@ import { ICountry } from './checkout';
 declare global {
     interface Window {
         config: {
+            botanicalContent?: import('../components/storefront/homeContent').HomeContent;
             defaultTheme: 'theme-one' | 'theme-two' | 'theme-three';
             defaultCategoryCard:
                 | 'category-card-one'
@@ -185,6 +186,7 @@ export interface IGetsQueryParams {
 }
 
 export interface URLFilterParams extends IGetsQueryParams {
+    concernSlug?: string | null;
     categorySlug?: string | null;
     brandSlug?: string | null;
     collection?: string | null;

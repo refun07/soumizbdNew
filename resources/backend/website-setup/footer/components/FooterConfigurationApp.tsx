@@ -39,7 +39,7 @@ const defaultFooterInfoItems: FooterInfoItem[] = [
     },
     {
         title: 'Delivery Charges',
-        description: 'Delivery charges are as follows:\nInside Dhaka: 90TK\nOutside Dhaka: 150TK'
+        description: 'Delivery charges are as follows:\nInside Dhaka: 70TK\nOutside Dhaka: 150TK'
     },
     {
         title: 'Delivery Time',
@@ -191,7 +191,7 @@ const FooterConfigurationApp: React.FC<FooterConfigurationAppProps> = ({
                             : [
                                 { id: 1, title: 'Home', link: '/', is_enabled: true },
                                 { id: 2, title: 'Shop', link: '/shops', is_enabled: true },
-                                { id: 3, title: 'All Products', link: '/products', is_enabled: true },
+                                { id: 3, title: 'All Products', link: '/product', is_enabled: true },
                                 { id: 4, title: 'About Us', link: '/pages/about-us', is_enabled: true },
                                 { id: 5, title: 'All Brands', link: '/brands', is_enabled: true }
                             ]

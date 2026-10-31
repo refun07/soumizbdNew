@@ -1,0 +1,113 @@
+/* Homepage editorial layout. Catalog cards and admin-managed content stay shared. */
+.bot-home--refined {
+    --home-border: #dce7df;
+    --home-paper: #fafbf8;
+    --home-section-space: clamp(44px, 5.5vw, 76px);
+}
+/* One continuous promotional canvas, with editable copy layered over the artwork. */
+.bot-home--refined .bot-hero { background: #e8f3eb; padding-block: 0; }
+.bot-home--refined .bot-hero-inner { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0; width: 100%; max-width: none; margin-inline: 0; padding-inline: 0; min-height: 520px; background: #e8f3eb; border: 0; border-radius: 0; overflow: hidden; isolation: isolate; }
+.bot-home--refined .bot-hero-copy { padding: 48px 0 48px max(32px, calc((100vw - 1180px) / 2)); max-width: none; }
+.bot-home--refined .bot-hero-kicker { display: inline-flex; margin-bottom: 20px; font-size: 12px; letter-spacing: 1.5px; line-height: 1.5; color: #126b3a; }
+.bot-home--refined .bot-hero h1 { font-size: clamp(36px, 3.8vw, 52px); line-height: 1.08; letter-spacing: -1.8px; max-width: 15ch; text-wrap: balance; }
+.bot-home--refined .bot-script { font-family: Georgia, 'Times New Roman', serif; font-size: clamp(46px, 4.6vw, 64px); font-weight: 400; letter-spacing: -2px; color: var(--bot-green); margin: 8px 0 20px; }
+.bot-home--refined .bot-hero-description { max-width: 37ch; font-size: 17px; line-height: 1.65; margin-bottom: 24px; color: #425b4d; }
+.bot-home--refined .bot-hero-buttons { gap: 18px; flex-wrap: wrap; }
+.bot-home--refined .bot-hero-buttons .bot-button { min-height: 50px; padding-inline: 24px; font-size: 16px; box-shadow: 0 5px 12px #005b2d12; }
+.bot-home--refined .bot-underlined-link { min-height: 48px; display: inline-flex; align-items: center; font-size: 16px; }
+.bot-home--refined .bot-hero-art { position: absolute; inset: 0 0 0 44%; margin: 0; min-height: 0; border-radius: 0; overflow: hidden; background: transparent; isolation: isolate; z-index: 0; }
+.bot-home--refined .bot-hero-photo { inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 66% center; mix-blend-mode: normal; mask-image: linear-gradient(90deg, transparent, #000 28%); -webkit-mask-image: linear-gradient(90deg, transparent, #000 28%); }
+.bot-home--refined .bot-hero-orbit,.bot-home--refined .bot-sparkle { display: none; }
+.bot-home--refined .bot-floating-label { padding: 9px 13px 9px 9px; font-size: 13px; gap: 8px; border: 1px solid #ffffffb3; box-shadow: 0 4px 16px #143f2212; }
+.bot-home--refined .bot-floating-label--delivery { top: 24px; left: auto; right: 24px; }
+.bot-home--refined .bot-floating-label--payment { top: auto; bottom: 24px; right: 24px; }
+.bot-home--refined .bot-hero-stamp { left: 24%; bottom: 24px; width: 82px; height: 82px; outline-width: 4px; }
+.bot-home--refined .bot-values { background: white; border-bottom: 1px solid var(--home-border); }
+.bot-home--refined .bot-values-inner { padding-block: 28px; gap: 24px; }
+.bot-home--refined .bot-value { align-items: center; }
+.bot-home--refined .bot-value-icon { border: 0; border-radius: 50%; background: var(--bot-mint); }
+.bot-home--refined .bot-value h2 { font-size: 18px; margin-bottom: 4px; }
+.bot-home--refined .bot-value p { font-size: 16px; line-height: 1.55; }
+.bot-home--refined .bot-category-section { padding-block: var(--home-section-space); }
+.bot-home--refined .bot-section-heading,.bot-home--refined .bot-bestsellers-heading { justify-content: space-between; align-items: end; gap: 20px; margin-bottom: 28px; }
+.bot-home--refined .bot-eyebrow { font-size: 14px; letter-spacing: .06em; }
+.bot-home--refined :is(.bot-section-heading,.bot-bestsellers-heading) h2 { font-size: clamp(28px, 2.8vw, 38px); line-height: 1.2; letter-spacing: -1px; font-weight: 600; text-wrap: balance; }
+.bot-home--refined :is(.bot-section-heading,.bot-bestsellers-heading) > a { margin: 0; padding: 10px 16px; border: 1px solid var(--home-border); border-radius: 999px; text-decoration: none; font-size: 16px; min-height: 46px; flex-shrink: 0; background: white; }
+.bot-home--refined :is(.bot-section-heading,.bot-bestsellers-heading) > a:hover { border-color: var(--bot-green); background: var(--bot-mint); }
+.bot-home--refined .bot-categories { gap: 16px; }
+.bot-home--refined .bot-category { padding: 10px; border-radius: 18px; background: var(--home-paper); }
+.bot-home--refined .bot-category-caption { padding: 14px 2px 4px; align-items: center; }
+.bot-home--refined .bot-category h3 { font-size: 17px; line-height: 1.35; }
+.bot-home--refined .bot-category p { font-size: 14px; margin-top: 5px; }
+.bot-home--refined .bot-category-caption > svg { width: 16px; }
+.bot-home--refined .bot-category:hover { border-color: #97b7a3; background: #f0f6f1; }
+.bot-home--refined .bot-bestsellers { padding-block: var(--home-section-space); background: #f2f7f3; border-block: 1px solid #e6ede7; }
+.bot-home--refined .bot-bestsellers-description { max-width: 48ch; font-size: 17px; line-height: 1.6; }
+.bot-home--refined .bot-flash-sale-section { padding-block: 0 var(--home-section-space); }
+.bot-home--refined .bot-flash-sale { border-radius: 24px; padding: 28px; }
+.bot-home--refined .bot-flash-sale-heading { gap: 20px; padding-bottom: 20px; }
+.bot-home--refined .bot-flash-sale h2::after { display: none; }
+.bot-home--refined .bot-flash-sale-eyebrow { letter-spacing: .04em; }
+.bot-home--refined .bot-flash-sale-description { margin-block: 18px 24px; font-size: 17px; }
+.bot-home--refined .bot-sale-more { border-radius: 999px; }
+.bot-home--refined .bot-promotion-section { padding-block: var(--home-section-space); }
+.bot-home--refined .bot-arrivals { padding-block: 0 var(--home-section-space); }
+.bot-home--refined .bot-testimonials-section { padding-block: 0 var(--home-section-space); }
+.bot-home--refined .bot-testimonials-panel { border-radius: 24px; box-shadow: none; background: var(--home-paper); padding: 40px 28px 24px; }
+.bot-home--refined .bot-testimonials-heading { margin-bottom: 28px; }
+.bot-home--refined .bot-testimonials-heading h2 { text-transform: none; font-size: clamp(28px, 2.8vw, 38px); }
+.bot-home--refined .bot-testimonial { border: 1px solid var(--home-border); border-radius: 18px; background: white; padding: 24px 18px; }
+.bot-home--refined .bot-testimonial > img,.bot-home--refined .bot-testimonial-initial { width: 80px; height: 80px; }
+.bot-home--refined .bot-testimonial blockquote { font-size: 17px; line-height: 1.8; }
+.bot-home--refined .bot-testimonial-quote { color: var(--bot-green); }
+@media (min-width: 701px) and (max-width: 1023px) {
+    .bot-home--refined .bot-hero-inner { min-height: 460px; }
+    .bot-home--refined .bot-hero-art { min-height: 0; left: 40%; }
+    .bot-home--refined .bot-hero-copy { padding: 32px 0 32px 28px; }
+    .bot-home--refined .bot-hero h1 { font-size: 38px; }
+    .bot-home--refined .bot-hero-buttons { gap: 12px; }
+    .bot-home--refined .bot-value { gap: 12px; }
+    .bot-home--refined .bot-value-icon { width: 40px; height: 40px; }
+}
+@media (max-width: 700px) {
+    .bot-home--refined .bot-hero { padding-block: 0; }
+    .bot-home--refined .bot-hero-inner { grid-template-columns: minmax(0, 1fr); gap: 0; min-height: 0; border-radius: 0; }
+    .bot-home--refined .bot-hero-copy { padding: 28px 24px 0; }
+    .bot-home--refined .bot-hero-kicker { font-size: 12px; margin-bottom: 16px; padding: 0; }
+    .bot-home--refined .bot-hero h1 { max-width: 15ch; font-size: clamp(34px, 9vw, 48px); letter-spacing: -1.2px; }
+    .bot-home--refined .bot-script { font-size: 50px; line-height: 1.15; margin: 8px 0 18px; }
+    .bot-home--refined .bot-hero-description { font-size: 17px; line-height: 1.65; margin-bottom: 22px; max-width: 38ch; }
+    .bot-home--refined .bot-hero-buttons { gap: 10px 16px; }
+    .bot-home--refined .bot-hero-buttons .bot-button { min-height: 48px; padding-inline: 20px; font-size: 16px; }
+    .bot-home--refined .bot-underlined-link { font-size: 15px; }
+    .bot-home--refined .bot-hero-art { position: relative; inset: auto; height: 300px; min-height: 0; width: 100%; max-width: none; border-radius: 0; margin-top: 12px; }
+    .bot-home--refined .bot-hero-photo { object-position: 66% 40%; mask-image: linear-gradient(180deg, transparent, #000 22%); -webkit-mask-image: linear-gradient(180deg, transparent, #000 22%); }
+    .bot-home--refined .bot-hero-stamp { width: 78px; height: 78px; left: 18px; bottom: 18px; }
+    .bot-home--refined .bot-floating-label--delivery { top: 30px; left: 16px; right: auto; }
+    .bot-home--refined .bot-floating-label--payment { bottom: 18px; right: 14px; max-width: calc(100% - 124px); }
+    .bot-home--refined .bot-floating-label { font-size: 12px; padding: 7px 10px; }
+    .bot-home--refined .bot-floating-label > svg { width: 25px; height: 25px; }
+    .bot-home--refined .bot-values-inner { padding-block: 12px; gap: 0; }
+    .bot-home--refined .bot-value { padding-block: 16px; gap: 14px; }
+    .bot-home--refined .bot-value-icon { width: 44px; height: 44px; }
+    .bot-home--refined .bot-value h2 { font-size: 17px; }
+    .bot-home--refined .bot-value p { font-size: 15px; }
+    .bot-home--refined .bot-section-heading,.bot-home--refined .bot-bestsellers-heading { align-items: flex-start; flex-direction: column; gap: 14px; margin-bottom: 24px; }
+    .bot-home--refined :is(.bot-section-heading,.bot-bestsellers-heading) > a { font-size: 15px; min-height: 44px; padding: 8px 14px; }
+    .bot-home--refined .bot-eyebrow { font-size: 14px; }
+    .bot-home--refined .bot-categories { gap: 12px; }
+    .bot-home--refined .bot-category { padding: 8px; }
+    .bot-home--refined .bot-category h3 { font-size: 17px; }
+    .bot-home--refined .bot-category-image { aspect-ratio: 1.15; }
+    .bot-home--refined .bot-flash-sale { padding: 20px 14px; border-radius: 20px; }
+    .bot-home--refined .bot-flash-sale-heading { gap: 14px; }
+    .bot-home--refined .bot-sale-more { margin-left: 0; }
+    .bot-home--refined .bot-testimonials-panel { padding: 28px 14px 18px; }
+    .bot-home--refined .bot-testimonial { padding: 24px 16px; }
+}
+
+/* Keep cards at catalog scale, even when a collection has only a few products. */
+.bot-home--refined .bot-home-product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 24px; align-items: stretch; justify-items: center; }
+.bot-home--refined .bot-home-product-grid > .bot-product { min-width: 0; width: 100%; max-width: 320px; height: 100%; }
+@media (max-width: 899px) { .bot-home--refined .bot-home-product-grid { gap: 16px; } }
+@media (max-width: 700px) { .bot-home--refined .bot-home-product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; } }

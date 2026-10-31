@@ -70,7 +70,7 @@ const DynamicMenu = ({ className = '' }: { className?: string }) => {
     if (item.type === 'Existing Page') {
       return item.link || '#';
     } else if (item.type === 'Category') {
-      return item.link || '/products';
+      return item.link || '/product';
     } else {
       // Custom Link
       return item.link || '#';
@@ -123,7 +123,7 @@ const DynamicMenu = ({ className = '' }: { className?: string }) => {
               subCategories.map((cat: any) => (
                 <Link
                   key={cat.id}
-                  to={`/products?category=${cat.id}`}
+                  to={`/product?category=${cat.id}`}
                   className="flex items-center gap-1 px-3 py-2 hover:bg-white/10 transition-colors text-white"
                   style={{
                     color: design.text_color

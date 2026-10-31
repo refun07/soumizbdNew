@@ -17,7 +17,7 @@ const Blogs = () => {
 
     return (
         <>
-            <div className="bg-gradient-to-t from-primary/40 to-transparent">
+            <div className="bot-journal-index-heading">
                 <div className="container h-[258px] flex items-center justify-center relative">
                     <div className="text-center">
                         <p className="text-primary text-base mb-2">
@@ -36,7 +36,7 @@ const Blogs = () => {
                 </div>
             </div>
 
-            <section className="my-20">
+            <section className="my-12">
                 <div className="container">
                     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-7">
                         {isLoading ? (

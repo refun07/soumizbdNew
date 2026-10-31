@@ -1,10 +1,11 @@
+@php($inputId = $attributes->get('id') ?: 'search-' . \Illuminate\Support\Str::uuid())
 @if ($label)
-    <label class="theme-input-label !pt-0 input-required">
+    <label for="{{ $inputId }}" class="theme-input-label !pt-0 input-required">
         {!! translate($label) !!}
     </label>
 @endif
 <div class="search-form relative flex-grow w-full">
-    <input {{ $attributes->merge(['class' => 'theme-input ' . $class]) }} type="text" id="{{ $name }}" name="{{ $name }}"
+    <input {{ $attributes->except(['id', 'aria-label'])->merge(['class' => 'theme-input ' . $class]) }} type="text" id="{{ $inputId }}" aria-label="{{ $attributes->get('aria-label') ?: translate($label ?: $placeholder ?: 'Search') }}" name="{{ $name }}"
         value="{!! $value !!}" placeholder="{{ translate($placeholder) }}"
         autocomplete="off" />
     <span

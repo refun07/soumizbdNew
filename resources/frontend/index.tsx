@@ -1,3 +1,4 @@
+import { safeLocalStorage } from './utils/safeStorage';
 import 'swiper/css';
 
 import { MotionConfig } from 'framer-motion';
@@ -12,6 +13,9 @@ import './i18next';
 import { store } from './store/store';
 import { STORAGE_KEYS } from './types';
 import localAxios from './utils/axios';
+import { installChunkRecovery } from './utils/chunkRecovery';
+
+installChunkRecovery();
 
 // if accessToken is in the query
 // set the access token to local storage
@@ -19,7 +23,7 @@ const searchParams = new URLSearchParams(window.location.search);
 const accessToken = searchParams.get('accessToken');
 
 if (accessToken) {
-    localStorage.setItem(STORAGE_KEYS.AUTH_KEY, accessToken);
+    safeLocalStorage.setItem(STORAGE_KEYS.AUTH_KEY, accessToken);
     localAxios.defaults.headers.common[
         'Authorization'
     ] = `Bearer ${accessToken}`;

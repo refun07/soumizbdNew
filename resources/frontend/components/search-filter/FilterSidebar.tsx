@@ -1,4 +1,5 @@
-import { ChangeEvent } from 'react';
+import { ChangeEvent, useRef } from 'react';
+import { usePanelFocus } from '../../hooks/usePanelFocus';
 import { LiaTimesSolid } from 'react-icons/lia';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
@@ -52,6 +53,8 @@ const FilterSidebar = ({
 }: Props) => {
     const dispatch = useAppDispatch();
     const { popup } = usePopup();
+    const panel = useRef<HTMLElement>(null);
+    usePanelFocus(popup === 'product-filter', panel);
     const [searchParams] = useSearchParams();
     const collections = productsRes?.selectedBrand?.collections || [];
     const activeCollection = searchParams.get('collection') || '';
@@ -65,9 +68,9 @@ const FilterSidebar = ({
     };
 
     return (
-        <aside
+        <aside ref={panel} tabIndex={-1} aria-label="Product filters"
             className={`product-filter-sidebar ${
-                popup === 'product-filter' && 'translate-x-0 delay-150'
+                popup === 'product-filter' && 'is-open translate-x-0 delay-150'
             }`}
         >
             <div className="flex items-center justify-between mb-5 gap-4">
@@ -79,7 +82,9 @@ const FilterSidebar = ({
                     }}
                 />
                 <button
-                    className="text-lg lg:hidden"
+                    type="button"
+                    aria-label="Close filters"
+                    className="inline-flex size-11 shrink-0 items-center justify-center text-lg lg:hidden"
                     onClick={() => dispatch(closePopup())}
                 >
                     <LiaTimesSolid />
@@ -182,8 +187,13 @@ const FilterSidebar = ({
                         </h5>
 
                         <div className="mt-5 space-y-3">
-                            {priceFilter && (
+                            {priceFilter && priceFilter.minPrice === priceFilter.maxPrice ? (
+                                <p className="text-sm text-zinc-700">
+                                    {priceFilter.minPrice ? `৳${priceFilter.minPrice}` : translate('No price range available')}
+                                </p>
+                            ) : priceFilter && (
                                 <PriceSlider
+                                    key={`${categorySlug || "all"}-${priceFilter.minPrice}-${priceFilter.maxPrice}`}
                                     options={{
                                         range: {
                                             min: priceFilter.minPrice || 0,

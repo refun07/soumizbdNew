@@ -41,7 +41,7 @@ const Pagination = ({
         setSearchParams(searchParams);
     };
 
-    const itemClasses = `size-7 sm:size-[38px] rounded inline-flex items-center justify-center text-sm text-black/70 border border-secondary hover:border-primary hover:text-white hover:bg-primary cursor-pointer`;
+    const itemClasses = `bot-pagination-control size-7 sm:size-[38px] rounded inline-flex items-center justify-center text-sm text-black/70 border border-secondary hover:border-primary hover:text-white hover:bg-primary cursor-pointer`;
 
     return (
         <div
@@ -59,6 +59,17 @@ const Pagination = ({
             </p>
 
             <ReactPaginate
+                hrefBuilder={(page) => {
+                    const params = new URLSearchParams(searchParams);
+                    params.set(
+                        'page',
+                        String(
+                            Math.max(1, Math.min(pagination.last_page, page)),
+                        ),
+                    );
+                    return `?${params.toString()}`;
+                }}
+                hrefAllControls
                 breakLabel={<span className={itemClasses}>...</span>}
                 onPageChange={handlePageClick}
                 disableInitialCallback={true}

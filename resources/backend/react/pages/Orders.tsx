@@ -1548,14 +1548,15 @@ const OrderPage: React.FC = () => {
 
                 {/* Pagination */}
                 <div className="p-4 border-t border-border">
-                    <div className="flex justify-between items-center">
+                    <div className="admin-order-pagination flex flex-wrap justify-between items-center gap-3">
                         <p className="text-sm text-muted">
                             Showing page {pagination.current_page} of{' '}
                             {pagination.last_page} ({pagination.total} orders)
                         </p>
-                        <div className="flex items-center space-x-4">
+                        <div className="flex flex-wrap items-center gap-3">
                             <div className="flex items-center gap-2 text-sm text-muted">
                                 <select
+                                    aria-label="Orders per page"
                                     value={perPage}
                                     onChange={(e) =>
                                         handlePerPageChange(

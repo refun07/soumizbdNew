@@ -89,9 +89,11 @@ const Signin = () => {
     });
 
     return (
-        <ModalWrapper isActive={isActive}>
+        <ModalWrapper isActive={isActive} ariaLabel="Sign in">
             <button
-                className="absolute right-5 top-5 text-xl text-white sm:text-primary z-[1]"
+                type="button"
+                aria-label="Close sign in"
+                className="absolute right-2 top-2 inline-flex size-11 items-center justify-center rounded-full bg-white text-xl text-primary z-[1]"
                 onClick={() => dispatch(closePopup())}
             >
                 <LiaTimesSolid />
@@ -123,9 +125,10 @@ const Signin = () => {
                     >
                         {isPhoneLogin ? (
                             <InputGroup>
-                                <Label htmlFor="phone">{translate('phone')}</Label>
+                                <Label htmlFor="login-phone">{translate('phone')}</Label>
                                 <Input
-                                    type="text"
+                                    type="tel"
+                                    autoComplete="username"
                                     id="login-phone"
                                     placeholder={translate('Type Your Phone (880XXXXXXXXXXX or 01XXXXXXXXX)')}
                                     {...formik.getFieldProps('phone')}
@@ -135,10 +138,13 @@ const Signin = () => {
                             </InputGroup>
                         ) : (
                             <InputGroup>
-                                <Label htmlFor="email">{translate('email')}</Label>
+                                <Label htmlFor="login-email">{translate('email')}</Label>
                                 <Input
                                     type="email"
                                     id="login-email"
+                                    autoComplete="username"
+                                    error={formik.errors.email}
+                                    touched={formik.touched.email}
                                     placeholder={translate('Type Your Email')}
                                     {...formik.getFieldProps('email')}
                                 />
@@ -146,12 +152,15 @@ const Signin = () => {
                         )}
                         
                         <InputGroup>
-                            <Label htmlFor="password">
+                            <Label htmlFor="login-password">
                                 {translate('password')}
                             </Label>
                             <Input
                                 type="password"
                                 id="login-password"
+                                autoComplete="current-password"
+                                error={formik.errors.password}
+                                touched={formik.touched.password}
                                 placeholder={translate('Type Your Password')}
                                 {...formik.getFieldProps('password')}
                             />
@@ -201,7 +210,7 @@ const Signin = () => {
                     </div> */}
 
                     <div className="text-center text-sm text-black/70 mt-5">
-                        {translate('Don&#39;t Have an Account?')}
+                        {translate("Don't Have an Account?")}
                         <button
                             onClick={() => dispatch(togglePopup('signup'))}
                             className="ml-1 text-primary"

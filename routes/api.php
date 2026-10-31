@@ -107,6 +107,7 @@ Route::group(['prefix' => config('app.api_version')], function () {
 
     // homepage
     Route::group(['prefix' => 'homepage'], function () {
+        Route::get('/botanical/flash-sale', [HomepageController::class, 'botanicalFlashSale'])->middleware('zone');
         // theme-one
         Route::group(['prefix' => 'theme-one'], function () {
             Route::get('/banner', [HomePageThemeOneController::class, 'banner']);

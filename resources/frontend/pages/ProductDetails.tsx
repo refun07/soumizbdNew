@@ -98,7 +98,7 @@ const ProductDetails = () => {
         },
         {
             name: translate('Products'),
-            link: '/products',
+            link: '/product',
         },
     ];
 
@@ -457,7 +457,7 @@ const ProductDetails = () => {
                                         className="mt-10 mb-8"
                                     />
 
-                                    <div className="space-y-5">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 lg:grid-cols-1">
                                         {product.relatedProducts.map((product) => (
                                             <ProductCardSmall
                                                 key={product.id}
@@ -483,7 +483,7 @@ const ProductDetails = () => {
                             link={
                                 product.rootCategory
                                     ? `/categories/${product.rootCategory?.slug}`
-                                    : '/products'
+                                    : '/product'
                             }
                         />
 
