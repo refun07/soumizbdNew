@@ -55,15 +55,19 @@ Route::group(['prefix' => config('app.api_version')], function () {
     Route::post('/verify-otp', [OTPController::class, 'verifyOtpForGuest']);
     Route::post('/resend-otp', [OTPController::class, 'resendOtp']);
 
-    // installation APIs
-    Route::group(['prefix' => 'installation'], function () {
-        Route::get('/checklist', [InstallController::class, 'checklist'])->name('installation.checklist');
+    // These routes can rewrite .env and refresh the entire database. They are
+    // unavailable on an installed application unless setup mode is explicitly
+    // enabled by an operator.
+    if (config('app.INSTALLATION_ENABLED', false)) {
+        Route::group(['prefix' => 'installation'], function () {
+            Route::get('/checklist', [InstallController::class, 'checklist'])->name('installation.checklist');
 
-        Route::post('/database-setup', [InstallController::class, 'storeDatabaseSetup'])->name('installation.storeDbSetup');
-        Route::post('/run-db-migration', [InstallController::class, 'runDbMigration'])->name('installation.runMigration');
+            Route::post('/database-setup', [InstallController::class, 'storeDatabaseSetup'])->name('installation.storeDbSetup');
+            Route::post('/run-db-migration', [InstallController::class, 'runDbMigration'])->name('installation.runMigration');
 
-        Route::post('/admin-configuration', [InstallController::class, 'storeAdmin'])->name('installation.storeAdmin');
-    });
+            Route::post('/admin-configuration', [InstallController::class, 'storeAdmin'])->name('installation.storeAdmin');
+        });
+    }
 
     // Auth routes
     Route::group(['prefix' => 'auth'], function () {

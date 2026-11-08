@@ -912,47 +912,6 @@ class CheckoutController extends Controller
                             $order->save();
                             $processedShopCount++;
 
-                            // Send Facebook Purchase event
-                            try {
-                                if ($user && config('app.FACEBOOK_PIXEL_ACTIVATION') == '1') {
-
-                                    // Build content_ids & contents arrays
-                                    $orderItems = OrderItem::where('order_id', $order->id)->get();
-
-                                    $content_ids = [];
-                                    $contents = [];
-
-                                    foreach ($orderItems as $orderItem) {
-                                        $variation = $orderItem->productVariation;
-                                        $product = $variation->product;
-
-                                        $variantId = "{$product->id}-{$variation->id}";
-
-                                        $content_ids[] = $variantId;
-
-                                        $contents[] = [
-                                            'id' => $variantId,
-                                            'quantity' => $orderItem->qty,
-                                            'item_price' => $orderItem->unit_price,
-                                        ];
-                                    }
-
-                                    $this->facebook->sendEvent('Purchase', [
-                                        'email' => $user->email,
-                                        'phone' => $user->phone,
-                                    ], [
-                                        'value' => $order->total_amount,
-                                        'currency' => getSetting('currencyCode') ?? 'USD',
-                                        'content_ids' => $content_ids,  // <-- FIXED (variant IDs)
-                                        'content_type' => 'product',
-                                        'contents' => $contents,     // <-- FIXED (details)
-                                        'num_items' => array_sum(array_column($contents, 'quantity')),
-                                    ], $request->eventId);
-                                }
-                            } catch (\Exception $e) {
-                                \Log::error('Facebook Pixel tracking failed: '.$e->getMessage());
-                            }
-
                             // ---------------------> commissions calculated in payment success <---------------------
 
                             // order update
@@ -1031,6 +990,51 @@ class CheckoutController extends Controller
             // complete transaction
             DB::commit();
             Log::debug('[CHECKOUT] DB transaction committed');
+
+            // Send one Purchase event for the committed order group. A single
+            // event keeps the browser/CAPI event ID and totals aligned even
+            // when the checkout contains orders from multiple shops.
+            try {
+                if (config('app.FACEBOOK_PIXEL_ACTIVATION') == '1') {
+                    $orderGroup->load('orders.orderItems.productVariation.product');
+                    $contents = [];
+
+                    foreach ($orderGroup->orders as $groupOrder) {
+                        foreach ($groupOrder->orderItems as $orderItem) {
+                            $variation = $orderItem->productVariation;
+                            $product = $variation?->product;
+
+                            if (! $variation || ! $product) {
+                                continue;
+                            }
+
+                            $contents[] = [
+                                'id' => "{$product->id}-{$variation->id}",
+                                'quantity' => $orderItem->qty,
+                                'item_price' => $orderItem->unit_price,
+                            ];
+                        }
+                    }
+
+                    $this->facebook->sendEvent('Purchase', [
+                        'email' => $user?->email,
+                        'phone' => $user?->phone,
+                    ], [
+                        'value' => $grandTotal,
+                        'currency' => getSetting('currencyCode') ?? 'USD',
+                        'content_ids' => array_column($contents, 'id'),
+                        'content_type' => 'product',
+                        'contents' => $contents,
+                        'num_items' => array_sum(array_column($contents, 'quantity')),
+                        'order_id' => (string) $orderGroup->code,
+                    ], $request->eventId);
+                }
+            } catch (\Throwable $e) {
+                Log::error('Facebook Purchase tracking failed', [
+                    'message' => $e->getMessage(),
+                    'order_group_id' => $orderGroup->id,
+                ]);
+            }
 
             // send notifications for offline methods (order is placed without an online gateway)
             if (in_array($request->paymentMethod, ['cash_on_delivery', 'card_on_delivery', 'bkash_personal'])) {

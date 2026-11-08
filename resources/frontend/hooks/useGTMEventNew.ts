@@ -120,6 +120,70 @@ export type GTMEventParams =
  */
 const pushedEventIds = new Set<string>();
 
+/**
+ * Send the browser-side Meta event directly. GTM still receives the original
+ * dataLayer event for analytics and any other configured tags, while Meta no
+ * longer depends on the GTM container to translate the ecommerce payload.
+ */
+const sendMetaPixelEvent = (eventData: GTMEventParams) => {
+    const fbq = (window as any).fbq;
+
+    if (typeof fbq !== 'function') return;
+
+    const eventId =
+        eventData.event_id ||
+        eventData.eventID ||
+        eventData.eventId ||
+        eventData.meta_event_id;
+    const eventOptions =
+        typeof eventId === 'string' ? { eventID: eventId } : undefined;
+
+    if (eventData.event === 'page_view') {
+        fbq('track', 'PageView', {}, eventOptions);
+        return;
+    }
+
+    if (
+        eventData.event !== 'view_item' &&
+        eventData.event !== 'add_to_cart' &&
+        eventData.event !== 'purchase'
+    ) {
+        return;
+    }
+
+    const ecommerce = eventData.ecommerce;
+    const items = Array.isArray(ecommerce?.items) ? ecommerce.items : [];
+    const contents = items.map((item) => ({
+        id: String(item.item_id),
+        quantity: Number(item.quantity || 1),
+        item_price: Number(item.price || 0),
+    }));
+    const params: Record<string, any> = {
+        content_ids: contents.map((item) => item.id),
+        contents,
+        content_type: 'product',
+        currency: ecommerce.currency,
+        value: Number(ecommerce.value || 0),
+    };
+
+    if (eventData.event === 'view_item') {
+        params.content_name = items[0]?.item_name || '';
+        fbq('track', 'ViewContent', params, eventOptions);
+        return;
+    }
+
+    if (eventData.event === 'add_to_cart') {
+        fbq('track', 'AddToCart', params, eventOptions);
+        return;
+    }
+
+    if (ecommerce.transaction_id) {
+        params.order_id = String(ecommerce.transaction_id);
+    }
+
+    fbq('track', 'Purchase', params, eventOptions);
+};
+
 const useGTMEventsNew = () => {
     const sendEvent = useCallback((eventData: GTMEventParams) => {
         if (typeof window !== 'undefined') {
@@ -139,6 +203,7 @@ const useGTMEventsNew = () => {
 
             window.dataLayer = window.dataLayer || [];
             window.dataLayer.push(eventData);
+            sendMetaPixelEvent(eventData);
         }
     }, []);
 

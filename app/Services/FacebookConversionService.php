@@ -63,14 +63,24 @@ class FacebookConversionService
 {
     protected $pixelId;
     protected $accessToken;
+    protected bool $configured = false;
 
     public function __construct()
     {
-        $this->pixelId     = env('META_PIXEL_ID');
-        $this->accessToken = env('META_CONVERSIONS_API_ACCESS_TOKEN');
+        $this->pixelId     = (string) config('app.META_PIXEL_ID');
+        $this->accessToken = (string) config('app.META_CONVERSIONS_API_ACCESS_TOKEN');
+
+        if (config('app.FACEBOOK_PIXEL_ACTIVATION') != '1') {
+            return;
+        }
+
+        if (! preg_match('/^\d+$/', $this->pixelId) || $this->accessToken === '') {
+            return;
+        }
 
         Api::init(null, null, $this->accessToken);
         Api::instance()->setLogger(new CurlLogger());
+        $this->configured = true;
     }
 
     public function sendEvent(
@@ -79,8 +89,12 @@ class FacebookConversionService
         array $customData = [],
         ?string $eventId = null    // for deduplication
     ) {
-        if (config('app.FACEBOOK_PIXEL_ACTIVATION') == '0') {
+        if (config('app.FACEBOOK_PIXEL_ACTIVATION') != '1') {
             return;
+        }
+
+        if (! $this->configured) {
+            throw new \RuntimeException('Meta CAPI is active but its Pixel ID or access token is invalid.');
         }
 
         // Collect fbp / fbc
@@ -127,6 +141,18 @@ class FacebookConversionService
 
         if (!empty($customData['content_type'])) {
             $customDataObj->setContentType($customData['content_type']);
+        }
+
+        if (!empty($customData['content_name'])) {
+            $customDataObj->setContentName($customData['content_name']);
+        }
+
+        if (array_key_exists('num_items', $customData)) {
+            $customDataObj->setNumItems((int) $customData['num_items']);
+        }
+
+        if (!empty($customData['order_id'])) {
+            $customDataObj->setOrderId((string) $customData['order_id']);
         }
 
         // Build server event

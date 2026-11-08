@@ -9,6 +9,7 @@ use App\Models\ProductVariation;
 use Illuminate\Http\Request;
 use App\Services\FacebookConversionService;
 use App\Facades\Gtag;
+use Illuminate\Support\Facades\Log;
 
 class CartController extends Controller
 {
@@ -61,33 +62,32 @@ class CartController extends Controller
             $cart->save();
 
             // Send Facebook AddToCart event
-            if ($user && config('app.FACEBOOK_PIXEL_ACTIVATION') == '1') {
+            if (config('app.FACEBOOK_PIXEL_ACTIVATION') == '1') {
                 try {
-
                     $variantId = "{$productVariation->product_id}-{$productVariation->id}"; // <-- FIXED
+                    $addedQty = max(1, (int) $request->qty);
 
                     $this->facebook->sendEvent('AddToCart', [
-                        'email' => $user->email,
-                        'phone' => $user->phone
+                        'email' => $user?->email,
+                        'phone' => $user?->phone,
                     ], [
-                        'value' => $productVariation->price * $cart->qty,
+                        'value' => $productVariation->price * $addedQty,
                         'currency' => getSetting('currencyCode') ?? 'USD',
                         'content_ids' => [$variantId],       // <-- FIXED
                         'content_type' => 'product',
+                        'content_name' => $productVariation->product->collectTranslation('name'),
+                        'contents' => [[
+                            'id' => $variantId,
+                            'quantity' => $addedQty,
+                            'item_price' => $productVariation->price,
+                        ]],
+                        'num_items' => $addedQty,
                     ], $request->eventId);
-                    // $this->facebook->sendEvent('AddToCart', [
-                    //     'email' => $user->email,
-                    //     'phone' => $user->phone
-                    // ], [
-                    //     'value' => $productVariation->price * $cart->qty,
-                    //     'currency' => getSetting('currencyCode') ?? 'USD',
-                    //     'content_ids' => [$productVariation->sku],
-                    //     'content_type' => 'product',
-                    // ]);
-
-                } catch (\Exception $e) {
-
-                    dd($e);
+                } catch (\Throwable $e) {
+                    Log::error('Facebook AddToCart tracking failed', [
+                        'message' => $e->getMessage(),
+                        'variation_id' => $productVariation->id,
+                    ]);
                 }
             }
 

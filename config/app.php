@@ -102,6 +102,10 @@ return [
     'FACEBOOK_ACTIVATION'       => env('FACEBOOK_ACTIVATION', ''),
     'FACEBOOK_PIXEL_ACTIVATION' => env('FACEBOOK_PIXEL_ACTIVATION', '0'),
 
+    // Installation routes can rewrite .env and refresh the entire database.
+    // Keep them unavailable unless an operator explicitly enables setup mode.
+    'INSTALLATION_ENABLED' => filter_var(env('INSTALLATION_ENABLED', false), FILTER_VALIDATE_BOOL),
+
     'OTP_ACTIVATION' => env('OTP_ACTIVATION', '0'),
 
 

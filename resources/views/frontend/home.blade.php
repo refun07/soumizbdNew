@@ -122,7 +122,16 @@
         t.src=v;s=b.getElementsByTagName(e)[0];
         s.parentNode.insertBefore(t,s)}(window, document,'script',
         'https://connect.facebook.net/en_US/fbevents.js');
-        fbq('init', `${window.config.meta_pixel_id}`);
+
+        (function () {
+            const metaPixelId = @json((string) config('app.META_PIXEL_ID'));
+
+            if (/^\d+$/.test(metaPixelId)) {
+                fbq('init', metaPixelId);
+            } else {
+                console.error('[Meta Pixel] Tracking disabled: META_PIXEL_ID must contain digits only.');
+            }
+        })();
     </script>
     {{-- Google Tag Manager (Head) --}}
     @if (config('services.gtm_id'))
@@ -143,10 +152,13 @@
 
     @endif
     {{-- End Google Tag Manager (Head) --}}
+    @if (preg_match('/^\d+$/', (string) config('app.META_PIXEL_ID')))
     <noscript>
         <img height="1" width="1" style="display:none"
-            src={`https://www.facebook.com/tr?id=${window.config.meta_pixel_id}&ev=PageView&noscript=1`}/>
+            src="https://www.facebook.com/tr?id={{ config('app.META_PIXEL_ID') }}&ev=PageView&noscript=1"
+            alt="" />
     </noscript>
+    @endif
     <!-- End Facebook Pixel Code -->
 
 

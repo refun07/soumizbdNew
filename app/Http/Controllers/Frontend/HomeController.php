@@ -263,7 +263,7 @@ class HomeController extends Controller
             'defaultLang'       => Language::where('code', config('app.default_language'))->get(['name', 'code', 'flag', 'is_rtl'])->first(),
             'paymentMethods'    => $paymentMethods,
             'socialLogins'      => $socialLogins,
-            'meta_pixel_id'     => env('META_PIXEL_ID'),
+            'meta_pixel_id'     => config('app.META_PIXEL_ID'),
 
             # floating chat buttons
             'floatingChat' => [
