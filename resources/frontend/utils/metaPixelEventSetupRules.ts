@@ -7,15 +7,21 @@ type MetaPixelQueue = {
     set?: (setting: string, pixelId: string, value: unknown) => void;
 };
 
-const LOCAL_HOSTNAMES = new Set(['127.0.0.1', 'localhost', '::1']);
+const GTM_MANAGED_HOSTNAMES = new Set([
+    '127.0.0.1',
+    'localhost',
+    '::1',
+    'soumisbangladesh.com',
+    'www.soumisbangladesh.com',
+]);
 
 /**
- * Meta Event Setup Tool rules are stored against the Pixel ID, so its button
- * rules also run on localhost. Clear only those codeless rules locally while
- * keeping the GTM-managed browser events enabled for testing.
+ * This storefront manages browser events through GTM. Clear stale Meta Event
+ * Setup Tool rules on the known storefront hosts so Meta cannot send a second
+ * codeless copy of AddToCart, Purchase, ViewContent or InitiateCheckout.
  */
-export const disableLocalMetaEventSetupRules = () => {
-    if (!LOCAL_HOSTNAMES.has(window.location.hostname)) return;
+export const disableMetaEventSetupRules = () => {
+    if (!GTM_MANAGED_HOSTNAMES.has(window.location.hostname)) return;
 
     let successfulClears = 0;
     let logged = false;
@@ -42,16 +48,16 @@ export const disableLocalMetaEventSetupRules = () => {
         if (!logged) {
             logged = true;
             console.info(
-                '[Meta Pixel] Event Setup Tool rules disabled on localhost; GTM events remain enabled.',
+                '[Meta Pixel] Event Setup Tool rules disabled; GTM events remain enabled.',
             );
         }
     };
 
     clearRules();
 
-    // The Pixel and its remote configuration load asynchronously. Keep
-    // clearing briefly after initialization so the remote rules cannot win a
-    // race with the local development bootstrap.
+    // Meta loads the Pixel and remote rule configuration asynchronously. Keep
+    // clearing briefly after initialization so a late config response cannot
+    // restore the stale rules.
     const intervalId = window.setInterval(() => {
         clearRules();
 
