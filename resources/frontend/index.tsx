@@ -14,8 +14,10 @@ import { store } from './store/store';
 import { STORAGE_KEYS } from './types';
 import localAxios from './utils/axios';
 import { installChunkRecovery } from './utils/chunkRecovery';
+import { disableLocalMetaEventSetupRules } from './utils/localMetaPixelDebug';
 
 installChunkRecovery();
+disableLocalMetaEventSetupRules();
 
 // if accessToken is in the query
 // set the access token to local storage
