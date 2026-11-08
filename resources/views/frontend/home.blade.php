@@ -112,27 +112,6 @@
     <script>
         window.config = @json($settings);
     </script>
-    <!-- Facebook Pixel Code -->
-    <script>
-        !function(f,b,e,v,n,t,s)
-        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-        n.queue=[];t=b.createElement(e);t.async=!0;
-        t.src=v;s=b.getElementsByTagName(e)[0];
-        s.parentNode.insertBefore(t,s)}(window, document,'script',
-        'https://connect.facebook.net/en_US/fbevents.js');
-
-        (function () {
-            const metaPixelId = @json((string) config('app.META_PIXEL_ID'));
-
-            if (/^\d+$/.test(metaPixelId)) {
-                fbq('init', metaPixelId);
-            } else {
-                console.error('[Meta Pixel] Tracking disabled: META_PIXEL_ID must contain digits only.');
-            }
-        })();
-    </script>
     {{-- Google Tag Manager (Head) --}}
     @if (config('services.gtm_id'))
     <script>
@@ -152,16 +131,6 @@
 
     @endif
     {{-- End Google Tag Manager (Head) --}}
-    @if (preg_match('/^\d+$/', (string) config('app.META_PIXEL_ID')))
-    <noscript>
-        <img height="1" width="1" style="display:none"
-            src="https://www.facebook.com/tr?id={{ config('app.META_PIXEL_ID') }}&ev=PageView&noscript=1"
-            alt="" />
-    </noscript>
-    @endif
-    <!-- End Facebook Pixel Code -->
-
-
     @viteReactRefresh
     @vite(['resources/frontend/index.css', 'resources/frontend/index.tsx'])
 </head>
